@@ -88,8 +88,8 @@ export class KIRService {
         // Create main KIR document
         await setDoc(kirRef, kirData);
 
-        // Note: Related documents will be created during final submission
-        // to avoid processing incomplete form data
+        // Create related documents immediately to ensure tabs have data
+        await this.createRelatedDocuments(kirId, cleanedData);
 
         console.log('KIR created successfully', { op: 'create', kirId, from: 'createKIR', time: new Date().toISOString() });
         return { id: kirId };

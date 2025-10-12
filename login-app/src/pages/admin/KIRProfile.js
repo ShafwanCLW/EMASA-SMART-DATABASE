@@ -1760,13 +1760,7 @@ export class KIRProfile {
       this.handleRouteChange();
     });
     
-    // Warn before leaving with unsaved changes
-    window.addEventListener('beforeunload', (e) => {
-      if (this.dirtyTabs.size > 0) {
-        e.preventDefault();
-        e.returnValue = 'Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu meninggalkan halaman ini?';
-      }
-    });
+    // Removed beforeunload warning popup
   }
 
   // Mark tab as dirty (has unsaved changes)
@@ -1869,11 +1863,10 @@ export class KIRProfile {
     }
   }
 
-  // Confirm dialog for unsaved changes
+  // Removed confirm dialog for unsaved changes
   confirmUnsavedChanges() {
     return new Promise((resolve) => {
-      const confirmed = confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu meninggalkan tab ini?');
-      resolve(confirmed);
+      resolve(true); // Always allow navigation without popup
     });
   }
 
@@ -2183,10 +2176,7 @@ export class KIRProfile {
   
   // Go back to KIR list
   goBack() {
-    if (this.dirtyTabs.size > 0) {
-      const confirmed = confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu meninggalkan halaman ini?');
-      if (!confirmed) return;
-    }
+    // Removed confirm dialog - always allow navigation
     
     // Navigate back to Senarai KIR section in admin dashboard
     window.location.hash = '#/admin';
@@ -2462,11 +2452,7 @@ export class KIRProfile {
   }
 
   closeAIRDrawer() {
-    if (this.drawerDirtyTabs.size > 0) {
-      if (!confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu menutup?')) {
-        return;
-      }
-    }
+    // Removed confirm dialog - always allow closing
     
     this.isDrawerOpen = false;
     this.currentAIR = null;
@@ -2826,11 +2812,7 @@ export class KIRProfile {
 
   // PKIR Methods
   switchPKIRSection(section) {
-    if (this.pkirDirtyTabs.has(this.currentPKIRSection)) {
-      if (!confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti untuk meninggalkan bahagian ini?')) {
-        return;
-      }
-    }
+    // Removed confirm dialog - always allow section switching
     
     this.currentPKIRSection = section;
     this.render();

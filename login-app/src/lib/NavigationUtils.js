@@ -14,17 +14,8 @@ export function handleSidebarNavigation(event) {
   if (currentSection === 'cipta-kir' && section !== 'cipta-kir') {
     const hasUnsavedData = checkForUnsavedCiptaKIRData();
     if (hasUnsavedData) {
-      const confirmLeave = confirm(
-        'Anda mempunyai data yang belum disimpan dalam Cipta KIR. ' +
-        'Jika anda meninggalkan halaman ini, semua data akan hilang kecuali anda telah klik "Simpan Draf". ' +
-        '\n\nAdakah anda pasti mahu meninggalkan halaman ini?'
-      );
-      
-      if (!confirmLeave) {
-        return; // Stay on current page
-      }
-      
-      // User confirmed to leave, clear the draft data
+      // Removed confirm dialog - always allow navigation
+      // Clear the draft data when leaving
       clearCiptaKIRDraft();
     }
   }

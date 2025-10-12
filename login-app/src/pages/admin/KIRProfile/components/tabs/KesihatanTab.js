@@ -408,7 +408,7 @@ export class KesihatanTab extends BaseTab {
   }
 
   async confirmUnsavedChanges() {
-    return confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu meninggalkan bahagian ini?');
+    return true; // Always allow navigation without popup
   }
 
   // Ubat Tetap Methods

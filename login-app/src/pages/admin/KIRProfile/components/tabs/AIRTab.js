@@ -489,11 +489,7 @@ export class AIRTab extends BaseTab {
   }
 
   closeAIRDrawer() {
-    if (this.drawerDirtyTabs.size > 0) {
-      if (!confirm('Anda mempunyai perubahan yang belum disimpan. Adakah anda pasti mahu menutup?')) {
-        return;
-      }
-    }
+    // Removed confirm dialog - always allow closing
     
     this.isDrawerOpen = false;
     this.currentAIR = null;
