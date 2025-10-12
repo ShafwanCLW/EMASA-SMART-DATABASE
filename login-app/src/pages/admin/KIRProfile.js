@@ -4,6 +4,16 @@ import { AIRService } from '../../services/backend/AIRService.js';
 import { PasanganService } from '../../services/backend/PasanganService.js';
 import { ProgramService } from '../../services/backend/ProgramService.js';
 
+// Import extracted tab components
+import { KAFATab, PendidikanTab, PekerjaanTab } from './KIRProfile/components/tabs/index.js';
+import { KekeluargaanTab } from './KIRProfile/components/tabs/KekeluargaanTab.js';
+import { KesihatanTab } from './KIRProfile/components/tabs/KesihatanTab.js';
+import { PendapatanTab } from './KIRProfile/components/tabs/PendapatanTab.js';
+import { PerbelanjaanTab } from './KIRProfile/components/tabs/PerbelanjaanTab.js';
+import { AIRTab } from './KIRProfile/components/tabs/AIRTab.js';
+import { PKIRTab } from './KIRProfile/components/tabs/PKIRTab.js';
+import { ProgramTab } from './KIRProfile/components/tabs/ProgramTab.js';
+
 export class KIRProfile {
   constructor() {
     this.kirId = null;
@@ -19,6 +29,9 @@ export class KIRProfile {
     this.airService = AIRService;
     this.pasanganService = PasanganService;
     this.programService = ProgramService;
+    
+    // Initialize tab components
+    this.tabComponents = {};
     
     // Initialize financial data arrays
     this.pendapatanData = [];
@@ -47,6 +60,22 @@ export class KIRProfile {
     this.validKesihatanSections = ['ringkasan', 'ubat-tetap', 'rawatan', 'pembedahan'];
   }
 
+  // Initialize tab components
+  initializeTabComponents() {
+    this.tabComponents = {
+      'kafa': new KAFATab(this),
+      'pendidikan': new PendidikanTab(this),
+      'pekerjaan': new PekerjaanTab(this),
+      'kekeluargaan': new KekeluargaanTab(this),
+      'kesihatan': new KesihatanTab(this),
+      'pendapatan': new PendapatanTab(this),
+      'perbelanjaan': new PerbelanjaanTab(this),
+      'air': new AIRTab(this),
+      'pkir': new PKIRTab(this),
+      'program': new ProgramTab(this)
+    };
+  }
+
   // Initialize KIR Profile with kirId and optional tab
   async init(kirId, tab = 'maklumat-asas') {
     // Validate kirId
@@ -61,6 +90,9 @@ export class KIRProfile {
     
     this.kirId = kirId;
     this.currentTab = this.validTabs.includes(tab) ? tab : 'maklumat-asas';
+    
+    // Initialize tab components
+    this.initializeTabComponents();
     
     // Update URL without reload
     this.updateURL();
@@ -106,7 +138,13 @@ export class KIRProfile {
         kafa: kirDataWithRelated.kafa || {},
         pendidikan: kirDataWithRelated.pendidikan || {},
         pekerjaan: kirDataWithRelated.pekerjaan || {},
-        kesihatan: kirDataWithRelated.kesihatan || {}
+        kesihatan: kirDataWithRelated.kesihatan || {},
+        kekeluargaan: kirDataWithRelated.kekeluargaan || {},
+        pendapatan: kirDataWithRelated.pendapatan || {},
+        perbelanjaan: kirDataWithRelated.perbelanjaan || {},
+        air: kirDataWithRelated.air || {},
+        pkir: kirDataWithRelated.pkir || {},
+        program: kirDataWithRelated.program || {}
       };
       
       // Extract main KIR data (remove related data properties)
@@ -115,6 +153,12 @@ export class KIRProfile {
       delete kirData.pendidikan;
       delete kirData.pekerjaan;
       delete kirData.kesihatan;
+      delete kirData.kekeluargaan;
+      delete kirData.pendapatan;
+      delete kirData.perbelanjaan;
+      delete kirData.air;
+      delete kirData.pkir;
+      delete kirData.program;
       
       // Load AIR data and PKIR data
       const [airData, pkirData] = await Promise.all([
@@ -200,7 +244,22 @@ export class KIRProfile {
     const container = document.getElementById('kir-profile-container');
     if (container) {
       container.innerHTML = this.createKIRProfileHTML();
+      
+      // Assign global tab component references for backward compatibility
+      this.assignGlobalTabReferences();
     }
+  }
+
+  // Assign global tab component references for backward compatibility
+  assignGlobalTabReferences() {
+    Object.keys(this.tabComponents).forEach(tabId => {
+      const component = this.tabComponents[tabId];
+      if (component) {
+        // Assign to window for global access
+        const globalName = `${tabId}Tab`;
+        window[globalName] = component;
+      }
+    });
   }
 
   // Create main KIR Profile HTML
@@ -347,31 +406,17 @@ export class KIRProfile {
 
   // Create specific tab HTML based on tab type
   createTabHTML(tabId) {
+    // Use tab components if available
+    if (this.tabComponents[tabId]) {
+      return this.tabComponents[tabId].render();
+    }
+    
+    // Fallback to original methods for tabs not yet extracted
     switch (tabId) {
       case 'maklumat-asas':
         return this.createMaklumatAsasTab();
-      case 'kafa':
-        return this.createKAFATab();
-      case 'pendidikan':
-        return this.createPendidikanTab();
-      case 'pekerjaan':
-        return this.createPekerjaanTab();
-      case 'kekeluargaan':
-        return this.createKekeluargaanTab();
-      case 'kesihatan':
-        return this.createKesihatanTab();
-      case 'pendapatan':
-        return this.createPendapatanTab();
-      case 'perbelanjaan':
-        return this.createPerbelanjaanTab();
       case 'bantuan-bulanan':
         return this.createBantuanBulananTab();
-      case 'air':
-        return this.createAIRTab();
-      case 'pkir':
-        return this.createPKIRTab();
-      case 'program':
-        return this.createProgramTab();
       default:
         return '<p>Tab tidak dijumpai</p>';
     }
@@ -547,1810 +592,19 @@ export class KIRProfile {
     `;
   }
 
-  // Create KAFA tab
-  createKAFATab() {
-    const data = this.relatedData?.kafa || {};
-    
-    console.log('=== KAFA Tab Render Debug ===');
-    console.log('relatedData:', this.relatedData);
-    console.log('KAFA data object:', data);
-    console.log('KAFA data keys:', Object.keys(data));
-    console.log('kafa_sumber value:', data.kafa_sumber);
-    console.log('kafa_iman value:', data.kafa_iman);
-    console.log('kafa_islam value:', data.kafa_islam);
-    console.log('=== End KAFA Debug ===');
-    
-    // Use correct field names with fallbacks
-    const sumberPengetahuan = data.kafa_sumber || data.sumber_pengetahuan || '';
-    const tahapIman = data.kafa_iman || data.tahap_iman || '';
-    const tahapIslam = data.kafa_islam || data.tahap_islam || '';
-    const tahapFatihah = data.kafa_fatihah || data.tahap_fatihah || '';
-    const tahapSolat = data.kafa_solat || data.tahap_taharah_wuduk_solat || '';
-    const tahapPuasa = data.kafa_puasa || data.tahap_puasa_fidyah_zakat || '';
-    
-    return `
-      <form class="kir-form" data-tab="kafa">
-        <div class="form-section">
-          <h3>Pendidikan Agama (KAFA)</h3>
-          
-          <div class="form-group">
-            <label for="kafa_sumber">Sumber Pengetahuan Agama</label>
-            <textarea id="kafa_sumber" name="kafa_sumber" rows="3">${sumberPengetahuan}</textarea>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="kafa_iman">Tahap Iman *</label>
-              <select id="kafa_iman" name="kafa_iman" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${tahapIman == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${tahapIman == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${tahapIman == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${tahapIman == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${tahapIman == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="kafa_islam">Tahap Islam *</label>
-              <select id="kafa_islam" name="kafa_islam" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${tahapIslam == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${tahapIslam == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${tahapIslam == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${tahapIslam == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${tahapIslam == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="kafa_fatihah">Tahap Al-Fatihah</label>
-              <select id="kafa_fatihah" name="kafa_fatihah">
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${tahapFatihah == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${tahapFatihah == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${tahapFatihah == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${tahapFatihah == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${tahapFatihah == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="kafa_solat">Tahap Taharah, Wuduk & Solat</label>
-              <select id="kafa_solat" name="kafa_solat">
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${tahapSolat == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${tahapSolat == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${tahapSolat == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${tahapSolat == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${tahapSolat == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="kafa_puasa">Tahap Puasa, Fidyah & Zakat</label>
-            <select id="kafa_puasa" name="kafa_puasa">
-              <option value="">Pilih Tahap</option>
-              <option value="1" ${tahapPuasa == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-              <option value="2" ${tahapPuasa == 2 ? 'selected' : ''}>2 - Lemah</option>
-              <option value="3" ${tahapPuasa == 3 ? 'selected' : ''}>3 - Sederhana</option>
-              <option value="4" ${tahapPuasa == 4 ? 'selected' : ''}>4 - Baik</option>
-              <option value="5" ${tahapPuasa == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('kafa')">Simpan</button>
-        </div>
-      </form>
-    `;
-  }
 
-  // Create Pendidikan tab
-  createPendidikanTab() {
-    const data = this.relatedData?.pendidikan || {};
-    
-    console.log('=== Pendidikan Tab Render Debug ===');
-    console.log('Pendidikan data object:', data);
-    console.log('Pendidikan data keys:', Object.keys(data));
-    console.log('=== End Pendidikan Debug ===');
-    
-    // Use correct field names with fallbacks
-    const tahapPendidikan = data.tahap_pendidikan || '';
-    const namaSekolah = data.nama_sekolah || '';
-    const bidangPengajian = data.bidang_pengajian || '';
-    const tahunTamat = data.tahun_tamat || '';
-    
-    return `
-      <form class="kir-form" data-tab="pendidikan">
-        <div class="form-section">
-          <h3>Pendidikan</h3>
-          
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="tahap_pendidikan">Tahap Pendidikan</label>
-        <select id="tahap_pendidikan" name="tahap_pendidikan">
-                <option value="">Pilih Tahap</option>
-                <option value="Tidak Bersekolah" ${tahapPendidikan === 'Tidak Bersekolah' ? 'selected' : ''}>Tidak Bersekolah</option>
-                <option value="Sekolah Rendah" ${tahapPendidikan === 'Sekolah Rendah' ? 'selected' : ''}>Sekolah Rendah</option>
-                <option value="Sekolah Menengah" ${tahapPendidikan === 'Sekolah Menengah' ? 'selected' : ''}>Sekolah Menengah</option>
-                <option value="SPM/SPMV" ${tahapPendidikan === 'SPM/SPMV' ? 'selected' : ''}>SPM/SPMV</option>
-                <option value="STPM/Diploma" ${tahapPendidikan === 'STPM/Diploma' ? 'selected' : ''}>STPM/Diploma</option>
-                <option value="Ijazah Sarjana Muda" ${tahapPendidikan === 'Ijazah Sarjana Muda' ? 'selected' : ''}>Ijazah Sarjana Muda</option>
-                <option value="Ijazah Sarjana" ${tahapPendidikan === 'Ijazah Sarjana' ? 'selected' : ''}>Ijazah Sarjana</option>
-                <option value="PhD" ${tahapPendidikan === 'PhD' ? 'selected' : ''}>PhD</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="nama_sekolah">Nama Sekolah/Institusi</label>
-        <input type="text" id="nama_sekolah" name="nama_sekolah" value="${namaSekolah}">
-            </div>
-            
-            <div class="form-group">
-              <label for="tahun_tamat">Tahun Tamat</label>
-              <input type="number" id="tahun_tamat" name="tahun_tamat" value="${tahunTamat}" min="1950" max="2030" placeholder="YYYY">
-            </div>
-            
-            <div class="form-group">
-              <label for="bidang_pengajian">Bidang Pengajian</label>
-        <input type="text" id="bidang_pengajian" name="bidang_pengajian" value="${bidangPengajian}">
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('pendidikan')">Simpan</button>
-        </div>
-      </form>
-    `;
-  }
 
-  // Create Pekerjaan tab
-  createPekerjaanTab() {
-    const data = this.relatedData?.pekerjaan || {};
-    
-    console.log('=== Pekerjaan Tab Render Debug ===');
-    console.log('Pekerjaan data object:', data);
-    console.log('Pekerjaan data keys:', Object.keys(data));
-    console.log('=== End Pekerjaan Debug ===');
-    
-    // Use correct field names with fallbacks
-    const statusPekerjaan = data.status_pekerjaan || '';
-    const jenisPekerjaan = data.jenis_pekerjaan || '';
-    const namaMajikan = data.nama_majikan || '';
-    const gajiBulanan = data.gaji_bulanan || '';
-    const alamatKerja = data.alamat_kerja || '';
-    const pengalamanKerja = data.pengalaman_kerja || '';
-    const kemahiran = data.kemahiran || '';
-    
-    return `
-      <form class="kir-form" data-tab="pekerjaan">
-        <div class="form-section">
-          <h3>Maklumat Pekerjaan</h3>
-          
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="status_pekerjaan">Status Pekerjaan</label>
-        <select id="status_pekerjaan" name="status_pekerjaan">
-                <option value="">Pilih Status</option>
-                <option value="Bekerja" ${statusPekerjaan === 'Bekerja' ? 'selected' : ''}>Bekerja</option>
-                <option value="Tidak Bekerja" ${statusPekerjaan === 'Tidak Bekerja' ? 'selected' : ''}>Tidak Bekerja</option>
-                <option value="Bersara" ${statusPekerjaan === 'Bersara' ? 'selected' : ''}>Bersara</option>
-                <option value="OKU" ${statusPekerjaan === 'OKU' ? 'selected' : ''}>OKU</option>
-              </select>
-            </div>
-            
-            <div class="form-group" id="jenis_pekerjaan_group">
-              <label for="jenis_pekerjaan">Jenis Pekerjaan</label>
-        <input type="text" id="jenis_pekerjaan" name="jenis_pekerjaan" value="${jenisPekerjaan}">
-            </div>
-            
-            <div class="form-group" id="nama_majikan_group">
-              <label for="nama_majikan">Nama Majikan</label>
-              <input type="text" id="nama_majikan" name="nama_majikan" value="${namaMajikan}">
-            </div>
-            
-            <div class="form-group" id="gaji_bulanan_group">
-              <label for="gaji_bulanan">Gaji Bulanan (RM)</label>
-        <input type="number" id="gaji_bulanan" name="gaji_bulanan" value="${gajiBulanan}" step="0.01" min="0">
-            </div>
-            
-            <div class="form-group" id="alamat_kerja_group">
-              <label for="alamat_kerja">Alamat Kerja</label>
-        <textarea id="alamat_kerja" name="alamat_kerja" rows="3">${alamatKerja}</textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="pengalaman_kerja">Pengalaman Kerja (Tahun)</label>
-              <input type="number" id="pengalaman_kerja" name="pengalaman_kerja" value="${pengalamanKerja}" min="0">
-            </div>
-            
-            <div class="form-group full-width">
-              <label for="kemahiran">Kemahiran</label>
-              <textarea id="kemahiran" name="kemahiran" rows="3" placeholder="Senaraikan kemahiran yang dimiliki">${kemahiran}</textarea>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('pekerjaan')">Simpan</button>
-        </div>
-      </form>
-    `;
-  }
 
-  // Create Kekeluargaan tab
-  createKekeluargaanTab() {
-    const data = this.kirData || {};
-    
-    console.log('=== Kekeluargaan Tab Render Debug ===');
-    console.log('KIR data object:', data);
-    console.log('Available fields:', Object.keys(data));
-    console.log('=== End Kekeluargaan Debug ===');
-    
-    return `
-      <form class="kir-form" data-tab="kekeluargaan">
-        <div class="form-section">
-          <h3>Kekeluargaan</h3>
-          
-          <div class="form-group">
-            <label for="status_perkahwinan">Status Perkahwinan *</label>
-            <select id="status_perkahwinan" name="status_perkahwinan" required>
-              <option value="">Pilih Status</option>
-              <option value="Bujang" ${data.status_perkahwinan === 'Bujang' ? 'selected' : ''}>Bujang</option>
-              <option value="Berkahwin" ${data.status_perkahwinan === 'Berkahwin' ? 'selected' : ''}>Berkahwin</option>
-              <option value="Bercerai" ${data.status_perkahwinan === 'Bercerai' ? 'selected' : ''}>Bercerai</option>
-              <option value="Balu/Duda" ${data.status_perkahwinan === 'Balu/Duda' ? 'selected' : ''}>Balu/Duda</option>
-            </select>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tarikh_nikah">Tarikh Nikah</label>
-              <input type="date" id="tarikh_nikah" name="tarikh_nikah" value="${data.tarikh_nikah || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="tarikh_cerai">Tarikh Cerai</label>
-              <input type="date" id="tarikh_cerai" name="tarikh_cerai" value="${data.tarikh_cerai || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="nama_pasangan">Nama Pasangan</label>
-              <input type="text" id="nama_pasangan" name="nama_pasangan" value="${data.nama_pasangan || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="pasangan_no_kp">No. KP Pasangan</label>
-              <input type="text" id="pasangan_no_kp" name="pasangan_no_kp" value="${data.pasangan_no_kp || ''}">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="pasangan_alamat">Alamat Pasangan</label>
-            <textarea id="pasangan_alamat" name="pasangan_alamat" rows="3">${data.pasangan_alamat || ''}</textarea>
-          </div>
-          
-          <div class="form-group">
-            <label for="pasangan_status">Status Pasangan</label>
-            <input type="text" id="pasangan_status" name="pasangan_status" value="${data.pasangan_status || ''}">
-          </div>
-          
-          <div class="form-group">
-            <label for="senarai_adik_beradik">Senarai Adik Beradik</label>
-            <div id="siblings-container">
-              ${this.createSiblingsHTML(data.senarai_adik_beradik || [])}
-            </div>
-            <button type="button" class="btn btn-secondary" onclick="kirProfile.addSibling()">Tambah Adik Beradik</button>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ibu_nama">Nama Ibu</label>
-              <input type="text" id="ibu_nama" name="ibu_nama" value="${data.ibu_nama || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="ibu_negeri">Negeri Ibu</label>
-              <input type="text" id="ibu_negeri" name="ibu_negeri" value="${data.ibu_negeri || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ayah_nama">Nama Ayah</label>
-              <input type="text" id="ayah_nama" name="ayah_nama" value="${data.ayah_nama || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="ayah_negeri">Negeri Ayah</label>
-              <input type="text" id="ayah_negeri" name="ayah_negeri" value="${data.ayah_negeri || ''}">
-            </div>
-          </div>
-        </div>
-        
-        <!-- PKIR Integration Panel -->
-        <div class="pkir-integration-panel">
-          <div class="integration-card">
-            <div class="integration-header">
-              <h4><i class="fas fa-users"></i> PKIR (Pasangan Ketua Isi Rumah)</h4>
-            </div>
-            <div class="integration-content">
-              ${this.pkirData ? 
-                `<p>Rekod PKIR telah wujud untuk pasangan ini.</p>
-                 <button type="button" class="btn btn-secondary" onclick="window.location.hash = '#/admin/kir/${this.kirId}?tab=pkir'">
-                   <i class="fas fa-eye"></i> Lihat/Urus PKIR
-                 </button>` :
-                `<p>Cipta rekod PKIR lengkap untuk pasangan berdasarkan maklumat di atas.</p>
-                 <button type="button" class="btn btn-outline-primary" onclick="kirProfile.openPKIRModal()">
-                   <i class="fas fa-arrow-up"></i> Promosi ke PKIR
-                 </button>`
-              }
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('kekeluargaan')">Simpan</button>
-        </div>
-      </form>
-    `;
-  }
+
+
+
+
 
   // Create Kesihatan KIR tab
-  createKesihatanTab() {
-    const data = this.relatedData?.kesihatan || {};
-    
-    // Initialize current section if not set
-    if (!this.currentKesihatanSection) {
-      this.currentKesihatanSection = 'ringkasan';
-    }
-    
-    return `
-      <div class="kesihatan-tab-content">
-        <div class="kesihatan-header">
-          <h3>Kesihatan KIR</h3>
-          <div class="kesihatan-last-updated">
-            ${data.updated_at ? `Kemaskini terakhir: ${new Date(data.updated_at).toLocaleString('ms-MY')}` : ''}
-          </div>
-        </div>
-        
-        <div class="kesihatan-sections">
-          ${this.createKesihatanSectionNavigation()}
-          <div class="kesihatan-section-content">
-            ${this.createKesihatanSectionContent()}
-          </div>
-        </div>
-      </div>
-    `;
-  }
 
-  // Create Kesihatan section navigation
-  createKesihatanSectionNavigation() {
-    const sections = [
-      { id: 'ringkasan', label: 'Ringkasan Kesihatan', icon: 'heart' },
-      { id: 'ubat-tetap', label: 'Ubat-ubatan Tetap', icon: 'pills' },
-      { id: 'rawatan', label: 'Rawatan / Follow-up Berkala', icon: 'calendar-check' },
-      { id: 'pembedahan', label: 'Sejarah Pembedahan', icon: 'cut' }
-    ];
-
-    const sectionsHTML = sections.map(section => {
-      const isActive = section.id === this.currentKesihatanSection;
-      const isDirty = this.kesihatanDirtyTabs?.has(section.id) || false;
-      
-      return `
-        <button class="kesihatan-section-btn ${isActive ? 'active' : ''}" 
-                data-section="${section.id}" 
-                onclick="kirProfile.switchKesihatanSection('${section.id}')">
-          <i class="fas fa-${section.icon}"></i>
-          ${section.label}
-          ${isDirty ? '<span class="dirty-indicator">•</span>' : ''}
-        </button>
-      `;
-    }).join('');
-
-    return `
-      <div class="kesihatan-section-navigation">
-        ${sectionsHTML}
-      </div>
-    `;
-  }
-
-  // Create Kesihatan section content
-  createKesihatanSectionContent() {
-    switch (this.currentKesihatanSection) {
-      case 'ringkasan':
-        return this.createRingkasanKesihatanSection();
-      case 'ubat-tetap':
-        return this.createUbatTetapSection();
-      case 'rawatan':
-        return this.createRawatanSection();
-      case 'pembedahan':
-        return this.createPembedahanSection();
-      default:
-        return this.createRingkasanKesihatanSection();
-    }
-  }
-
-  // Create Ringkasan Kesihatan section
-  createRingkasanKesihatanSection() {
-    const data = this.relatedData?.kesihatan || {};
-    
-    // Use fallback logic for field names
-    const kumpulanDarah = data.kumpulan_darah || data.blood_type || '';
-    const penyakitKronik = data.penyakit_kronik || data.chronic_diseases || [];
-    const ringkasanKesihatan = data.ringkasan_kesihatan || data.health_summary || '';
-    const catatanKesihatan = data.catatan_kesihatan || '';
-    
-    console.log('Kesihatan data:', data);
-    console.log('Processed values:', { kumpulanDarah, penyakitKronik, ringkasanKesihatan, catatanKesihatan });
-    
-    return `
-      <form class="kesihatan-form" data-section="ringkasan">
-        <div class="form-section">
-          <h4>Ringkasan Kesihatan</h4>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="kumpulan_darah">Kumpulan Darah</label>
-              <select id="kumpulan_darah" name="kumpulan_darah">
-                <option value="">Pilih Kumpulan Darah</option>
-                <option value="A+" ${kumpulanDarah === 'A+' ? 'selected' : ''}>A+</option>
-                <option value="A-" ${kumpulanDarah === 'A-' ? 'selected' : ''}>A-</option>
-                <option value="B+" ${kumpulanDarah === 'B+' ? 'selected' : ''}>B+</option>
-                <option value="B-" ${kumpulanDarah === 'B-' ? 'selected' : ''}>B-</option>
-                <option value="AB+" ${kumpulanDarah === 'AB+' ? 'selected' : ''}>AB+</option>
-                <option value="AB-" ${kumpulanDarah === 'AB-' ? 'selected' : ''}>AB-</option>
-                <option value="O+" ${kumpulanDarah === 'O+' ? 'selected' : ''}>O+</option>
-                <option value="O-" ${kumpulanDarah === 'O-' ? 'selected' : ''}>O-</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Penyakit Kronik</label>
-            <div class="checkbox-group">
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Diabetes" ${penyakitKronik.includes('Diabetes') ? 'checked' : ''}>
-                <span>Diabetes</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Hipertensi" ${penyakitKronik.includes('Hipertensi') ? 'checked' : ''}>
-                <span>Hipertensi</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Jantung" ${penyakitKronik.includes('Jantung') ? 'checked' : ''}>
-                <span>Penyakit Jantung</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Asma" ${penyakitKronik.includes('Asma') ? 'checked' : ''}>
-                <span>Asma</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Buah Pinggang" ${penyakitKronik.includes('Buah Pinggang') ? 'checked' : ''}>
-                <span>Penyakit Buah Pinggang</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="penyakit_kronik" value="Lain-lain" ${penyakitKronik.includes('Lain-lain') ? 'checked' : ''}>
-                <span>Lain-lain</span>
-              </label>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="ringkasan_kesihatan">Ringkasan Kesihatan</label>
-            <textarea id="ringkasan_kesihatan" name="ringkasan_kesihatan" rows="3" placeholder="Ringkasan keseluruhan kesihatan...">${ringkasanKesihatan}</textarea>
-          </div>
-          
-          <div class="form-group">
-            <label for="catatan_kesihatan">Catatan Kesihatan</label>
-            <textarea id="catatan_kesihatan" name="catatan_kesihatan" rows="4" placeholder="Catatan tambahan mengenai kesihatan...">${catatanKesihatan}</textarea>
-          </div>
-          
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save"></i> Simpan Ringkasan Kesihatan
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create Ubat Tetap section
-  createUbatTetapSection() {
-    const data = this.relatedData?.kesihatan?.ubat_tetap || [];
-    
-    if (data.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-pills"></i>
-          </div>
-          <h4>Tiada Ubat-ubatan Tetap</h4>
-          <p>Belum ada maklumat ubat-ubatan tetap yang didaftarkan.</p>
-          <button class="btn btn-primary" onclick="kirProfile.addUbatTetapKIR()">
-            <i class="fas fa-plus"></i> Tambah Ubat Pertama
-          </button>
-        </div>
-      `;
-    }
-    
-    const tableRows = data.map((ubat, index) => `
-      <tr>
-        <td>${ubat.nama_ubat || ''}</td>
-        <td>${ubat.dos || ''}</td>
-        <td>${ubat.kekerapan || ''}</td>
-        <td>${ubat.catatan || ''}</td>
-        <td>
-          <div class="action-menu">
-            <button class="action-menu-btn" title="Edit" onclick="kirProfile.editUbatTetapKIR(${index})">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-menu-btn" title="Padam" onclick="kirProfile.deleteUbatTetapKIR(${index})">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-    
-    return `
-      <div class="section-header">
-        <h4>Ubat-ubatan Tetap</h4>
-        <button class="btn btn-primary" onclick="kirProfile.addUbatTetapKIR()">
-          <i class="fas fa-plus"></i> Tambah Ubat
-        </button>
-      </div>
-      
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nama Ubat</th>
-              <th>Dos</th>
-              <th>Kekerapan</th>
-              <th>Catatan</th>
-              <th>Tindakan</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  // Create Rawatan section
-  createRawatanSection() {
-    const data = this.relatedData?.kesihatan?.rawatan || [];
-    
-    if (data.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-calendar-check"></i>
-          </div>
-          <h4>Tiada Rawatan / Follow-up</h4>
-          <p>Belum ada maklumat rawatan atau follow-up berkala yang didaftarkan.</p>
-          <button class="btn btn-primary" onclick="kirProfile.addRawatanKIR()">
-            <i class="fas fa-plus"></i> Tambah Rawatan Pertama
-          </button>
-        </div>
-      `;
-    }
-    
-    const tableRows = data.map((rawatan, index) => `
-      <tr>
-        <td>${rawatan.fasiliti || ''}</td>
-        <td>${rawatan.tarikh ? new Date(rawatan.tarikh).toLocaleDateString('ms-MY') : ''}</td>
-        <td>${rawatan.catatan || ''}</td>
-        <td>
-          <div class="action-menu">
-            <button class="action-menu-btn" title="Edit" onclick="kirProfile.editRawatanKIR(${index})">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-menu-btn" title="Padam" onclick="kirProfile.deleteRawatanKIR(${index})">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-    
-    return `
-      <div class="section-header">
-        <h4>Rawatan / Follow-up Berkala</h4>
-        <button class="btn btn-primary" onclick="kirProfile.addRawatanKIR()">
-          <i class="fas fa-plus"></i> Tambah Rawatan
-        </button>
-      </div>
-      
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Fasiliti</th>
-              <th>Tarikh</th>
-              <th>Catatan</th>
-              <th>Tindakan</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  // Create Pembedahan section
-  createPembedahanSection() {
-    const data = this.relatedData?.kesihatan?.pembedahan || [];
-    
-    if (data.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="fas fa-cut"></i>
-          </div>
-          <h4>Tiada Sejarah Pembedahan</h4>
-          <p>Belum ada maklumat sejarah pembedahan yang didaftarkan.</p>
-          <button class="btn btn-primary" onclick="kirProfile.addPembedahanKIR()">
-            <i class="fas fa-plus"></i> Tambah Pembedahan Pertama
-          </button>
-        </div>
-      `;
-    }
-    
-    // Create timeline view
-    const timelineItems = data
-      .sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh))
-      .map(pembedahan => `
-        <div class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <h5>${pembedahan.jenis_pembedahan || 'Pembedahan'}</h5>
-              <span class="timeline-date">${pembedahan.tarikh ? new Date(pembedahan.tarikh).toLocaleDateString('ms-MY') : ''}</span>
-            </div>
-            <div class="timeline-body">
-              <p><strong>Hospital:</strong> ${pembedahan.hospital || 'Tidak dinyatakan'}</p>
-              <span class="status-badge ${pembedahan.status === 'Selesai' ? 'status-success' : 'status-warning'}">
-                ${pembedahan.status || 'Perlu Follow-up'}
-              </span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    
-    const tableRows = data.map((pembedahan, index) => `
-      <tr>
-        <td>${pembedahan.tarikh ? new Date(pembedahan.tarikh).toLocaleDateString('ms-MY') : ''}</td>
-        <td>${pembedahan.jenis_pembedahan || ''}</td>
-        <td>${pembedahan.hospital || ''}</td>
-        <td>
-          <span class="status-badge ${pembedahan.status === 'Selesai' ? 'status-success' : 'status-warning'}">
-            ${pembedahan.status || 'Perlu Follow-up'}
-          </span>
-        </td>
-        <td>
-          <div class="action-menu">
-            <button class="action-menu-btn" title="Edit" onclick="kirProfile.editPembedahanKIR(${index})">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-menu-btn" title="Padam" onclick="kirProfile.deletePembedahanKIR(${index})">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-    
-    return `
-      <div class="section-header">
-        <h4>Sejarah Pembedahan</h4>
-        <button class="btn btn-primary" onclick="kirProfile.addPembedahanKIR()">
-          <i class="fas fa-plus"></i> Tambah Pembedahan
-        </button>
-      </div>
-      
-      <div class="pembedahan-content">
-        <div class="timeline-container">
-          <h5>Timeline Pembedahan</h5>
-          <div class="timeline">
-            ${timelineItems}
-          </div>
-        </div>
-        
-        <div class="table-container">
-          <h5>Senarai Pembedahan</h5>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Tarikh</th>
-                <th>Jenis Pembedahan</th>
-                <th>Hospital</th>
-                <th>Status</th>
-                <th>Tindakan</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  // Get file icon based on file extension
-  getFileIcon(filename) {
-    const ext = filename.split('.').pop().toLowerCase();
-    switch (ext) {
-      case 'pdf': return 'file-pdf';
-      case 'jpg':
-      case 'jpeg':
-      case 'png': return 'file-image';
-      default: return 'file';
-    }
-  }
 
   // Create AIR tab
-  createAIRTab() {
-    return `
-      <form class="kir-form" data-tab="air">
-        <div class="form-section">
-          <div class="section-header">
-            <h3>Ahli Isi Rumah (AIR)</h3>
-            <button type="button" class="btn btn-primary" onclick="kirProfile.openAIRDrawer()">
-              <i class="fas fa-plus"></i> Tambah AIR
-            </button>
-          </div>
-          
-          ${this.createAIRFormContent()}
-        </div>
-      </form>
-      
-      ${this.createAIRDrawer()}
-    `;
-  }
-
-  // Create AIR form content
-  createAIRFormContent() {
-    if (!this.airData || this.airData.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <h4>Tiada Ahli Isi Rumah</h4>
-          <p>Klik butang "Tambah AIR" untuk menambah ahli isi rumah.</p>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="air-list">
-        ${this.airData.map(air => `
-          <div class="air-card">
-            <div class="air-header">
-              <div class="air-info">
-                <h4>${air.nama || 'Tiada Nama'}</h4>
-                <span class="air-relation">${air.hubungan || 'Tiada Hubungan'}</span>
-              </div>
-              <div class="air-actions">
-                <button class="btn btn-sm btn-outline" onclick="kirProfile.editAIR('${air.id}')">
-                  <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="kirProfile.deleteAIR('${air.id}')">
-                  <i class="fas fa-trash"></i> Hapus
-                </button>
-              </div>
-            </div>
-            <div class="air-details">
-              <div class="detail-row">
-                <div class="detail-item">
-                  <label>No. KP/Passport:</label>
-                  <span>${air.no_kp || 'Tiada Data'}</span>
-                </div>
-                <div class="detail-item">
-                  <label>Tarikh Lahir:</label>
-                  <span>${air.tarikh_lahir ? new Date(air.tarikh_lahir).toLocaleDateString('ms-MY') : 'Tiada Data'}</span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <div class="detail-item">
-                  <label>Jantina:</label>
-                  <span>${air.jantina || 'Tiada Data'}</span>
-                </div>
-                <div class="detail-item">
-                  <label>Bangsa:</label>
-                  <span>${air.bangsa || 'Tiada Data'}</span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <div class="detail-item">
-                  <label>Agama:</label>
-                  <span>${air.agama || 'Tiada Data'}</span>
-                </div>
-                <div class="detail-item">
-                  <label>Status Perkahwinan:</label>
-                  <span>${air.status_perkahwinan || 'Tiada Data'}</span>
-                </div>
-              </div>
-              <div class="detail-row">
-                <div class="detail-item">
-                  <label>Tahap Pendidikan:</label>
-                  <span>${air.tahap_pendidikan || 'Tiada Data'}</span>
-                </div>
-                <div class="detail-item">
-                  <label>Pekerjaan:</label>
-                  <span>${air.pekerjaan || 'Tiada Data'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-  
-  // Create AIR table
-  createAIRTable() {
-    const tableHeader = `
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Hubungan</th>
-              <th>Jantina</th>
-              <th>Tarikh Lahir</th>
-              <th>No. KP/Sijil Lahir</th>
-              <th>Bangsa</th>
-              <th>Agama</th>
-              <th>Status</th>
-              <th>Tindakan</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    if (!this.airData || this.airData.length === 0) {
-      return `
-        ${tableHeader}
-            <tr>
-              <td colspan="9" class="text-center py-4">
-                <div class="empty-state-inline">
-                  <i class="fas fa-users text-muted mb-2" style="font-size: 2rem;"></i>
-                  <p class="text-muted mb-3">Tiada ahli isi rumah didaftarkan.</p>
-                  <button class="btn btn-primary" onclick="kirProfile.openAIRDrawer()">
-                    <i class="fas fa-plus"></i> Tambah AIR Pertama
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      `;
-    }
-
-    const tableRows = this.airData.map(air => `
-      <tr>
-        <td>
-          <div class="air-info">
-            <div class="air-avatar">${(air.nama || 'N').charAt(0).toUpperCase()}</div>
-            <div class="air-details">
-              <span class="air-name">${air.nama || 'Tiada Nama'}</span>
-              <span class="air-age">${AIRService.calculateAge(air.tarikh_lahir)} tahun</span>
-            </div>
-          </div>
-        </td>
-        <td>${air.hubungan || 'Tiada Maklumat'}</td>
-        <td>${air.jantina || 'Tiada Maklumat'}</td>
-        <td>${AIRService.formatDate(air.tarikh_lahir)}</td>
-        <td>${air.no_kp || air.sijil_lahir || 'Tiada Maklumat'}</td>
-        <td>${air.bangsa || 'Tiada Maklumat'}</td>
-        <td>${air.agama || 'Tiada Maklumat'}</td>
-        <td>
-          <span class="status-badge ${air.status === 'Aktif' ? 'status-active' : 'status-inactive'}">
-            ${air.status || 'Aktif'}
-          </span>
-        </td>
-        <td>
-          <div class="action-menu">
-            <button class="action-menu-btn" title="Edit AIR" onclick="kirProfile.editAIR('${air.id}')">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-menu-btn" title="Padam AIR" onclick="kirProfile.deleteAIR('${air.id}')">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-
-    return `
-      ${tableHeader}
-        ${tableRows}
-      </tbody>
-    </table>
-  </div>
-    `;
-  }
-
   // Create PKIR tab
-  createPKIRTab() {
-    if (!this.pkirData) {
-      // Empty state - show form structure
-      return `
-        <form class="kir-form" data-tab="pkir">
-          <div class="form-section">
-            <div class="section-header">
-              <h3>PKIR (Pasangan Ketua Isi Rumah)</h3>
-              <button type="button" class="btn btn-primary" onclick="kirProfile.openPKIRModal()">
-                <i class="fas fa-plus"></i> Cipta Rekod PKIR
-              </button>
-            </div>
-            
-            <div class="empty-state-form">
-              <div class="text-center py-5">
-                <i class="fas fa-users text-muted mb-3" style="font-size: 3rem;"></i>
-                <h5 class="text-muted mb-2">Tiada rekod PKIR untuk KIR ini</h5>
-                <p class="text-muted mb-4">Belum ada maklumat pasangan yang didaftarkan untuk KIR ini.</p>
-                <button type="button" class="btn btn-primary" onclick="kirProfile.openPKIRModal()">
-                  <i class="fas fa-plus"></i> Cipta Rekod PKIR
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          ${this.createPKIRModal()}
-        </form>
-      `;
-    }
-
-    // PKIR record exists - show form structure
-    return `
-      <form class="kir-form" data-tab="pkir">
-        <div class="form-section">
-          <div class="section-header">
-            <h3>PKIR (Pasangan Ketua Isi Rumah)</h3>
-            <button type="button" class="btn btn-secondary" onclick="kirProfile.deletePKIR()">
-              <i class="fas fa-trash"></i> Padam PKIR
-            </button>
-          </div>
-          
-          ${this.createPKIRFormContent()}
-        </div>
-      </form>
-      
-      ${this.createPKIRModal()}
-    `;
-  }
-
-  // Create PKIR section navigation
-  createPKIRSectionNavigation() {
-    const sections = [
-      { id: 'maklumat-asas', label: 'Maklumat Asas', icon: 'user' },
-      { id: 'kafa', label: 'Pendidikan Agama (KAFA)', icon: 'mosque' },
-      { id: 'pendidikan', label: 'Pendidikan', icon: 'graduation-cap' },
-      { id: 'pekerjaan', label: 'Pekerjaan', icon: 'briefcase' },
-      { id: 'kesihatan', label: 'Kesihatan', icon: 'heartbeat' }
-    ];
-
-    const sectionsHTML = sections.map(section => {
-      const isActive = section.id === this.currentPKIRSection;
-      const isDirty = this.pkirDirtyTabs.has(section.id);
-      
-      return `
-        <button class="pkir-section-btn ${isActive ? 'active' : ''}" 
-                data-section="${section.id}" 
-                onclick="kirProfile.switchPKIRSection('${section.id}')">
-          <i class="fas fa-${section.icon}"></i>
-          ${section.label}
-          ${isDirty ? '<span class="dirty-indicator">•</span>' : ''}
-        </button>
-      `;
-    }).join('');
-
-    return `
-      <div class="pkir-section-navigation">
-        ${sectionsHTML}
-      </div>
-    `;
-  }
-
-  // Create PKIR form content (combined sections)
-  createPKIRFormContent() {
-    const asasData = this.pkirData?.asas || {};
-    const kafaData = this.pkirData?.kafa || {};
-    const pendidikanData = this.pkirData?.pendidikan || {};
-    const pekerjaanData = this.pkirData?.pekerjaan || {};
-    const kesihatanData = this.pkirData?.kesihatan || {};
-    
-    return `
-      <!-- Maklumat Asas -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_nama">Nama Pasangan *</label>
-          <input type="text" id="pkir_nama" name="nama_pasangan" value="${asasData.nama || ''}" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_no_kp">No. KP Pasangan *</label>
-          <input type="text" id="pkir_no_kp" name="no_kp_pasangan" value="${asasData.no_kp || ''}" required>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_tarikh_lahir">Tarikh Lahir *</label>
-          <input type="date" id="pkir_tarikh_lahir" name="tarikh_lahir_pasangan" value="${asasData.tarikh_lahir || ''}" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_jantina">Jantina *</label>
-          <select id="pkir_jantina" name="jantina_pasangan" required>
-            <option value="">Pilih Jantina</option>
-            <option value="Lelaki" ${asasData.jantina === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
-            <option value="Perempuan" ${asasData.jantina === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_bangsa">Bangsa</label>
-          <input type="text" id="pkir_bangsa" name="bangsa_pasangan" value="${asasData.bangsa || ''}">
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_agama">Agama</label>
-          <input type="text" id="pkir_agama" name="agama_pasangan" value="${asasData.agama || ''}">
-        </div>
-      </div>
-      
-      <!-- Pendidikan -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_tahap_pendidikan">Tahap Pendidikan</label>
-          <select id="pkir_tahap_pendidikan" name="tahap_pendidikan">
-            <option value="">Pilih Tahap</option>
-            <option value="Tiada Pendidikan Formal" ${pendidikanData.tahap === 'Tiada Pendidikan Formal' ? 'selected' : ''}>Tiada Pendidikan Formal</option>
-            <option value="Sekolah Rendah" ${pendidikanData.tahap === 'Sekolah Rendah' ? 'selected' : ''}>Sekolah Rendah</option>
-            <option value="Sekolah Menengah" ${pendidikanData.tahap === 'Sekolah Menengah' ? 'selected' : ''}>Sekolah Menengah</option>
-            <option value="SPM/SPMV" ${pendidikanData.tahap === 'SPM/SPMV' ? 'selected' : ''}>SPM/SPMV</option>
-            <option value="STPM/Diploma" ${pendidikanData.tahap === 'STPM/Diploma' ? 'selected' : ''}>STPM/Diploma</option>
-            <option value="Ijazah Sarjana Muda" ${pendidikanData.tahap === 'Ijazah Sarjana Muda' ? 'selected' : ''}>Ijazah Sarjana Muda</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_institusi">Institusi Pendidikan</label>
-          <input type="text" id="pkir_institusi" name="institusi_pendidikan" value="${pendidikanData.institusi || ''}">
-        </div>
-      </div>
-      
-      <!-- Pekerjaan -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_status_pekerjaan">Status Pekerjaan</label>
-          <select id="pkir_status_pekerjaan" name="status_pekerjaan">
-            <option value="">Pilih Status</option>
-            <option value="Bekerja" ${pekerjaanData.status === 'Bekerja' ? 'selected' : ''}>Bekerja</option>
-            <option value="Menganggur" ${pekerjaanData.status === 'Menganggur' ? 'selected' : ''}>Menganggur</option>
-            <option value="Pelajar" ${pekerjaanData.status === 'Pelajar' ? 'selected' : ''}>Pelajar</option>
-            <option value="Pesara" ${pekerjaanData.status === 'Pesara' ? 'selected' : ''}>Pesara</option>
-            <option value="Suri Rumah" ${pekerjaanData.status === 'Suri Rumah' ? 'selected' : ''}>Suri Rumah</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_jenis_pekerjaan">Jenis Pekerjaan</label>
-          <input type="text" id="pkir_jenis_pekerjaan" name="jenis_pekerjaan" value="${pekerjaanData.jenis || ''}">
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="pkir_pendapatan">Pendapatan Bulanan (RM)</label>
-          <input type="number" id="pkir_pendapatan" name="pendapatan_bulanan" value="${pekerjaanData.pendapatan || ''}" min="0" step="0.01">
-        </div>
-        
-        <div class="form-group">
-          <label for="pkir_kumpulan_darah">Kumpulan Darah</label>
-          <select id="pkir_kumpulan_darah" name="kumpulan_darah">
-            <option value="">Pilih Kumpulan Darah</option>
-            <option value="A+" ${kesihatanData.kumpulan_darah === 'A+' ? 'selected' : ''}>A+</option>
-            <option value="A-" ${kesihatanData.kumpulan_darah === 'A-' ? 'selected' : ''}>A-</option>
-            <option value="B+" ${kesihatanData.kumpulan_darah === 'B+' ? 'selected' : ''}>B+</option>
-            <option value="B-" ${kesihatanData.kumpulan_darah === 'B-' ? 'selected' : ''}>B-</option>
-            <option value="AB+" ${kesihatanData.kumpulan_darah === 'AB+' ? 'selected' : ''}>AB+</option>
-            <option value="AB-" ${kesihatanData.kumpulan_darah === 'AB-' ? 'selected' : ''}>AB-</option>
-            <option value="O+" ${kesihatanData.kumpulan_darah === 'O+' ? 'selected' : ''}>O+</option>
-            <option value="O-" ${kesihatanData.kumpulan_darah === 'O-' ? 'selected' : ''}>O-</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRForm()">
-          <i class="fas fa-save"></i> Simpan Maklumat
-        </button>
-      </div>
-    `;
-  }
-  
-  // Create PKIR section content (keep for backward compatibility)
-  createPKIRSectionContent() {
-    switch (this.currentPKIRSection) {
-      case 'maklumat-asas':
-        return this.createPKIRMaklumatAsasSection();
-      case 'kafa':
-        return this.createPKIRKAFASection();
-      case 'pendidikan':
-        return this.createPKIRPendidikanSection();
-      case 'pekerjaan':
-        return this.createPKIRPekerjaanSection();
-      case 'kesihatan':
-        return this.createPKIRKesihatanSection();
-      default:
-        return this.createPKIRMaklumatAsasSection();
-    }
-  }
-
-  // Create PKIR Maklumat Asas section
-  createPKIRMaklumatAsasSection() {
-    const data = this.pkirData?.asas || {};
-    
-    return `
-      <form class="pkir-form" data-section="maklumat-asas">
-        <div class="form-section">
-          <h4>Maklumat Asas Pasangan</h4>
-          
-          <div class="form-group">
-            <label for="pkir_gambar_profil">Gambar Profil Pasangan</label>
-            <input type="file" id="pkir_gambar_profil" name="gambar_profil_pasangan" accept="image/*">
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_nama">Nama Pasangan *</label>
-              <input type="text" id="pkir_nama" name="nama_pasangan" value="${data.nama || ''}" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_no_kp">No. KP Pasangan *</label>
-              <input type="text" id="pkir_no_kp" name="no_kp_pasangan" value="${data.no_kp || ''}" 
-                     onblur="kirProfile.checkDuplicateKIR(this.value)" required>
-              <div id="duplicate-kir-warning" class="warning-banner" style="display: none;"></div>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_tarikh_lahir">Tarikh Lahir *</label>
-              <input type="date" id="pkir_tarikh_lahir" name="tarikh_lahir_pasangan" value="${data.tarikh_lahir || ''}" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_telefon">Telefon Pasangan</label>
-              <input type="tel" id="pkir_telefon" name="telefon_pasangan" value="${data.telefon || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_jantina">Jantina *</label>
-              <select id="pkir_jantina" name="jantina_pasangan" required>
-                <option value="">Pilih Jantina</option>
-                <option value="Lelaki" ${data.jantina === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
-                <option value="Perempuan" ${data.jantina === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_bangsa">Bangsa *</label>
-              <select id="pkir_bangsa" name="bangsa_pasangan" required>
-                <option value="">Pilih Bangsa</option>
-                <option value="Melayu" ${data.bangsa === 'Melayu' ? 'selected' : ''}>Melayu</option>
-                <option value="Cina" ${data.bangsa === 'Cina' ? 'selected' : ''}>Cina</option>
-                <option value="India" ${data.bangsa === 'India' ? 'selected' : ''}>India</option>
-                <option value="Lain-lain" ${data.bangsa === 'Lain-lain' ? 'selected' : ''}>Lain-lain</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_agama">Agama *</label>
-              <select id="pkir_agama" name="agama_pasangan" required>
-                <option value="">Pilih Agama</option>
-                <option value="Islam" ${data.agama === 'Islam' ? 'selected' : ''}>Islam</option>
-                <option value="Kristian" ${data.agama === 'Kristian' ? 'selected' : ''}>Kristian</option>
-                <option value="Buddha" ${data.agama === 'Buddha' ? 'selected' : ''}>Buddha</option>
-                <option value="Hindu" ${data.agama === 'Hindu' ? 'selected' : ''}>Hindu</option>
-                <option value="Lain-lain" ${data.agama === 'Lain-lain' ? 'selected' : ''}>Lain-lain</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_tempat_lahir">Tempat Lahir</label>
-              <input type="text" id="pkir_tempat_lahir" name="tempat_lahir_pasangan" value="${data.tempat_lahir || ''}">
-            </div>
-          </div>
-          
-          <div class="form-section">
-            <h4>Maklumat Perkahwinan</h4>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="pkir_tarikh_nikah">Tarikh Nikah</label>
-                <input type="date" id="pkir_tarikh_nikah" name="tarikh_nikah" value="${data.tarikh_nikah || ''}">
-              </div>
-              
-              <div class="form-group">
-                <label for="pkir_tarikh_cerai">Tarikh Cerai (jika berkenaan)</label>
-                <input type="date" id="pkir_tarikh_cerai" name="tarikh_cerai" value="${data.tarikh_cerai || ''}">
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="pkir_alamat">Alamat Pasangan</label>
-            <textarea id="pkir_alamat" name="alamat_pasangan" rows="3">${data.alamat || ''}</textarea>
-            <small class="form-help">Boleh berbeza dari alamat KIR utama</small>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_status">Status Pasangan *</label>
-              <select id="pkir_status" name="status_pasangan" required>
-                <option value="">Pilih Status</option>
-                <option value="Hidup" ${data.status_pasangan === 'Hidup' ? 'selected' : ''}>Hidup</option>
-                <option value="Meninggal" ${data.status_pasangan === 'Meninggal' ? 'selected' : ''}>Meninggal</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_oku">OKU Pasangan</label>
-              <select id="pkir_oku" name="oku_pasangan">
-                <option value="">Pilih Status</option>
-                <option value="Ya" ${data.oku === 'Ya' ? 'selected' : ''}>Ya</option>
-                <option value="Tidak" ${data.oku === 'Tidak' ? 'selected' : ''}>Tidak</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRSection('maklumat-asas')">
-              <i class="fas fa-save"></i> Simpan Maklumat Asas
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create PKIR modal
-  createPKIRModal() {
-    if (!this.isPKIRModalOpen) return '';
-    
-    const kekeluargaanData = this.relatedData?.keluarga || {};
-    
-    return `
-      <div class="modal-overlay" onclick="kirProfile.closePKIRModal()">
-        <div class="modal pkir-modal" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h3>Cipta Rekod PKIR</h3>
-            <button class="modal-close" onclick="kirProfile.closePKIRModal()">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          
-          <div class="modal-body">
-            <p>Maklumat berikut akan dipra-isi dari tab Kekeluargaan. Anda boleh mengedit sebelum menyimpan.</p>
-            
-            <form id="pkir-creation-form">
-              <div class="form-group">
-                <label for="modal_nama_pasangan">Nama Pasangan *</label>
-                <input type="text" id="modal_nama_pasangan" name="nama_pasangan" 
-                       value="${kekeluargaanData.nama_pasangan || ''}" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="modal_no_kp_pasangan">No. KP Pasangan *</label>
-                <input type="text" id="modal_no_kp_pasangan" name="no_kp_pasangan" 
-                       value="${kekeluargaanData.no_kp_pasangan || ''}" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="modal_tarikh_lahir_pasangan">Tarikh Lahir *</label>
-                <input type="date" id="modal_tarikh_lahir_pasangan" name="tarikh_lahir_pasangan" 
-                       value="${kekeluargaanData.tarikh_lahir_pasangan || ''}" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="modal_telefon_pasangan">Telefon Pasangan</label>
-                <input type="tel" id="modal_telefon_pasangan" name="telefon_pasangan" 
-                       value="${kekeluargaanData.telefon_pasangan || ''}">
-              </div>
-            </form>
-          </div>
-          
-          <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="kirProfile.closePKIRModal()">Batal</button>
-            <button class="btn btn-primary" onclick="kirProfile.createPKIRRecord()">
-              <i class="fas fa-save"></i> Cipta PKIR
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // Create PKIR KAFA section
-  createPKIRKAFASection() {
-    const data = this.pkirData?.kafa || {};
-    
-    return `
-      <form class="pkir-form" data-section="kafa">
-        <div class="form-section">
-          <h4>Pendidikan Agama (KAFA) Pasangan</h4>
-          
-          <div class="form-group">
-            <label for="pkir_sumber_pengetahuan">Sumber Pengetahuan Agama</label>
-            <textarea id="pkir_sumber_pengetahuan" name="sumber_pengetahuan" rows="3">${data.sumber_pengetahuan || ''}</textarea>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_tahap_iman">Tahap Iman *</label>
-              <select id="pkir_tahap_iman" name="tahap_iman" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${data.tahap_iman == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${data.tahap_iman == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${data.tahap_iman == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${data.tahap_iman == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${data.tahap_iman == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_tahap_islam">Tahap Islam *</label>
-              <select id="pkir_tahap_islam" name="tahap_islam" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${data.tahap_islam == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${data.tahap_islam == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${data.tahap_islam == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${data.tahap_islam == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${data.tahap_islam == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_tahap_fatihah">Tahap Al-Fatihah *</label>
-              <select id="pkir_tahap_fatihah" name="tahap_fatihah" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${data.tahap_fatihah == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${data.tahap_fatihah == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${data.tahap_fatihah == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${data.tahap_fatihah == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${data.tahap_fatihah == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_tahap_taharah">Tahap Taharah, Wuduk & Solat *</label>
-              <select id="pkir_tahap_taharah" name="tahap_taharah_wuduk_solat" required>
-                <option value="">Pilih Tahap</option>
-                <option value="1" ${data.tahap_taharah_wuduk_solat == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-                <option value="2" ${data.tahap_taharah_wuduk_solat == 2 ? 'selected' : ''}>2 - Lemah</option>
-                <option value="3" ${data.tahap_taharah_wuduk_solat == 3 ? 'selected' : ''}>3 - Sederhana</option>
-                <option value="4" ${data.tahap_taharah_wuduk_solat == 4 ? 'selected' : ''}>4 - Baik</option>
-                <option value="5" ${data.tahap_taharah_wuduk_solat == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="pkir_tahap_puasa">Tahap Puasa, Fidyah & Zakat *</label>
-            <select id="pkir_tahap_puasa" name="tahap_puasa_fidyah_zakat" required>
-              <option value="">Pilih Tahap</option>
-              <option value="1" ${data.tahap_puasa_fidyah_zakat == 1 ? 'selected' : ''}>1 - Sangat Lemah</option>
-              <option value="2" ${data.tahap_puasa_fidyah_zakat == 2 ? 'selected' : ''}>2 - Lemah</option>
-              <option value="3" ${data.tahap_puasa_fidyah_zakat == 3 ? 'selected' : ''}>3 - Sederhana</option>
-              <option value="4" ${data.tahap_puasa_fidyah_zakat == 4 ? 'selected' : ''}>4 - Baik</option>
-              <option value="5" ${data.tahap_puasa_fidyah_zakat == 5 ? 'selected' : ''}>5 - Sangat Baik</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="pkir_skor_kafa">Skor KAFA Pasangan</label>
-            <input type="number" id="pkir_skor_kafa" name="skor_kafa" value="${data.skor_kafa || ''}" readonly>
-            <small class="form-help">Skor akan dikira secara automatik semasa menyimpan</small>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRSection('kafa')">
-              <i class="fas fa-save"></i> Simpan KAFA
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create PKIR Pendidikan section
-  createPKIRPendidikanSection() {
-    const data = this.pkirData?.pendidikan || {};
-    
-    return `
-      <form class="pkir-form" data-section="pendidikan">
-        <div class="form-section">
-          <h4>Pendidikan Pasangan</h4>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_tahap_pendidikan">Tahap Pendidikan</label>
-              <select id="pkir_tahap_pendidikan" name="tahap">
-                <option value="">Pilih Tahap</option>
-                <option value="Tiada Pendidikan Formal" ${data.tahap === 'Tiada Pendidikan Formal' ? 'selected' : ''}>Tiada Pendidikan Formal</option>
-                <option value="Sekolah Rendah" ${data.tahap === 'Sekolah Rendah' ? 'selected' : ''}>Sekolah Rendah</option>
-                <option value="Sekolah Menengah" ${data.tahap === 'Sekolah Menengah' ? 'selected' : ''}>Sekolah Menengah</option>
-                <option value="SPM/SPMV" ${data.tahap === 'SPM/SPMV' ? 'selected' : ''}>SPM/SPMV</option>
-                <option value="STPM/Diploma" ${data.tahap === 'STPM/Diploma' ? 'selected' : ''}>STPM/Diploma</option>
-                <option value="Ijazah Sarjana Muda" ${data.tahap === 'Ijazah Sarjana Muda' ? 'selected' : ''}>Ijazah Sarjana Muda</option>
-                <option value="Ijazah Sarjana" ${data.tahap === 'Ijazah Sarjana' ? 'selected' : ''}>Ijazah Sarjana</option>
-                <option value="Ijazah Doktor Falsafah" ${data.tahap === 'Ijazah Doktor Falsafah' ? 'selected' : ''}>Ijazah Doktor Falsafah</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_institusi">Institusi</label>
-              <input type="text" id="pkir_institusi" name="institusi" value="${data.institusi || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_tahun_tamat">Tahun Tamat</label>
-              <input type="number" id="pkir_tahun_tamat" name="tahun_tamat" value="${data.tahun_tamat || ''}" min="1950" max="2030">
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_bidang">Bidang Pengajian</label>
-              <input type="text" id="pkir_bidang" name="bidang" value="${data.bidang || ''}">
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRSection('pendidikan')">
-              <i class="fas fa-save"></i> Simpan Pendidikan
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create PKIR Pekerjaan section
-  createPKIRPekerjaanSection() {
-    const data = this.pkirData?.pekerjaan || {};
-    
-    return `
-      <form class="pkir-form" data-section="pekerjaan">
-        <div class="form-section">
-          <h4>Pekerjaan Pasangan</h4>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_status_pekerjaan">Status Pekerjaan</label>
-              <select id="pkir_status_pekerjaan" name="status">
-                <option value="">Pilih Status</option>
-                <option value="Bekerja" ${data.status === 'Bekerja' ? 'selected' : ''}>Bekerja</option>
-                <option value="Menganggur" ${data.status === 'Menganggur' ? 'selected' : ''}>Menganggur</option>
-                <option value="Pelajar" ${data.status === 'Pelajar' ? 'selected' : ''}>Pelajar</option>
-                <option value="Pesara" ${data.status === 'Pesara' ? 'selected' : ''}>Pesara</option>
-                <option value="Suri Rumah" ${data.status === 'Suri Rumah' ? 'selected' : ''}>Suri Rumah</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_jenis_pekerjaan">Jenis Pekerjaan</label>
-              <input type="text" id="pkir_jenis_pekerjaan" name="jenis" value="${data.jenis || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_majikan">Majikan/Syarikat</label>
-              <input type="text" id="pkir_majikan" name="majikan" value="${data.majikan || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_pendapatan">Pendapatan Bulanan (RM)</label>
-              <input type="number" id="pkir_pendapatan" name="pendapatan_bulanan" value="${data.pendapatan_bulanan || ''}" min="0" step="0.01">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pkir_lokasi">Lokasi Kerja</label>
-              <input type="text" id="pkir_lokasi" name="lokasi" value="${data.lokasi || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="pkir_pengalaman">Pengalaman (Tahun)</label>
-              <input type="number" id="pkir_pengalaman" name="pengalaman" value="${data.pengalaman || ''}" min="0">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="pkir_kemahiran">Kemahiran</label>
-            <textarea id="pkir_kemahiran" name="kemahiran" rows="3">${data.kemahiran || ''}</textarea>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRSection('pekerjaan')">
-              <i class="fas fa-save"></i> Simpan Pekerjaan
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create PKIR Kesihatan section
-  createPKIRKesihatanSection() {
-    const data = this.pkirData?.kesihatan || {};
-    const penyakitKronik = data.penyakit_kronik || [];
-    const ubatTetap = data.ubat_tetap || [];
-    
-    return `
-      <form class="pkir-form" data-section="kesihatan">
-        <div class="form-section">
-          <h4>Kesihatan Pasangan</h4>
-          
-          <div class="form-group">
-            <label for="pkir_kumpulan_darah">Kumpulan Darah</label>
-            <select id="pkir_kumpulan_darah" name="kumpulan_darah">
-              <option value="">Pilih Kumpulan Darah</option>
-              <option value="A+" ${data.kumpulan_darah === 'A+' ? 'selected' : ''}>A+</option>
-              <option value="A-" ${data.kumpulan_darah === 'A-' ? 'selected' : ''}>A-</option>
-              <option value="B+" ${data.kumpulan_darah === 'B+' ? 'selected' : ''}>B+</option>
-              <option value="B-" ${data.kumpulan_darah === 'B-' ? 'selected' : ''}>B-</option>
-              <option value="AB+" ${data.kumpulan_darah === 'AB+' ? 'selected' : ''}>AB+</option>
-              <option value="AB-" ${data.kumpulan_darah === 'AB-' ? 'selected' : ''}>AB-</option>
-              <option value="O+" ${data.kumpulan_darah === 'O+' ? 'selected' : ''}>O+</option>
-              <option value="O-" ${data.kumpulan_darah === 'O-' ? 'selected' : ''}>O-</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Penyakit Kronik</label>
-            <div id="pkir-penyakit-kronik-list">
-              ${penyakitKronik.map((penyakit, index) => `
-                <div class="dynamic-item" data-index="${index}">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <input type="text" name="penyakit_nama_${index}" value="${penyakit.nama || ''}" placeholder="Nama Penyakit">
-                    </div>
-                    <div class="form-group">
-                      <input type="text" name="penyakit_catatan_${index}" value="${penyakit.catatan || ''}" placeholder="Catatan">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="kirProfile.removePenyakitKronik(${index})">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="kirProfile.addPenyakitKronik()">
-              <i class="fas fa-plus"></i> Tambah Penyakit Kronik
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Ubat Tetap</label>
-            <div id="pkir-ubat-tetap-list">
-              ${ubatTetap.map((ubat, index) => `
-                <div class="dynamic-item" data-index="${index}">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <input type="text" name="ubat_nama_${index}" value="${ubat.nama_ubat || ''}" placeholder="Nama Ubat">
-                    </div>
-                    <div class="form-group">
-                      <input type="text" name="ubat_dos_${index}" value="${ubat.dos || ''}" placeholder="Dos">
-                    </div>
-                    <div class="form-group">
-                      <input type="text" name="ubat_kekerapan_${index}" value="${ubat.kekerapan || ''}" placeholder="Kekerapan">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="kirProfile.removeUbatTetap(${index})">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="kirProfile.addUbatTetap()">
-              <i class="fas fa-plus"></i> Tambah Ubat Tetap
-            </button>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="kirProfile.savePKIRSection('kesihatan')">
-              <i class="fas fa-save"></i> Simpan Kesihatan
-            </button>
-          </div>
-        </div>
-      </form>
-    `;
-  }
-
-  // Create Pendapatan tab
-  createPendapatanTab() {
-    return `
-      <div class="kir-form">
-        <div class="form-section">
-          <h4><i class="fas fa-money-bill-wave"></i> Pendapatan KIR</h4>
-          
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <div class="summary-display">
-                <div class="summary-item">
-                  <span class="summary-label">Jumlah Keseluruhan Pendapatan Bulanan:</span>
-                  <span class="summary-value" id="total-pendapatan">RM 0.00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-section">
-          <h4><i class="fas fa-chart-line"></i> Pendapatan Tetap</h4>
-          <p class="section-description">Pendapatan yang diterima secara tetap setiap bulan (Contoh: Gaji, Pencen, Elaun Tetap, Dividen)</p>
-          
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <div class="section-actions">
-                <button class="btn btn-primary" onclick="kirProfile.openPendapatanModal('Tetap')">
-                  <i class="fas fa-plus"></i> Tambah Pendapatan Tetap
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group full-width">
-              <div class="pendapatan-table-container" id="pendapatan-tetap-table">
-                ${this.createPendapatanTable('Tetap')}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-section">
-          <h4><i class="fas fa-chart-bar"></i> Pendapatan Tidak Tetap</h4>
-          <p class="section-description">Pendapatan yang tidak tetap atau berubah-ubah (Contoh: Kerja Sambilan, Bonus, Komisyen, Freelance)</p>
-          
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <div class="section-actions">
-                <button class="btn btn-primary" onclick="kirProfile.openPendapatanModal('Tidak Tetap')">
-                  <i class="fas fa-plus"></i> Tambah Pendapatan Tidak Tetap
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group full-width">
-              <div class="pendapatan-table-container" id="pendapatan-tidak-tetap-table">
-                ${this.createPendapatanTable('Tidak Tetap')}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      ${this.createPendapatanModal()}
-    `;
-  }
-
-  // Create Perbelanjaan tab
-  createPerbelanjaanTab() {
-    return `
-      <div class="kir-form">
-        <div class="form-section">
-          <h4><i class="fas fa-shopping-cart"></i> Perbelanjaan KIR</h4>
-          
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <div class="summary-display">
-                <div class="summary-item">
-                  <span class="summary-label">Jumlah Perbelanjaan Bulanan:</span>
-                  <span class="summary-value" id="total-perbelanjaan">RM 0.00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-section">
-          <h4><i class="fas fa-list"></i> Senarai Perbelanjaan</h4>
-          <p class="section-description">Perbelanjaan rutin bulanan mengikut kategori</p>
-          
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <div class="section-actions">
-                <button class="btn btn-primary" onclick="kirProfile.openPerbelanjaanModal()">
-                  <i class="fas fa-plus"></i> Tambah Perbelanjaan
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group full-width">
-              <label>Tapis mengikut Kategori</label>
-              <div class="category-filters">
-                <button class="filter-btn active" data-category="all" onclick="kirProfile.filterPerbelanjaan('all')">
-                  <i class="fas fa-th"></i> Semua
-                </button>
-                <button class="filter-btn" data-category="Utiliti-Air" onclick="kirProfile.filterPerbelanjaan('Utiliti-Air')">
-                  <i class="fas fa-tint"></i> Air
-                </button>
-                <button class="filter-btn" data-category="Utiliti-Elektrik" onclick="kirProfile.filterPerbelanjaan('Utiliti-Elektrik')">
-                  <i class="fas fa-bolt"></i> Elektrik
-                </button>
-                <button class="filter-btn" data-category="Sewa" onclick="kirProfile.filterPerbelanjaan('Sewa')">
-                  <i class="fas fa-home"></i> Sewa
-                </button>
-                <button class="filter-btn" data-category="Ansuran" onclick="kirProfile.filterPerbelanjaan('Ansuran')">
-                  <i class="fas fa-credit-card"></i> Ansuran
-                </button>
-                <button class="filter-btn" data-category="Makanan" onclick="kirProfile.filterPerbelanjaan('Makanan')">
-                  <i class="fas fa-utensils"></i> Makanan
-                </button>
-                <button class="filter-btn" data-category="Sekolah-Anak" onclick="kirProfile.filterPerbelanjaan('Sekolah-Anak')">
-                  <i class="fas fa-school"></i> Sekolah
-                </button>
-                <button class="filter-btn" data-category="Rawatan" onclick="kirProfile.filterPerbelanjaan('Rawatan')">
-                  <i class="fas fa-medkit"></i> Rawatan
-                </button>
-                <button class="filter-btn" data-category="Lain-lain" onclick="kirProfile.filterPerbelanjaan('Lain-lain')">
-                   <i class="fas fa-ellipsis-h"></i> Lain-lain
-                 </button>
-               </div>
-             </div>
-             
-             <div class="form-group full-width">
-               <div class="perbelanjaan-table-container" id="perbelanjaan-table">
-                 ${this.createPerbelanjaanTable()}
-               </div>
-             </div>
-             
-             <div class="form-group full-width">
-               <div class="perbelanjaan-subtotals" id="perbelanjaan-subtotals">
-                 ${this.createPerbelanjaanSubtotals()}
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-       
-       ${this.createPerbelanjaanModal()}
-     `;
-  }
-
   // Create Bantuan Bulanan tab
   createBantuanBulananTab() {
     return `
@@ -3498,6 +1752,9 @@ export class KIRProfile {
       }
     });
     
+    // Setup event listeners for extracted tab components
+    this.setupTabComponentEventListeners();
+    
     // Handle browser back/forward
     window.addEventListener('popstate', (e) => {
       this.handleRouteChange();
@@ -3538,6 +1795,17 @@ export class KIRProfile {
     }
   }
 
+  // Setup event listeners for extracted tab components
+  setupTabComponentEventListeners() {
+    // Setup event listeners for each tab component when they become active
+    Object.keys(this.tabComponents).forEach(tabId => {
+      if (this.tabComponents[tabId] && typeof this.tabComponents[tabId].setupEventListeners === 'function') {
+        // We'll call setupEventListeners when the tab is rendered/switched to
+        // This is handled in the switchTab method
+      }
+    });
+  }
+
   // Legacy method for backward compatibility
   updateTabNavigation() {
     this.updateSidebarNavigation();
@@ -3573,10 +1841,18 @@ export class KIRProfile {
         </div>
       `;
     }
-    
+
     // Update active tab
     this.updateTabNavigation();
-    
+
+    // Setup event listeners for extracted tab components
+    if (this.tabComponents[tabId] && typeof this.tabComponents[tabId].setupEventListeners === 'function') {
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        this.tabComponents[tabId].setupEventListeners();
+      }, 0);
+    }
+
     // Load financial data for financial tabs
     if (tabId === 'pendapatan') {
       await this.loadPendapatanData();
@@ -3604,6 +1880,17 @@ export class KIRProfile {
   // Save tab data
   async saveTab(tabId) {
     try {
+      // Check if we have a tab component for this tab
+      if (this.tabComponents[tabId]) {
+        const success = await this.tabComponents[tabId].save();
+        if (success) {
+          // Refresh header data
+          await this.refreshHeaderData();
+        }
+        return;
+      }
+      
+      // Fallback to original save logic for non-extracted tabs
       const form = document.querySelector(`form[data-tab="${tabId}"]`);
       if (!form) return;
       
@@ -5309,37 +3596,6 @@ export class KIRProfile {
   }
 
   // Program & Kehadiran Tab
-  createProgramTab() {
-    return `
-      <div class="program-tab-content">
-        <div class="program-header">
-          <h3>Program & Kehadiran</h3>
-          <div class="program-filters">
-            <input type="date" id="program-date-from" placeholder="Tarikh Mula">
-            <input type="date" id="program-date-to" placeholder="Tarikh Akhir">
-            <select id="program-kategori">
-              <option value="">Semua Kategori</option>
-              <option value="Kemahiran">Kemahiran</option>
-              <option value="Kesihatan">Kesihatan</option>
-              <option value="Pendidikan">Pendidikan</option>
-              <option value="Keagamaan">Keagamaan</option>
-            </select>
-            <input type="text" id="program-search" placeholder="Cari nama program...">
-          </div>
-        </div>
-        
-        <div class="program-table-container">
-          <div class="loading-skeleton" id="program-loading">
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-          </div>
-          <div id="program-table"></div>
-        </div>
-      </div>
-    `;
-  }
-
   // Bind financial event listeners
   bindFinancialEventListeners() {
     // Pendapatan form submission
