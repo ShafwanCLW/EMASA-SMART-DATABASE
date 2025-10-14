@@ -1,6 +1,6 @@
 // Main application controller
 import { createLoginForm, handleTabSwitch, handleDemoLogin, showError, handleAuthToggle, handleRegistration, showRegistrationSuccess, showRegistrationError, handleGoogleSignIn } from './pages/auth/LoginForm.js';
-import { createAdminDashboard, setupUserManagementListeners, setupKIRManagementListeners, setupCiptaKIRListeners, setupProgramKehadiranListeners, setupSenariKIRListeners, setupReportsListeners, setupSettingsListeners, setupFinancialTrackingListeners } from './pages/admin/AdminDashboard.js';
+import { createAdminDashboard, setupUserManagementListeners, setupKIRManagementListeners, setupCiptaKIRListeners, setupProgramKehadiranListeners, setupProgramKehadiranNewListeners, setupSenariKIRListeners, setupReportsListeners, setupSettingsListeners, setupFinancialTrackingListeners } from './pages/admin/AdminDashboard.js';
 import { createUserDashboard } from './pages/user/UserDashboard.js';
 import { FirebaseAuthService, handleFirebaseLogin, handleFirebaseLogout } from './services/frontend/FirebaseAuthService.js';
 import { AuthService, handleLogin, handleLogout } from './services/frontend/AuthService.js'; // Keep for demo functionality
@@ -128,7 +128,9 @@ export class App {
       setupCiptaKIRListeners();
 
       // Setup Program & Kehadiran listeners for admin dashboard
-    setupProgramKehadiranListeners();
+      setupProgramKehadiranListeners();
+      // Setup Program & Kehadiran (New) listeners for admin dashboard
+      setupProgramKehadiranNewListeners();
       // Setup Financial Tracking listeners for admin dashboard
       setupFinancialTrackingListeners();
       // Setup Reports listeners for admin dashboard

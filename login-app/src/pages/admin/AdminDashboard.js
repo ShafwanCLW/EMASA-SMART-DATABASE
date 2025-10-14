@@ -40,6 +40,10 @@ export function createAdminSidebar(user) {
           <span class="nav-icon">📅</span>
           Program & Kehadiran
         </a>
+        <a href="#" class="nav-item" data-section="program-kehadiran-new">
+          <span class="nav-icon">📅</span>
+          Program & Kehadiran (New)
+        </a>
         <a href="#" class="nav-item" data-section="financial-tracking">
             <span class="nav-icon">💰</span>
             Financial Tracking
@@ -1503,6 +1507,149 @@ export function createAdminMainContent() {
       </div>
     </div>
     
+    <!-- Program & Kehadiran (New) Content -->
+    <div id="program-kehadiran-new-content" class="content-section">
+      <div class="section-header">
+        <h3 class="section-title">Program & Kehadiran (New)</h3>
+        <p class="section-description">Enhanced program and attendance management system</p>
+      </div>
+      
+      <!-- Main Program & Kehadiran (New) Overview -->
+      <div id="program-kehadiran-new-overview" class="sub-content-section active">
+        <div class="program-kehadiran-grid">
+          <div class="program-card">
+            <div class="program-header">
+              <h4>Enhanced Program Management</h4>
+              <span class="program-icon">📅</span>
+            </div>
+            <p class="program-description">Advanced program creation and management with improved features</p>
+            <button class="btn btn-primary" id="manage-programs-new-btn">Manage Programs</button>
+          </div>
+          <div class="program-card">
+            <div class="program-header">
+              <h4>Smart Attendance Tracking</h4>
+              <span class="program-icon">✅</span>
+            </div>
+            <p class="program-description">Real-time attendance tracking with analytics</p>
+            <button class="btn btn-primary" id="view-attendance-new-btn">View Attendance</button>
+          </div>
+          <div class="program-card">
+            <div class="program-header">
+              <h4>Advanced Reports</h4>
+              <span class="program-icon">📊</span>
+            </div>
+            <p class="program-description">Comprehensive analytics and reporting dashboard</p>
+            <button class="btn btn-primary" id="generate-reports-new-btn">Generate Reports</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Enhanced Program Management Sub-section -->
+      <div id="program-management-new-content" class="sub-content-section">
+        <div class="section-header">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="back-btn" id="program-management-new-back-btn">
+              <span>⬅️</span>
+              Back to Overview
+            </button>
+            <h3 class="section-title">Enhanced Program Management</h3>
+          </div>
+          <p class="section-description">Create, edit, and manage community programs with advanced features</p>
+        </div>
+        
+        <div class="action-bar">
+          <button class="btn btn-secondary" id="import-programs-btn">
+            <span>📥</span> Import Programs
+          </button>
+          <button class="btn btn-secondary" id="export-programs-btn">
+            <span>📤</span> Export Programs
+          </button>
+          <button class="btn btn-primary" id="add-program-new-btn">
+            <span>➕</span> Add New Program
+          </button>
+        </div>
+        
+        <div class="table-container">
+          <table class="data-table" id="programs-new-table">
+            <thead>
+              <tr>
+                <th>Program Name</th>
+                <th>Description</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Category</th>
+                <th>Participants</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="programs-new-table-body">
+              <!-- Enhanced programs will be loaded here -->
+              <tr>
+                <td colspan="8" class="loading-text">Loading enhanced programs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Smart Attendance Tracking Sub-section -->
+      <div id="attendance-tracking-new-content" class="sub-content-section">
+        <div class="section-header">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="back-btn" id="attendance-tracking-new-back-btn">
+              <span>⬅️</span>
+              Back to Overview
+            </button>
+            <h3 class="section-title">Smart Attendance Tracking</h3>
+          </div>
+          <p class="section-description">Real-time attendance tracking with advanced analytics</p>
+        </div>
+        
+        <div class="filters-container">
+          <div class="filter-group">
+            <label for="program-new-filter">Program:</label>
+            <select id="program-new-filter" class="form-select">
+              <option value="">All Programs</option>
+              <!-- Programs will be loaded here -->
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="date-range-new-filter">Date Range:</label>
+            <input type="date" id="start-date-new-filter" class="form-input">
+            <span>to</span>
+            <input type="date" id="end-date-new-filter" class="form-input">
+          </div>
+          <button class="btn btn-secondary" id="apply-filters-new-btn">Apply Filters</button>
+          <button class="btn btn-primary" id="export-attendance-new-btn">
+            <span>📤</span> Export Data
+          </button>
+        </div>
+        
+        <div class="table-container">
+          <table class="data-table" id="attendance-new-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Present</th>
+                <th>Attendance Rate</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-new-table-body">
+              <!-- Enhanced attendance data will be loaded here -->
+              <tr>
+                <td colspan="7" class="loading-text">Loading attendance data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
     <div id="financial-tracking-content" class="content-section">
       <div class="section-header">
         <h3 class="section-title">Financial Tracking</h3>
@@ -2735,6 +2882,95 @@ export function initializeKIRManagement(tableBodyId = 'kirTableBody') {
   });
 }
 
+// Function to close the enhanced add program modal
+function closeAddProgramNewModal() {
+  const modal = document.getElementById('add-program-new-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.remove();
+  }
+}
+
+// Function to save a new program in the enhanced tab
+async function saveProgramNew() {
+  try {
+    // Get form values
+    const name = document.getElementById('program-name-new').value.trim();
+    const description = document.getElementById('program-description-new').value.trim();
+    const startDate = document.getElementById('program-start-date-new').value;
+    const endDate = document.getElementById('program-end-date-new').value;
+    const category = document.getElementById('program-category-new').value;
+    const location = document.getElementById('program-location-new').value.trim();
+    const participants = document.getElementById('program-participants-new').value;
+    const budget = document.getElementById('program-budget-new').value;
+    const objectives = document.getElementById('program-objectives-new').value.trim();
+    
+    // Validate required fields
+    if (!name || !description || !startDate || !endDate || !category) {
+      alert('Please fill in all required fields (Name, Description, Start Date, End Date, Category).');
+      return;
+    }
+    
+    // Validate date range
+    if (new Date(startDate) > new Date(endDate)) {
+      alert('End date must be after start date.');
+      return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('#add-program-new-form button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    submitBtn.disabled = true;
+    
+    // Create enhanced program object
+    const program = {
+      nama_program: name,
+      nama: name, // Alternative field name for compatibility
+      deskripsi: description,
+      description: description, // Alternative field name for compatibility
+      tarikh_mula: new Date(startDate),
+      tarikh_tamat: new Date(endDate),
+      kategori: category,
+      category: category, // Alternative field name for compatibility
+      lokasi: location || '',
+      location: location || '', // Alternative field name for compatibility
+      participants: parseInt(participants) || 0,
+      budget: parseFloat(budget) || 0,
+      objectives: objectives || '',
+      status: 'upcoming', // Default status
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Save program to the database
+    await ProgramService.createProgram(program);
+    
+    // Close the modal
+    closeAddProgramNewModal();
+    
+    // Reload programs in the enhanced tab
+    await loadProgramsNew();
+    
+    // Show success message
+    alert('Program created successfully!');
+    
+  } catch (error) {
+    console.error('Error saving program:', error);
+    alert('Failed to save program. Please try again.');
+    
+    // Reset button state
+    const submitBtn = document.querySelector('#add-program-new-form button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Program';
+      submitBtn.disabled = false;
+    }
+  }
+}
+
 // Initialize user management when users section is activated
 export function setupUserManagementListeners() {
   const userManagementNav = document.querySelector('[data-section="users"]');
@@ -2935,6 +3171,27 @@ export function setupProgramKehadiranListeners() {
       console.log('Program & Kehadiran section is active on load, initializing...');
       setTimeout(async () => {
         await initializeProgramKehadiran();
+      }, 100);
+    }
+  }
+}
+
+// Setup Program & Kehadiran (New) navigation listener
+export function setupProgramKehadiranNewListeners() {
+  const programNewNav = document.querySelector('[data-section="program-kehadiran-new"]');
+  if (programNewNav) {
+    programNewNav.addEventListener('click', () => {
+      console.log('Program & Kehadiran (New) nav clicked, loading page...');
+      setTimeout(async () => {
+        await initializeProgramKehadiranNew();
+      }, 100);
+    });
+    
+    // Also initialize if this section is currently active
+    if (document.getElementById('program-kehadiran-new-content').classList.contains('active')) {
+      console.log('Program & Kehadiran (New) section is active on load, initializing...');
+      setTimeout(async () => {
+        await initializeProgramKehadiranNew();
       }, 100);
     }
   }
@@ -4374,6 +4631,301 @@ export async function initializeProgramKehadiran() {
       <div class="error-container">
         <h3>Error Loading Program & Kehadiran</h3>
         <p>Unable to load the Program & Kehadiran page. Please try again.</p>
+        <p class="error-details">${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+// Initialize Program & Kehadiran (New) functionality
+export async function initializeProgramKehadiranNew() {
+  console.log('Initializing Program & Kehadiran (New) page...');
+  
+  const container = document.getElementById('program-kehadiran-new-content');
+  if (!container) {
+    console.error('Program & Kehadiran (New) container not found');
+    return;
+  }
+  
+  // Make sure the overview section is visible initially
+  showProgramNewSubSection('program-kehadiran-new-overview');
+
+  try {
+    // Import ProgramService for enhanced program management
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    const programService = new ProgramService();
+    
+    // Setup event listeners for Program & Kehadiran (New) overview buttons
+    setupProgramKehadiranNewOverviewListeners();
+    
+    // Setup event listeners for Enhanced Program Management section
+    setupProgramManagementNewListeners(programService);
+    
+    // Import the enhanced CSS styles
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      /* Enhanced Program & Kehadiran Section Styles */
+      .program-kehadiran-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+      }
+      
+      .program-card {
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+      }
+      
+      .program-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+      
+      .program-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+      
+      .program-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+      }
+      
+      .program-icon {
+        font-size: 28px;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .program-description {
+        color: #64748b;
+        margin-bottom: 20px;
+        flex-grow: 1;
+        line-height: 1.6;
+      }
+      
+      .btn.btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      
+      .btn.btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      }
+      
+      /* Enhanced table styles */
+      .table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+      }
+      
+      .data-table th {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        font-weight: 600;
+        color: #374151;
+        padding: 16px;
+      }
+      
+      .data-table td {
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      
+      .data-table tr:hover {
+        background-color: #f8fafc;
+      }
+      
+      /* Enhanced action bar */
+      .action-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      
+      .btn.btn-secondary {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      
+      .btn.btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+      }
+      
+      /* Enhanced filters */
+      .filters-container {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+      }
+      
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      
+      .filter-group label {
+        font-weight: 500;
+        color: #374151;
+        min-width: 80px;
+      }
+      
+      .form-select, .form-input {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 8px 12px;
+        transition: border-color 0.3s ease;
+      }
+      
+      .form-select:focus, .form-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+    `;
+    document.head.appendChild(styleElement);
+    
+    console.log('Program & Kehadiran (New) page loaded successfully');
+    
+    // Add event listeners for the main navigation buttons
+    const manageNewBtn = document.getElementById('manage-programs-new-btn');
+    const attendanceNewBtn = document.getElementById('view-attendance-new-btn');
+    const reportsNewBtn = document.getElementById('generate-reports-new-btn');
+    
+    console.log('Setting up Program & Kehadiran (New) navigation buttons:', { 
+      manageNewBtn: !!manageNewBtn, 
+      attendanceNewBtn: !!attendanceNewBtn, 
+      reportsNewBtn: !!reportsNewBtn 
+    });
+    
+    if (manageNewBtn) {
+      manageNewBtn.addEventListener('click', () => {
+        console.log('Enhanced Manage Programs button clicked');
+        showProgramNewSubSection('program-management-new-content');
+        loadProgramsNew();
+      });
+    } else {
+      console.error('Enhanced Manage Programs button not found');
+    }
+    
+    if (attendanceNewBtn) {
+      attendanceNewBtn.addEventListener('click', () => {
+        console.log('Smart Attendance Tracking button clicked');
+        showProgramNewSubSection('attendance-tracking-new-content');
+        loadAttendanceDataNew();
+      });
+    } else {
+      console.error('Smart Attendance Tracking button not found');
+    }
+    
+    if (reportsNewBtn) {
+      reportsNewBtn.addEventListener('click', () => {
+        console.log('Advanced Reports button clicked');
+        showProgramNewSubSection('program-reports-new-content');
+        loadProgramReportsNew();
+      });
+    } else {
+      console.error('Advanced Reports button not found');
+    }
+    
+    // Add event listeners for back buttons
+    const programManagementNewBackBtn = document.getElementById('program-management-new-back-btn');
+    if (programManagementNewBackBtn) {
+      programManagementNewBackBtn.addEventListener('click', () => {
+        console.log('Enhanced Program Management back button clicked');
+        showProgramNewSubSection('program-kehadiran-new-overview');
+      });
+    } else {
+      console.error('Enhanced Program Management back button not found');
+    }
+    
+    const attendanceTrackingNewBackBtn = document.getElementById('attendance-tracking-new-back-btn');
+    if (attendanceTrackingNewBackBtn) {
+      attendanceTrackingNewBackBtn.addEventListener('click', () => {
+        console.log('Smart Attendance Tracking back button clicked');
+        showProgramNewSubSection('program-kehadiran-new-overview');
+      });
+    } else {
+      console.error('Smart Attendance Tracking back button not found');
+    }
+    
+    // Add event listeners for enhanced action buttons
+    const addProgramNewBtn = document.getElementById('add-program-new-btn');
+    if (addProgramNewBtn) {
+      addProgramNewBtn.addEventListener('click', () => {
+        console.log('Add New Program (Enhanced) button clicked');
+        openAddProgramNewModal();
+      });
+    }
+    
+    const importProgramsBtn = document.getElementById('import-programs-btn');
+    if (importProgramsBtn) {
+      importProgramsBtn.addEventListener('click', () => {
+        console.log('Import Programs button clicked');
+        openImportProgramsModal();
+      });
+    }
+    
+    const exportProgramsBtn = document.getElementById('export-programs-btn');
+    if (exportProgramsBtn) {
+      exportProgramsBtn.addEventListener('click', () => {
+        console.log('Export Programs button clicked');
+        exportProgramsData();
+      });
+    }
+    
+    // Add event listeners for enhanced attendance filters
+    const applyFiltersNewBtn = document.getElementById('apply-filters-new-btn');
+    if (applyFiltersNewBtn) {
+      applyFiltersNewBtn.addEventListener('click', () => {
+        applyAttendanceFiltersNew();
+      });
+    }
+    
+    const exportAttendanceNewBtn = document.getElementById('export-attendance-new-btn');
+    if (exportAttendanceNewBtn) {
+      exportAttendanceNewBtn.addEventListener('click', () => {
+        exportAttendanceDataNew();
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error loading Program & Kehadiran (New) page:', error);
+    container.innerHTML = `
+      <div class="error-container">
+        <h3>Error Loading Program & Kehadiran (New)</h3>
+        <p>Unable to load the enhanced Program & Kehadiran page. Please try again.</p>
         <p class="error-details">${error.message}</p>
       </div>
     `;
@@ -6319,4 +6871,824 @@ function initializeSpouseConditionalLogic() {
   
   // Initialize on page load
   toggleSpouseAndAIRSections();
+}
+
+// Helper functions for Program & Kehadiran (New) functionality
+function showProgramNewSubSection(sectionId) {
+  console.log('Showing Program New sub-section:', sectionId);
+  
+  // Hide all sub-sections
+  const subSections = [
+    'program-kehadiran-new-overview',
+    'program-management-new-content',
+    'attendance-tracking-new-content',
+    'program-reports-new-content'
+  ];
+  
+  subSections.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = 'none';
+    }
+  });
+  
+  // Show the selected section
+  const targetSection = document.getElementById(sectionId);
+  if (targetSection) {
+    targetSection.style.display = 'block';
+  } else {
+    console.error(`Section ${sectionId} not found`);
+  }
+}
+
+function setupProgramKehadiranNewOverviewListeners() {
+  console.log('Setting up Program & Kehadiran (New) overview listeners');
+  // This function will be called when the overview section is initialized
+}
+
+function setupProgramManagementNewListeners(programService) {
+  console.log('Setting up Enhanced Program Management listeners');
+  // This function will handle enhanced program management functionality
+}
+
+async function loadProgramsNew() {
+  console.log('Loading enhanced programs data...');
+  
+  try {
+    const programsTableBody = document.getElementById('programs-new-table-body');
+    if (!programsTableBody) {
+      console.error('Enhanced programs table body not found');
+      return;
+    }
+    
+    programsTableBody.innerHTML = '<tr><td colspan="8" class="loading-text">Loading enhanced programs...</td></tr>';
+    
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Get programs from the database
+    const programs = await ProgramService.listProgram();
+    console.log('Enhanced programs loaded:', programs);
+    
+    if (programs.length === 0) {
+      programsTableBody.innerHTML = `
+        <tr><td colspan="8" class="empty-text">
+          No programs found. 
+          <button id="create-test-program-new" class="btn btn-sm btn-primary">Create Test Program</button>
+        </td></tr>
+      `;
+      
+      // Add event listener to create test program button
+      const createTestBtn = document.getElementById('create-test-program-new');
+      if (createTestBtn) {
+        createTestBtn.addEventListener('click', createTestProgram);
+      }
+      return;
+    }
+    
+    // Clear the loading message
+    programsTableBody.innerHTML = '';
+    
+    // Add each program to the table
+    programs.forEach(program => {
+      const row = document.createElement('tr');
+      
+      // Format dates - handle both tarikh and tarikh_mula fields
+      const startDate = formatProgramDate(program.tarikh_mula);
+      const endDate = formatProgramDate(program.tarikh_tamat);
+      
+      // Determine status based on dates if not explicitly set
+      let status = program.status || 'upcoming';
+      if (!program.status) {
+        const now = new Date();
+        const programStartDate = program.tarikh_mula;
+        const programEndDate = program.tarikh_tamat;
+        
+        if (programStartDate && programEndDate) {
+          let startDate, endDate;
+          
+          // Handle different timestamp formats
+          if (programStartDate.seconds) {
+            startDate = new Date(programStartDate.seconds * 1000);
+          } else {
+            startDate = new Date(programStartDate);
+          }
+          
+          if (programEndDate.seconds) {
+            endDate = new Date(programEndDate.seconds * 1000);
+          } else {
+            endDate = new Date(programEndDate);
+          }
+          
+          if (now > endDate) {
+            status = 'completed';
+          } else if (now >= startDate && now <= endDate) {
+            status = 'active';
+          } else {
+            status = 'upcoming';
+          }
+        }
+      }
+      
+      // Determine status class
+      let statusClass = 'status-badge ';
+      switch(status) {
+        case 'upcoming':
+          statusClass += 'upcoming';
+          break;
+        case 'active':
+          statusClass += 'active';
+          break;
+        case 'completed':
+          statusClass += 'completed';
+          break;
+        case 'cancelled':
+          statusClass += 'cancelled';
+          break;
+        default:
+          statusClass += 'upcoming';
+      }
+      
+      // Create the row content - handle both nama and nama_program fields
+      const programName = program.nama_program || program.nama || 'Unnamed Program';
+      const description = program.penerangan || program.deskripsi || 'No description';
+      
+      // Create the row content with enhanced styling
+      row.innerHTML = `
+        <td><strong>${programName}</strong></td>
+        <td>${description}</td>
+        <td>${startDate}</td>
+        <td>${endDate}</td>
+        <td><span class="category-badge">${program.kategori || 'N/A'}</span></td>
+        <td><span class="${statusClass}">${status.toUpperCase()}</span></td>
+        <td>${program.participants || 0}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn btn-sm btn-primary edit-program-new" data-id="${program.id}" title="Edit Program">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-info view-program-new" data-id="${program.id}" title="View Details">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button class="btn btn-sm btn-danger delete-program-new" data-id="${program.id}" title="Delete Program">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </td>
+      `;
+      
+      programsTableBody.appendChild(row);
+      
+      // Add event listeners for enhanced action buttons
+      row.querySelector('.edit-program-new').addEventListener('click', () => {
+        editProgram(program.id);
+      });
+      
+      row.querySelector('.view-program-new').addEventListener('click', () => {
+        viewProgramDetails(program.id);
+      });
+      
+      row.querySelector('.delete-program-new').addEventListener('click', () => {
+        deleteProgram(program.id);
+      });
+    });
+    
+  } catch (error) {
+    console.error('Error loading enhanced programs:', error);
+    const programsTableBody = document.getElementById('programs-new-table-body');
+    if (programsTableBody) {
+      programsTableBody.innerHTML = `<tr><td colspan="8" class="error-text">Error loading enhanced programs: ${error.message}</td></tr>`;
+    }
+  }
+}
+
+async function loadAttendanceDataNew() {
+  console.log('Loading smart attendance tracking data...');
+  
+  try {
+    const attendanceTableBody = document.getElementById('attendance-new-table-body');
+    if (!attendanceTableBody) {
+      console.error('Enhanced attendance table body not found');
+      return;
+    }
+    
+    attendanceTableBody.innerHTML = '<tr><td colspan="7" class="loading-text">Loading smart attendance records...</td></tr>';
+    
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Load programs for the filter dropdown
+    const programs = await ProgramService.listProgram();
+    const programFilterNew = document.getElementById('program-filter-new');
+    
+    if (programFilterNew) {
+      // Clear existing options except the first one
+      while (programFilterNew.options.length > 1) {
+        programFilterNew.remove(1);
+      }
+      
+      // Add program options to the filter
+      programs.forEach(program => {
+        const option = document.createElement('option');
+        option.value = program.id;
+        option.textContent = program.nama_program || program.nama || 'Unnamed Program';
+        programFilterNew.appendChild(option);
+      });
+    }
+    
+    // Get attendance records
+    const attendanceRecords = await ProgramService.listAllAttendance();
+    console.log('Enhanced attendance records loaded:', attendanceRecords);
+    
+    if (attendanceRecords.length === 0) {
+      attendanceTableBody.innerHTML = '<tr><td colspan="7" class="empty-text">No attendance records found. Start tracking attendance for your programs!</td></tr>';
+      return;
+    }
+    
+    // Clear the loading message
+    attendanceTableBody.innerHTML = '';
+    
+    // Add each attendance record to the table with enhanced features
+    attendanceRecords.forEach(record => {
+      const row = document.createElement('tr');
+      
+      // Enhanced attendance status with visual indicators
+      const attendanceStatus = record.present ? 
+        '<span class="attendance-status present"><i class="fas fa-check-circle"></i> Present</span>' : 
+        '<span class="attendance-status absent"><i class="fas fa-times-circle"></i> Absent</span>';
+      
+      // Format timestamp if available
+      const timestamp = record.timestamp ? 
+        new Date(record.timestamp.seconds * 1000).toLocaleString() : 
+        'N/A';
+      
+      row.innerHTML = `
+        <td><strong>${record.participantName || 'Unknown'}</strong></td>
+        <td><span class="participant-id">${record.participantId || 'N/A'}</span></td>
+        <td><span class="participant-type-badge ${record.participantType?.toLowerCase() || 'default'}">${record.participantType || 'Participant'}</span></td>
+        <td>${attendanceStatus}</td>
+        <td><span class="timestamp">${timestamp}</span></td>
+        <td>
+          <div class="notes-container">
+            <span class="notes-text">${record.notes || 'No notes'}</span>
+          </div>
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn btn-sm btn-primary edit-attendance-new" data-id="${record.id}" title="Edit Attendance">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-info view-details-new" data-id="${record.id}" title="View Details">
+              <i class="fas fa-eye"></i> Details
+            </button>
+            <button class="btn btn-sm btn-warning toggle-status-new" data-id="${record.id}" title="Toggle Status">
+              <i class="fas fa-sync"></i> Toggle
+            </button>
+          </div>
+        </td>
+      `;
+      
+      attendanceTableBody.appendChild(row);
+      
+      // Add event listeners for enhanced action buttons
+      row.querySelector('.edit-attendance-new').addEventListener('click', () => {
+        editAttendanceRecordNew(record.id);
+      });
+      
+      row.querySelector('.view-details-new').addEventListener('click', () => {
+        viewAttendanceDetailsNew(record.id);
+      });
+      
+      row.querySelector('.toggle-status-new').addEventListener('click', async () => {
+        await toggleAttendanceStatusNew(record.id, !record.present);
+      });
+    });
+    
+  } catch (error) {
+    console.error('Error loading enhanced attendance data:', error);
+    const attendanceTableBody = document.getElementById('attendance-new-table-body');
+    if (attendanceTableBody) {
+      attendanceTableBody.innerHTML = `<tr><td colspan="7" class="error-text">Error loading smart attendance records: ${error.message}</td></tr>`;
+    }
+  }
+}
+
+async function loadProgramReportsNew() {
+  console.log('Loading advanced program reports...');
+  
+  try {
+    const reportsContainer = document.getElementById('reports-new-container');
+    if (!reportsContainer) {
+      console.error('Enhanced reports container not found');
+      return;
+    }
+    
+    reportsContainer.innerHTML = '<div class="loading-text">Loading advanced program reports...</div>';
+    
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Get programs and attendance data for reports
+    const programs = await ProgramService.listProgram();
+    const attendanceRecords = await ProgramService.listAllAttendance();
+    
+    // Generate enhanced reports
+    const reportsHTML = generateEnhancedReports(programs, attendanceRecords);
+    reportsContainer.innerHTML = reportsHTML;
+    
+  } catch (error) {
+    console.error('Error loading advanced program reports:', error);
+    const reportsContainer = document.getElementById('reports-new-container');
+    if (reportsContainer) {
+      reportsContainer.innerHTML = `<div class="error-text">Error loading advanced reports: ${error.message}</div>`;
+    }
+  }
+}
+
+function generateEnhancedReports(programs, attendanceRecords) {
+  // Calculate statistics
+  const totalPrograms = programs.length;
+  const activePrograms = programs.filter(p => p.status === 'active').length;
+  const completedPrograms = programs.filter(p => p.status === 'completed').length;
+  const totalAttendance = attendanceRecords.length;
+  const presentCount = attendanceRecords.filter(r => r.present).length;
+  const attendanceRate = totalAttendance > 0 ? ((presentCount / totalAttendance) * 100).toFixed(1) : 0;
+  
+  return `
+    <div class="reports-dashboard">
+      <div class="reports-header">
+        <h3>Advanced Program Reports</h3>
+        <div class="report-actions">
+          <button class="btn btn-primary" onclick="exportReportsNew()">
+            <i class="fas fa-download"></i> Export Reports
+          </button>
+          <button class="btn btn-secondary" onclick="refreshReportsNew()">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h4>${totalPrograms}</h4>
+            <p>Total Programs</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-play-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h4>${activePrograms}</h4>
+            <p>Active Programs</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h4>${completedPrograms}</h4>
+            <p>Completed Programs</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <h4>${attendanceRate}%</h4>
+            <p>Attendance Rate</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="reports-content">
+        <div class="report-section">
+          <h4>Program Performance Overview</h4>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Program Name</th>
+                  <th>Status</th>
+                  <th>Participants</th>
+                  <th>Attendance Rate</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${programs.map(program => {
+                  const programAttendance = attendanceRecords.filter(r => r.programId === program.id);
+                  const programRate = programAttendance.length > 0 ? 
+                    ((programAttendance.filter(r => r.present).length / programAttendance.length) * 100).toFixed(1) : 0;
+                  
+                  return `
+                    <tr>
+                      <td><strong>${program.nama_program || program.nama || 'Unnamed Program'}</strong></td>
+                      <td><span class="status-badge ${program.status || 'upcoming'}">${(program.status || 'upcoming').toUpperCase()}</span></td>
+                      <td>${program.participants || programAttendance.length || 0}</td>
+                      <td>${programRate}%</td>
+                      <td>${calculateProgramDuration(program)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function calculateProgramDuration(program) {
+  if (!program.tarikh_mula || !program.tarikh_tamat) return 'N/A';
+  
+  let startDate, endDate;
+  
+  if (program.tarikh_mula.seconds) {
+    startDate = new Date(program.tarikh_mula.seconds * 1000);
+  } else {
+    startDate = new Date(program.tarikh_mula);
+  }
+  
+  if (program.tarikh_tamat.seconds) {
+    endDate = new Date(program.tarikh_tamat.seconds * 1000);
+  } else {
+    endDate = new Date(program.tarikh_tamat);
+  }
+  
+  const diffTime = Math.abs(endDate - startDate);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+}
+
+function openAddProgramNewModal() {
+  console.log('Opening enhanced Add Program modal...');
+  
+  // Create enhanced modal HTML with improved styling
+  const modalHTML = `
+    <div id="add-program-new-modal" class="modal">
+      <div class="modal-content enhanced-modal">
+        <div class="modal-header">
+          <h2><i class="fas fa-plus-circle"></i> Add New Program</h2>
+          <span class="close-modal" onclick="closeAddProgramNewModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="add-program-new-form">
+            <div class="form-group">
+              <label for="program-name-new"><i class="fas fa-tag"></i> Program Name</label>
+              <input type="text" id="program-name-new" class="form-input" placeholder="Enter program name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="program-description-new"><i class="fas fa-align-left"></i> Description</label>
+              <textarea id="program-description-new" class="form-input" rows="4" placeholder="Enter program description" required></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="program-start-date-new"><i class="fas fa-calendar-alt"></i> Start Date</label>
+                <input type="date" id="program-start-date-new" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="program-end-date-new"><i class="fas fa-calendar-check"></i> End Date</label>
+                <input type="date" id="program-end-date-new" class="form-input" required>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="program-category-new"><i class="fas fa-folder"></i> Category</label>
+                <select id="program-category-new" class="form-select" required>
+                  <option value="">Select Category</option>
+                  <option value="Education">Education</option>
+                  <option value="Health">Health</option>
+                  <option value="Community">Community</option>
+                  <option value="Religious">Religious</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Environment">Environment</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="program-location-new"><i class="fas fa-map-marker-alt"></i> Location</label>
+                <input type="text" id="program-location-new" class="form-input" placeholder="Enter location">
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="program-participants-new"><i class="fas fa-users"></i> Expected Participants</label>
+                <input type="number" id="program-participants-new" class="form-input" min="1" placeholder="Number of participants">
+              </div>
+              <div class="form-group">
+                <label for="program-budget-new"><i class="fas fa-dollar-sign"></i> Budget (RM)</label>
+                <input type="number" id="program-budget-new" class="form-input" min="0" step="0.01" placeholder="0.00">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="program-objectives-new"><i class="fas fa-bullseye"></i> Objectives</label>
+              <textarea id="program-objectives-new" class="form-input" rows="3" placeholder="Enter program objectives"></textarea>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" onclick="closeAddProgramNewModal()">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Program
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add modal to the DOM
+  const modalContainer = document.createElement('div');
+  modalContainer.innerHTML = modalHTML;
+  document.body.appendChild(modalContainer.firstElementChild);
+  
+  // Show the modal
+  const modal = document.getElementById('add-program-new-modal');
+  modal.style.display = 'block';
+  
+  // Add event listener for form submission
+  document.getElementById('add-program-new-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await saveProgramNew();
+  });
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeAddProgramNewModal();
+    }
+  });
+}
+
+function openImportProgramsModal() {
+  console.log('Opening Import Programs modal...');
+  // Import programs functionality
+}
+
+async function exportProgramsData() {
+  console.log('Exporting programs data...');
+  
+  try {
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Get all programs
+    const programs = await ProgramService.listProgram();
+    
+    if (programs.length === 0) {
+      alert('No program data available to export');
+      return;
+    }
+    
+    // Prepare CSV data
+    const csvHeaders = ['Program Name', 'Description', 'Start Date', 'End Date', 'Category', 'Status', 'Participants'];
+    const csvRows = programs.map(program => {
+      const startDate = program.tarikh_mula?.seconds ? 
+        new Date(program.tarikh_mula.seconds * 1000).toLocaleDateString() : 
+        (program.tarikh_mula ? new Date(program.tarikh_mula).toLocaleDateString() : 'N/A');
+      
+      const endDate = program.tarikh_tamat?.seconds ? 
+        new Date(program.tarikh_tamat.seconds * 1000).toLocaleDateString() : 
+        (program.tarikh_tamat ? new Date(program.tarikh_tamat).toLocaleDateString() : 'N/A');
+      
+      // Determine status
+      let status = 'upcoming';
+      const now = new Date();
+      const start = program.tarikh_mula?.seconds ? new Date(program.tarikh_mula.seconds * 1000) : new Date(program.tarikh_mula);
+      const end = program.tarikh_tamat?.seconds ? new Date(program.tarikh_tamat.seconds * 1000) : new Date(program.tarikh_tamat);
+      
+      if (start && end) {
+        if (now < start) {
+          status = 'upcoming';
+        } else if (now >= start && now <= end) {
+          status = 'active';
+        } else if (now > end) {
+          status = 'completed';
+        }
+      }
+      
+      return [
+        program.nama_program || program.nama || 'Unnamed Program',
+        program.deskripsi || program.description || '',
+        startDate,
+        endDate,
+        program.kategori || program.category || 'General',
+        status.toUpperCase(),
+        program.participants || '0'
+      ];
+    });
+    
+    // Create CSV content
+    const csvContent = [csvHeaders, ...csvRows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `programs_data_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Programs data exported successfully');
+    
+  } catch (error) {
+    console.error('Error exporting programs data:', error);
+    alert('Error exporting programs data: ' + error.message);
+  }
+}
+
+async function applyAttendanceFiltersNew() {
+  console.log('Applying enhanced attendance filters...');
+  
+  try {
+    const programFilter = document.getElementById('program-filter-new')?.value || '';
+    const statusFilter = document.getElementById('status-filter-new')?.value || '';
+    const dateFilter = document.getElementById('date-filter-new')?.value || '';
+    
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Get all attendance records
+    let attendanceRecords = await ProgramService.listAllAttendance();
+    
+    // Apply filters
+    if (programFilter) {
+      attendanceRecords = attendanceRecords.filter(record => 
+        record.programId === programFilter || record.program_name?.includes(programFilter)
+      );
+    }
+    
+    if (statusFilter) {
+      const isPresent = statusFilter === 'present';
+      attendanceRecords = attendanceRecords.filter(record => record.present === isPresent);
+    }
+    
+    if (dateFilter) {
+      const filterDate = new Date(dateFilter);
+      attendanceRecords = attendanceRecords.filter(record => {
+        let recordDate;
+        if (record.timestamp?.seconds) {
+          recordDate = new Date(record.timestamp.seconds * 1000);
+        } else if (record.timestamp) {
+          recordDate = new Date(record.timestamp);
+        } else if (record.date) {
+          recordDate = new Date(record.date);
+        }
+        
+        if (recordDate) {
+          return recordDate.toDateString() === filterDate.toDateString();
+        }
+        return false;
+      });
+    }
+    
+    // Update the attendance table with filtered results
+    updateAttendanceTableNew(attendanceRecords);
+    
+  } catch (error) {
+    console.error('Error applying attendance filters:', error);
+  }
+}
+
+function updateAttendanceTableNew(attendanceRecords) {
+  const tableBody = document.querySelector('#attendance-table-new tbody');
+  if (!tableBody) {
+    console.error('Attendance table body not found');
+    return;
+  }
+  
+  if (attendanceRecords.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center">No attendance records found matching the filters</td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tableBody.innerHTML = attendanceRecords.map(record => {
+    const timestamp = record.timestamp?.seconds ? 
+      new Date(record.timestamp.seconds * 1000).toLocaleString() : 
+      (record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A');
+    
+    const statusClass = record.present ? 'status-present' : 'status-absent';
+    const statusIcon = record.present ? 'fa-check-circle' : 'fa-times-circle';
+    const statusText = record.present ? 'Present' : 'Absent';
+    
+    return `
+      <tr>
+        <td><strong>${record.participant_name || record.name || 'Unknown'}</strong></td>
+        <td>${record.program_name || record.programName || 'N/A'}</td>
+        <td>${timestamp}</td>
+        <td>
+          <span class="status-indicator ${statusClass}">
+            <i class="fas ${statusIcon}"></i>
+            ${statusText}
+          </span>
+        </td>
+        <td>${record.notes || '-'}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn btn-sm btn-primary" onclick="editAttendanceRecordNew('${record.id}')" title="Edit Record">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-info" onclick="viewAttendanceDetailsNew('${record.id}')" title="View Details">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-sm ${record.present ? 'btn-warning' : 'btn-success'}" 
+                    onclick="toggleAttendanceStatusNew('${record.id}', ${!record.present})" 
+                    title="${record.present ? 'Mark Absent' : 'Mark Present'}">
+              <i class="fas ${record.present ? 'fa-times' : 'fa-check'}"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function exportAttendanceDataNew() {
+  console.log('Exporting enhanced attendance data...');
+  
+  try {
+    // Import the ProgramService dynamically
+    const { ProgramService } = await import('../../services/backend/ProgramService.js');
+    
+    // Get all attendance records
+    const attendanceRecords = await ProgramService.listAllAttendance();
+    
+    if (attendanceRecords.length === 0) {
+      alert('No attendance data available to export');
+      return;
+    }
+    
+    // Prepare CSV data
+    const csvHeaders = ['Participant Name', 'Program Name', 'Date/Time', 'Status', 'Notes'];
+    const csvRows = attendanceRecords.map(record => {
+      const timestamp = record.timestamp?.seconds ? 
+        new Date(record.timestamp.seconds * 1000).toLocaleString() : 
+        (record.timestamp ? new Date(record.timestamp).toLocaleString() : 'N/A');
+      
+      const status = record.present ? 'Present' : 'Absent';
+      
+      return [
+        record.participant_name || record.name || 'Unknown',
+        record.program_name || record.programName || 'N/A',
+        timestamp,
+        status,
+        record.notes || ''
+      ];
+    });
+    
+    // Create CSV content
+    const csvContent = [csvHeaders, ...csvRows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `attendance_data_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Attendance data exported successfully');
+    
+  } catch (error) {
+    console.error('Error exporting attendance data:', error);
+    alert('Error exporting attendance data: ' + error.message);
+  }
 }
