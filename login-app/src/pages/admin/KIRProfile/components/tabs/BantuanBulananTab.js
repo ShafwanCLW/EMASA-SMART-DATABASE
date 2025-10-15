@@ -150,14 +150,6 @@ export class BantuanBulananTab extends BaseTab {
   }
 
   setupEventListeners() {
-    // Fix layout shift by marking form grids as loaded
-    setTimeout(() => {
-      const formGrids = document.querySelectorAll('.form-grid, .form-row');
-      formGrids.forEach(grid => {
-        grid.classList.add('loaded');
-      });
-    }, 50);
-    
     // Auto-calculate total when individual amounts change
     const assistanceFields = [
       'bantuan_jkm', 'bantuan_zakat', 'bantuan_oku', 'bantuan_warga_emas',

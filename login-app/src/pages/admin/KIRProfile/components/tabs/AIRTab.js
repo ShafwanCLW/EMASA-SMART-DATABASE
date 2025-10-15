@@ -979,14 +979,6 @@ export class AIRTab extends BaseTab {
     // Make the tab instance globally accessible for onclick handlers
     window.airTab = this;
     
-    // Fix layout shift by marking form grids as loaded
-    setTimeout(() => {
-      const formGrids = document.querySelectorAll('.form-grid, .air-form .form-row');
-      formGrids.forEach(grid => {
-        grid.classList.add('loaded');
-      });
-    }, 50);
-    
     // Load initial data
     this.loadAIRData().then(() => {
       this.refreshAIRList();

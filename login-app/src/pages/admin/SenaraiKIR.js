@@ -951,8 +951,11 @@ export class SenaraiKIR {
         if (tableBody) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem;">
-                        <div class="loading-spinner">Memuatkan data...</div>
+                    <td colspan="6" class="table-loading-state">
+                        <div class="table-loading">
+                            <div class="loading-spinner"></div>
+                            <span>Memuatkan data...</span>
+                        </div>
                     </td>
                 </tr>
             `;

@@ -150,14 +150,6 @@ export class PerbelanjaanTab extends BaseTab {
   }
 
   setupEventListeners() {
-    // Fix layout shift by marking form grids as loaded
-    setTimeout(() => {
-      const formGrids = document.querySelectorAll('.form-grid, .form-row');
-      formGrids.forEach(grid => {
-        grid.classList.add('loaded');
-      });
-    }, 50);
-    
     // Auto-calculate total when individual amounts change
     const expenseFields = [
       'utiliti_air', 'utiliti_elektrik', 'sewa_rumah', 'ansuran_kenderaan',

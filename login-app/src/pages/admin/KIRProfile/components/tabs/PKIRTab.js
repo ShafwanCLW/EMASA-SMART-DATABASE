@@ -475,14 +475,6 @@ export class PKIRTab extends BaseTab {
     // Set global reference for backward compatibility
     window.pkirTab = this;
     
-    // Fix layout shift by marking form grids as loaded
-    setTimeout(() => {
-      const formGrids = document.querySelectorAll('.form-grid, .form-row');
-      formGrids.forEach(grid => {
-        grid.classList.add('loaded');
-      });
-    }, 50);
-    
     // Load initial data
     this.loadPKIRData();
     
