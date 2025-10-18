@@ -48,6 +48,10 @@ export function createAdminSidebar(user) {
             <span class="nav-icon">💰</span>
             Financial Tracking
         </a>
+        <a href="#" class="nav-item" data-section="financial-tracking-newest">
+            <span class="nav-icon">💰</span>
+            Financial Tracking (Newest)
+        </a>
         <a href="#" class="nav-item" data-section="reports">
           <span class="nav-icon">📈</span>
           Laporan
@@ -1423,6 +1427,10 @@ export function createAdminMainContent() {
       </div>
     </div>
     
+    <div id="financial-tracking-newest-content" class="content-section">
+      <!-- Content will be dynamically loaded by FinancialTrackingNewest.js component -->
+    </div>
+
     <div id="program-kehadiran-newest-content" class="content-section">
       <!-- Content will be dynamically loaded by ProgramKehadiranNewest.js component -->
     </div>
@@ -3202,10 +3210,10 @@ export function setupProgramKehadiranNewListeners() {
 }
 
 export function setupProgramKehadiranNewestListeners() {
-  const programNewestNav = document.querySelector('[data-section="program-kehadiran-newest"]');
+    const programNewestNav = document.querySelector('[data-section="program-kehadiran-newest"]');
 
-  const loadNewestModule = async () => {
-    try {
+    const loadNewestModule = async () => {
+      try {
       const container = document.getElementById('program-kehadiran-newest-content');
       if (!container) {
         console.error('Content container not found: program-kehadiran-newest-content');
@@ -3243,6 +3251,50 @@ export function setupProgramKehadiranNewestListeners() {
   if (initialContainer && initialContainer.classList.contains('active')) {
     console.log('Program & Kehadiran (Newest) section is active on load, initializing...');
     setTimeout(loadNewestModule, 100);
+    }
+  }
+
+export function setupFinancialTrackingNewestListeners() {
+  const newestNav = document.querySelector('[data-section="financial-tracking-newest"]');
+
+  const loadNewestTracking = async () => {
+    try {
+      const container = document.getElementById('financial-tracking-newest-content');
+      if (!container) {
+        console.error('Content container not found: financial-tracking-newest-content');
+        return;
+      }
+
+      if (container.dataset.financialNewestLoaded === 'true' && window.financialTrackingNewest) {
+        return;
+      }
+
+      const { FinancialTrackingNewest } = await import('./FinancialTrackingNewest.js');
+      const module = new FinancialTrackingNewest();
+      window.financialTrackingNewest = module;
+
+      container.innerHTML = module.createContent();
+      try {
+        await module.initialize();
+        container.dataset.financialNewestLoaded = 'true';
+      } catch (initError) {
+        console.error('Error initializing Financial Tracking (Newest):', initError);
+      }
+    } catch (error) {
+      console.error('Error loading FinancialTrackingNewest module:', error);
+    }
+  };
+
+  if (newestNav) {
+    newestNav.addEventListener('click', (event) => {
+      event.preventDefault();
+      setTimeout(loadNewestTracking, 100);
+    });
+  }
+
+  const initialContainer = document.getElementById('financial-tracking-newest-content');
+  if (initialContainer && initialContainer.classList.contains('active')) {
+    setTimeout(loadNewestTracking, 100);
   }
 }
 
