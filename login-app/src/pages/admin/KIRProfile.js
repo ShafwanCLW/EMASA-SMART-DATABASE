@@ -249,6 +249,15 @@ export class KIRProfile {
       
       // Assign global tab component references for backward compatibility
       this.assignGlobalTabReferences();
+
+      // Ensure active tab component binds its event listeners on initial render
+      const activeTabComponent = this.tabComponents[this.currentTab];
+      if (activeTabComponent && typeof activeTabComponent.setupEventListeners === 'function') {
+        // Defer to ensure DOM is fully painted
+        setTimeout(() => {
+          activeTabComponent.setupEventListeners();
+        }, 0);
+      }
     }
   }
 

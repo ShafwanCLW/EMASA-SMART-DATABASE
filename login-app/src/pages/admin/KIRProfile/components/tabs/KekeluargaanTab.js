@@ -1,5 +1,6 @@
 import { BaseTab } from '../shared/BaseTab.js';
 import { FormHelpers } from '../shared/FormHelpers.js';
+import { DokumenService } from '../../../../../services/backend/DokumenService.js';
 
 export class KekeluargaanTab extends BaseTab {
   constructor(kirProfile) {
@@ -46,43 +47,89 @@ export class KekeluargaanTab extends BaseTab {
           <option value="Balu/Duda" ${data.status_perkahwinan === 'Balu/Duda' ? 'selected' : ''}>Balu/Duda</option>
         </select>
       </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="tarikh_nikah">Tarikh Nikah</label>
-          <input type="date" id="tarikh_nikah" name="tarikh_nikah" value="${data.tarikh_nikah || ''}">
-        </div>
-        
-        <div class="form-group">
-          <label for="tarikh_cerai">Tarikh Cerai</label>
-          <input type="date" id="tarikh_cerai" name="tarikh_cerai" value="${data.tarikh_cerai || ''}">
-        </div>
-      </div>
     `;
   }
 
   createSpouseSection(data) {
+    const initialCount = parseInt(data.bilangan_isteri || '1', 10) || 1;
+    const isBujang = data.status_perkahwinan === 'Bujang';
     return `
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nama_pasangan">Nama Pasangan</label>
-          <input type="text" id="nama_pasangan" name="nama_pasangan" value="${data.nama_pasangan || ''}">
-        </div>
-        
-        <div class="form-group">
-          <label for="pasangan_no_kp">No. KP Pasangan</label>
-          <input type="text" id="pasangan_no_kp" name="pasangan_no_kp" value="${data.pasangan_no_kp || ''}">
-        </div>
+      <div class="form-group" id="bilangan_isteri_group" style="${isBujang ? 'display:none;' : ''}">
+        <label for="bilangan_isteri">Berapa isteri?</label>
+        <select id="bilangan_isteri" name="bilangan_isteri">
+          <option value="1" ${initialCount === 1 ? 'selected' : ''}>1</option>
+          <option value="2" ${initialCount === 2 ? 'selected' : ''}>2</option>
+          <option value="3" ${initialCount === 3 ? 'selected' : ''}>3</option>
+          <option value="4" ${initialCount === 4 ? 'selected' : ''}>4</option>
+        </select>
       </div>
-      
-      <div class="form-group">
-        <label for="pasangan_alamat">Alamat Pasangan</label>
-        <textarea id="pasangan_alamat" name="pasangan_alamat" rows="3">${data.pasangan_alamat || ''}</textarea>
+
+      <div id="pasangan-container">
+        ${isBujang ? '' : this.renderSpouseBlocks(initialCount, data)}
       </div>
-      
-      <div class="form-group">
-        <label for="pasangan_status">Status Pasangan</label>
-        <input type="text" id="pasangan_status" name="pasangan_status" value="${data.pasangan_status || ''}">
+    `;
+  }
+
+  renderSpouseBlocks(count, data) {
+    const blocks = [];
+    for (let i = 1; i <= count; i++) {
+      blocks.push(this.getSpouseBlockHTML(i, data));
+    }
+    return blocks.join('');
+  }
+
+  getSpouseBlockHTML(index, data) {
+    const name = data[`nama_pasangan_${index}`] || '';
+    const noKp = data[`no_kp_pasangan_${index}`] || '';
+    const alamat = data[`alamat_pasangan_${index}`] || '';
+    const tarikhNikah = data[`tarikh_nikah_${index}`] || '';
+    const status = data[`status_pasangan_${index}`] || '';
+    const ceraiSelected = status === 'Sudah Bercerai';
+    return `
+      <div class="spouse-block" data-index="${index}">
+        <h4>Pasangan ${index}</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tarikh_nikah_${index}">Tarikh Nikah</label>
+            <input type="date" id="tarikh_nikah_${index}" name="tarikh_nikah_${index}" value="${tarikhNikah}" required>
+          </div>
+          <div class="form-group">
+            <label for="nama_pasangan_${index}">Nama Pasangan</label>
+            <input type="text" id="nama_pasangan_${index}" name="nama_pasangan_${index}" value="${FormHelpers.escapeHtml(name)}" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="no_kp_pasangan_${index}">No. KP Pasangan</label>
+            <input type="text" id="no_kp_pasangan_${index}" name="no_kp_pasangan_${index}" value="${FormHelpers.escapeHtml(noKp)}" required>
+          </div>
+          <div class="form-group">
+            <label for="status_pasangan_${index}">Status Pasangan</label>
+            <select id="status_pasangan_${index}" name="status_pasangan_${index}" required>
+              <option value="">Pilih Status</option>
+              <option value="Masih berkahwin" ${status === 'Masih berkahwin' ? 'selected' : ''}>Masih berkahwin</option>
+              <option value="Sudah Bercerai" ${status === 'Sudah Bercerai' ? 'selected' : ''}>Sudah Bercerai</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="alamat_pasangan_${index}" id="alamat_label_${index}">${ceraiSelected ? 'Alamat Bekas Pasangan' : 'Alamat Pasangan'}</label>
+          <textarea id="alamat_pasangan_${index}" name="alamat_pasangan_${index}" rows="3" required>${FormHelpers.escapeHtml(alamat)}</textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sijil_nikah_${index}">Sijil Nikah (PDF/JPG/PNG)</label>
+            <input type="file" id="sijil_nikah_${index}" name="sijil_nikah_${index}" accept=".pdf,image/*">
+          </div>
+          <div class="form-group" id="cerai_group_${index}" style="${ceraiSelected ? '' : 'display:none;'}">
+            <label for="sijil_cerai_${index}">Sijil Cerai (wajib jika bercerai)</label>
+            <input type="file" id="sijil_cerai_${index}" name="sijil_cerai_${index}" accept=".pdf,image/*" ${ceraiSelected ? 'required' : ''}>
+          </div>
+        </div>
+        <hr>
       </div>
     `;
   }
@@ -228,6 +275,69 @@ export class KekeluargaanTab extends BaseTab {
         this.markTabDirty();
       });
     }
+
+    // Bind dynamic spouse events
+    const bilanganIsteri = document.getElementById('bilangan_isteri');
+    if (bilanganIsteri) {
+      bilanganIsteri.addEventListener('change', (e) => {
+        const count = parseInt(e.target.value, 10) || 1;
+        const container = document.getElementById('pasangan-container');
+        if (container) {
+          container.innerHTML = this.renderSpouseBlocks(count, this.kirProfile.kirData || {});
+          // After re-render, rebind status change events
+          this.bindSpouseStatusEvents(count);
+        }
+      });
+      // Initial binding for default count when visible
+      this.bindSpouseStatusEvents(parseInt(bilanganIsteri.value || '1', 10));
+    }
+
+    // Toggle pasangan visibility if status changes in this tab
+    const statusPerkahwinanEl = document.getElementById('status_perkahwinan');
+    if (statusPerkahwinanEl) {
+      statusPerkahwinanEl.addEventListener('change', (e) => {
+        const isBujang = e.target.value === 'Bujang';
+        const pasanganContainer = document.getElementById('pasangan-container');
+        const bilanganIsteriGroup = document.getElementById('bilangan_isteri_group');
+        const bilanganIsteriSelect = document.getElementById('bilangan_isteri');
+        if (isBujang) {
+          // Hide pasangan section entirely
+          if (bilanganIsteriGroup) bilanganIsteriGroup.style.display = 'none';
+          if (pasanganContainer) pasanganContainer.innerHTML = '';
+        } else {
+          // Show pasangan section with at least one block
+          if (bilanganIsteriGroup) bilanganIsteriGroup.style.display = '';
+          const count = parseInt(bilanganIsteriSelect?.value || '1', 10);
+          if (pasanganContainer) {
+            pasanganContainer.innerHTML = this.renderSpouseBlocks(count, this.kirProfile.kirData || {});
+            this.bindSpouseStatusEvents(count);
+          }
+        }
+      });
+    }
+  }
+
+  bindSpouseStatusEvents(count) {
+    for (let i = 1; i <= count; i++) {
+      const statusEl = document.getElementById(`status_pasangan_${i}`);
+      const ceraiGroup = document.getElementById(`cerai_group_${i}`);
+      const ceraiInput = document.getElementById(`sijil_cerai_${i}`);
+      const alamatLabel = document.getElementById(`alamat_label_${i}`);
+      if (statusEl) {
+        statusEl.addEventListener('change', (e) => {
+          const isCerai = e.target.value === 'Sudah Bercerai';
+          if (ceraiGroup) {
+            ceraiGroup.style.display = isCerai ? '' : 'none';
+          }
+          if (ceraiInput) {
+            ceraiInput.required = isCerai;
+          }
+          if (alamatLabel) {
+            alamatLabel.textContent = isCerai ? 'Alamat Bekas Pasangan' : 'Alamat Pasangan';
+          }
+        });
+      }
+    }
   }
 
   async save() {
@@ -248,10 +358,10 @@ export class KekeluargaanTab extends BaseTab {
     // Collect form data
     const formData = new FormData(form);
     const data = {};
-    
-    // Basic form fields
+
+    // Basic form fields (excluding dynamic spouse and sibling fields)
     for (const [key, value] of formData.entries()) {
-      if (!key.startsWith('sibling_')) {
+      if (!key.startsWith('sibling_') && !key.match(/^(.+)_\d+$/)) {
         data[key] = value;
       }
     }
@@ -269,7 +379,54 @@ export class KekeluargaanTab extends BaseTab {
       data.senarai_adik_beradik = siblings;
     }
 
-    // Save via KIR service
+    // Validate dynamic spouse blocks and upload documents
+    const bilanganIsteri = parseInt(formData.get('bilangan_isteri') || '1', 10);
+    for (let i = 1; i <= bilanganIsteri; i++) {
+      const tarikhNikah = formData.get(`tarikh_nikah_${i}`)?.toString() || '';
+      const nama = formData.get(`nama_pasangan_${i}`)?.toString() || '';
+      const noKp = formData.get(`no_kp_pasangan_${i}`)?.toString() || '';
+      const alamat = formData.get(`alamat_pasangan_${i}`)?.toString() || '';
+      const status = formData.get(`status_pasangan_${i}`)?.toString() || '';
+      const sijilNikah = formData.get(`sijil_nikah_${i}`);
+      const sijilCerai = formData.get(`sijil_cerai_${i}`);
+
+      // Validate required spouse fields
+      const missingField = !tarikhNikah ? `Tarikh Nikah (Pasangan ${i})` :
+                          !nama ? `Nama Pasangan ${i}` :
+                          !noKp ? `No. KP Pasangan ${i}` :
+                          !alamat ? `Alamat Pasangan ${i}` :
+                          !status ? `Status Pasangan ${i}` : '';
+      if (missingField) {
+        throw new Error(`Sila isi medan ${missingField}`);
+      }
+
+      // If bercerai, require sijil cerai
+      if (status === 'Sudah Bercerai' && (!sijilCerai || (sijilCerai && !sijilCerai.name))) {
+        throw new Error(`Sila muat naik Sijil Cerai untuk Pasangan ${i}`);
+      }
+
+      // Upload sijil nikah if provided
+      if (sijilNikah && sijilNikah.name) {
+        try {
+          await DokumenService.uploadDokumen(this.kirProfile.kirId, sijilNikah, 'Sijil Nikah');
+        } catch (err) {
+          console.error('Upload Sijil Nikah gagal:', err);
+          throw new Error(`Gagal muat naik Sijil Nikah untuk Pasangan ${i}: ${err.message}`);
+        }
+      }
+
+      // Upload sijil cerai if provided
+      if (status === 'Sudah Bercerai' && sijilCerai && sijilCerai.name) {
+        try {
+          await DokumenService.uploadDokumen(this.kirProfile.kirId, sijilCerai, 'Sijil Cerai');
+        } catch (err) {
+          console.error('Upload Sijil Cerai gagal:', err);
+          throw new Error(`Gagal muat naik Sijil Cerai untuk Pasangan ${i}: ${err.message}`);
+        }
+      }
+    }
+
+    // Save via KIR service (scalar fields only)
     await this.kirProfile.KIRService.updateKIR(this.kirProfile.kirId, data);
     
     // Update local data
