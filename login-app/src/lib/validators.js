@@ -32,6 +32,10 @@ const KIR_SCHEMA = {
   tempat_lahir: 'string',
   
   // Family
+  status_perkahwinan: 'string',
+  bilangan_anak: 'number',
+  tarikh_nikah: 'timestamp',
+  tarikh_cerai: 'timestamp',
   ayah_nama: 'string',
   ibu_nama: 'string',
   

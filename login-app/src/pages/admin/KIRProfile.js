@@ -578,9 +578,14 @@ export class KIRProfile {
                 <option value="Bujang" ${data.status_perkahwinan === 'Bujang' ? 'selected' : ''}>Bujang</option>
                 <option value="Berkahwin" ${data.status_perkahwinan === 'Berkahwin' ? 'selected' : ''}>Berkahwin</option>
                 <option value="Bercerai" ${data.status_perkahwinan === 'Bercerai' ? 'selected' : ''}>Bercerai</option>
-                <option value="Janda/Duda" ${data.status_perkahwinan === 'Janda/Duda' ? 'selected' : ''}>Janda/Duda</option>
+                <option value="Balu/Duda" ${data.status_perkahwinan === 'Balu/Duda' ? 'selected' : ''}>Balu/Duda</option>
               </select>
             </div>
+          </div>
+
+          <div class="form-group" id="bilangan_anak_group" style="${data.status_perkahwinan && data.status_perkahwinan !== 'Bujang' ? '' : 'display: none;'}">
+            <label for="bilangan_anak">Bilangan Anak</label>
+            <input type="number" id="bilangan_anak" name="bilangan_anak" value="${data.bilangan_anak || ''}" min="0">
           </div>
           
           <div class="form-row">
@@ -596,7 +601,7 @@ export class KIRProfile {
           </div>
           
           <div class="form-group">
-            <label for="alamat">Alamat</label>
+            <label for="alamat">Alamat Terkini</label>
             <textarea id="alamat" name="alamat" rows="3">${data.alamat || ''}</textarea>
           </div>
           
@@ -1856,6 +1861,8 @@ export class KIRProfile {
 
   // Event handlers and utility methods
   setupEventListeners() {
+    // Setup marital status toggling
+    this.setupMaritalStatusListener();
     // Track form changes for dirty state
     document.addEventListener('input', (e) => {
       if (e.target.closest('.kir-form')) {
@@ -1889,6 +1896,33 @@ export class KIRProfile {
     });
     
     // Removed beforeunload warning popup
+  }
+
+  setupMaritalStatusListener() {
+    const statusPerkahwinan = document.getElementById('status_perkahwinan');
+    const bilanganAnakGroup = document.getElementById('bilangan_anak_group');
+    const bilanganAnakInput = document.getElementById('bilangan_anak');
+
+    if (statusPerkahwinan && bilanganAnakGroup) {
+      const toggleBilanganAnak = () => {
+        if (statusPerkahwinan.value === 'Bujang') {
+          bilanganAnakGroup.style.display = 'none';
+          if (bilanganAnakInput) {
+            bilanganAnakInput.value = '';
+            bilanganAnakInput.disabled = true;
+          }
+        } else {
+          bilanganAnakGroup.style.display = 'block';
+          if (bilanganAnakInput) {
+            bilanganAnakInput.disabled = false;
+          }
+        }
+      };
+
+      statusPerkahwinan.addEventListener('change', toggleBilanganAnak);
+      // Initial check
+      toggleBilanganAnak();
+    }
   }
 
   // Mark tab as dirty (has unsaved changes)
