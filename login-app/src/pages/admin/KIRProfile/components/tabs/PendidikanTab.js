@@ -24,11 +24,11 @@ export class PendidikanTab extends BaseTab {
     return `
       <form class="kir-form" data-tab="pendidikan">
         <div class="form-section">
-          <h3>Pendidikan</h3>
+          <h3>Pendidikan Tertinggi</h3>
           
           <div class="form-row">
             <div class="form-group">
-              <label for="tahap_pendidikan">Tahap Pendidikan</label>
+              <label for="tahap_pendidikan">Tahap Pendidikan Tertinggi</label>
               <select id="tahap_pendidikan" name="tahap_pendidikan">
                 <option value="">Pilih Tahap</option>
                 <option value="Tidak Bersekolah" ${tahapPendidikan === 'Tidak Bersekolah' ? 'selected' : ''}>Tidak Bersekolah</option>
@@ -39,6 +39,10 @@ export class PendidikanTab extends BaseTab {
                 <option value="Ijazah Sarjana Muda" ${tahapPendidikan === 'Ijazah Sarjana Muda' ? 'selected' : ''}>Ijazah Sarjana Muda</option>
                 <option value="Ijazah Sarjana" ${tahapPendidikan === 'Ijazah Sarjana' ? 'selected' : ''}>Ijazah Sarjana</option>
                 <option value="PhD" ${tahapPendidikan === 'PhD' ? 'selected' : ''}>PhD</option>
+                <option value="Sijil Kemahiran Malaysia 1" ${tahapPendidikan === 'Sijil Kemahiran Malaysia 1' ? 'selected' : ''}>Sijil Kemahiran Malaysia 1</option>
+                <option value="Sijil Kemahiran Malaysia 2" ${tahapPendidikan === 'Sijil Kemahiran Malaysia 2' ? 'selected' : ''}>Sijil Kemahiran Malaysia 2</option>
+                <option value="Sijil Kemahiran Malaysia 3" ${tahapPendidikan === 'Sijil Kemahiran Malaysia 3' ? 'selected' : ''}>Sijil Kemahiran Malaysia 3</option>
+                <option value="Asasi" ${tahapPendidikan === 'Asasi' ? 'selected' : ''}>Asasi</option>
               </select>
             </div>
             

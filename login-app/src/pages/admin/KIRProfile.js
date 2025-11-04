@@ -425,7 +425,7 @@ export class KIRProfile {
     const tabs = [
       { id: 'maklumat-asas', label: 'Maklumat Asas', icon: 'fas fa-user' },
       { id: 'kafa', label: 'Pendidikan Agama (KAFA)', icon: 'fas fa-mosque' },
-      { id: 'pendidikan', label: 'Pendidikan', icon: 'fas fa-graduation-cap' },
+      { id: 'pendidikan', label: 'Pendidikan Tertinggi', icon: 'fas fa-graduation-cap' },
       { id: 'pekerjaan', label: 'Pekerjaan', icon: 'fas fa-briefcase' },
       { id: 'kekeluargaan', label: 'Kekeluargaan', icon: 'fas fa-users' },
       { id: 'kesihatan', label: 'Kesihatan KIR', icon: 'fas fa-heartbeat' },
