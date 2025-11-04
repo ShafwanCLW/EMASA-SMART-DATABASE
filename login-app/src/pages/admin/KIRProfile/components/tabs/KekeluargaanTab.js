@@ -22,11 +22,9 @@ export class KekeluargaanTab extends BaseTab {
           
           ${this.createMaritalStatusSection(data)}
           ${this.createSpouseSection(data)}
-          ${this.createSiblingsSection(data)}
           ${this.createParentsSection(data)}
+          ${this.createSiblingsSection(data)}
         </div>
-        
-        ${this.createPKIRIntegrationPanel()}
         
         <div class="form-actions">
           <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('kekeluargaan')">Simpan</button>
@@ -137,16 +135,15 @@ export class KekeluargaanTab extends BaseTab {
   createSiblingsSection(data) {
     return `
       <div class="form-group">
-        <label for="senarai_adik_beradik">Senarai Adik Beradik</label>
-        <div id="siblings-container">
-          ${this.createSiblingsHTML(data.senarai_adik_beradik || [])}
-        </div>
-        <button type="button" class="btn btn-secondary" onclick="kekeluargaanTab.addSibling()">Tambah Adik Beradik</button>
+        <label for="bilangan_adik_beradik">Bilangan Adik Beradik</label>
+        <input type="number" id="bilangan_adik_beradik" name="bilangan_adik_beradik" min="0" step="1" value="${typeof data.bilangan_adik_beradik !== 'undefined' ? data.bilangan_adik_beradik : ''}" placeholder="Contoh: 3">
       </div>
     `;
   }
 
   createParentsSection(data) {
+    const statusIbu = data.status_ibu || '';
+    const statusAyah = data.status_ayah || '';
     return `
       <div class="form-row">
         <div class="form-group">
@@ -155,8 +152,12 @@ export class KekeluargaanTab extends BaseTab {
         </div>
         
         <div class="form-group">
-          <label for="ibu_negeri">Negeri Ibu</label>
-          <input type="text" id="ibu_negeri" name="ibu_negeri" value="${data.ibu_negeri || ''}">
+          <label for="status_ibu">Hidup atau Meninggal Dunia</label>
+          <select id="status_ibu" name="status_ibu">
+            <option value="">Pilih Status</option>
+            <option value="Masih Hidup" ${statusIbu === 'Masih Hidup' ? 'selected' : ''}>Masih Hidup</option>
+            <option value="Sudah Meninggal Dunia" ${statusIbu === 'Sudah Meninggal Dunia' ? 'selected' : ''}>Sudah Meninggal Dunia</option>
+          </select>
         </div>
       </div>
       
@@ -167,8 +168,12 @@ export class KekeluargaanTab extends BaseTab {
         </div>
         
         <div class="form-group">
-          <label for="ayah_negeri">Negeri Ayah</label>
-          <input type="text" id="ayah_negeri" name="ayah_negeri" value="${data.ayah_negeri || ''}">
+          <label for="status_ayah">Hidup atau Meninggal Dunia</label>
+          <select id="status_ayah" name="status_ayah">
+            <option value="">Pilih Status</option>
+            <option value="Masih Hidup" ${statusAyah === 'Masih Hidup' ? 'selected' : ''}>Masih Hidup</option>
+            <option value="Sudah Meninggal Dunia" ${statusAyah === 'Sudah Meninggal Dunia' ? 'selected' : ''}>Sudah Meninggal Dunia</option>
+          </select>
         </div>
       </div>
     `;
@@ -364,19 +369,6 @@ export class KekeluargaanTab extends BaseTab {
       if (!key.startsWith('sibling_') && !key.match(/^(.+)_\d+$/)) {
         data[key] = value;
       }
-    }
-    
-    // Collect siblings data
-    const siblings = [];
-    const siblingInputs = form.querySelectorAll('input[name^="sibling_"]');
-    siblingInputs.forEach(input => {
-      if (input.value.trim()) {
-        siblings.push(input.value.trim());
-      }
-    });
-    
-    if (siblings.length > 0) {
-      data.senarai_adik_beradik = siblings;
     }
 
     // Validate dynamic spouse blocks and upload documents
