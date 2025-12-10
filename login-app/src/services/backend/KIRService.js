@@ -884,7 +884,7 @@ export class KIRService {
   }
 
   // Update specific related document
-  static async updateRelatedDocument(kirId, collection, data) {
+  static async updateRelatedDocument(kirId, collectionKey, data) {
     try {
       const collectionMap = {
         'kafa': COLLECTIONS.KIR_KAFA,
@@ -895,9 +895,9 @@ export class KIRService {
         // Basic family status fields should be stored in main KIR record
       };
       
-      const collectionName = collectionMap[collection];
+      const collectionName = collectionMap[collectionKey];
       if (!collectionName) {
-        throw new Error(`Invalid collection: ${collection}`);
+        throw new Error(`Invalid collection: ${collectionKey}`);
       }
       
       // Find existing document
@@ -908,7 +908,7 @@ export class KIRService {
       const snapshot = await getDocs(q);
       
       // Normalize field names based on collection type
-      const normalizedData = normalizeFieldNames(collection, data);
+      const normalizedData = normalizeFieldNames(collectionKey, data);
       
       const updateData = {
         ...normalizedData,
@@ -916,7 +916,7 @@ export class KIRService {
         updated_at: serverTimestamp()
       };
       
-      console.log(`Updating ${collection} data (normalized):`, JSON.stringify(updateData, null, 2));
+      console.log(`Updating ${collectionKey} data (normalized):`, JSON.stringify(updateData, null, 2));
       
       if (!snapshot.empty) {
         // Update existing document

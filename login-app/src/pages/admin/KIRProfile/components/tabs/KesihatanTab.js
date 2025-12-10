@@ -62,6 +62,7 @@ export class KesihatanTab extends BaseTab {
     
     const kumpulanDarah = data.kumpulan_darah || data.blood_type || '';
     const penyakitKronik = data.penyakit_kronik || data.chronic_diseases || [];
+    const penyakitKronikLain = data.penyakit_kronik_lain || '';
     const catatanKesihatan = data.catatan_kesihatan || '';
     const statusMerokok = data.status_merokok || '';
     
@@ -122,6 +123,10 @@ export class KesihatanTab extends BaseTab {
                 <input type="checkbox" name="penyakit_kronik" value="Lain-lain" ${penyakitKronik.includes('Lain-lain') ? 'checked' : ''}>
                 <span>Lain-lain</span>
               </label>
+            </div>
+            <div class="form-group lain-lain-extra" style="${penyakitKronik.includes('Lain-lain') ? '' : 'display:none;'}">
+              <label for="penyakit_kronik_lain">Nyatakan Penyakit Lain-lain</label>
+              <input type="text" id="penyakit_kronik_lain" name="penyakit_kronik_lain" value="${FormHelpers.escapeHtml(penyakitKronikLain)}" placeholder="Contoh: Masalah tiroid">
             </div>
           </div>
           
@@ -239,28 +244,6 @@ export class KesihatanTab extends BaseTab {
   createPembedahanSection() {
     const data = this.kirProfile.relatedData?.kesihatan?.pembedahan || [];
     
-    const timelineItems = (data.length === 0)
-      ? `<div class="empty-row">Tiada Sejarah Pembedahan</div>`
-      : data
-        .sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh))
-        .map(pembedahan => `
-        <div class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <h5>${FormHelpers.escapeHtml(pembedahan.jenis_pembedahan || 'Pembedahan')}</h5>
-              <span class="timeline-date">${pembedahan.tarikh ? new Date(pembedahan.tarikh).toLocaleDateString('ms-MY') : ''}</span>
-            </div>
-            <div class="timeline-body">
-              <p><strong>Hospital:</strong> ${FormHelpers.escapeHtml(pembedahan.hospital || 'Tidak dinyatakan')}</p>
-              <span class="status-badge ${pembedahan.status === 'Selesai' ? 'status-success' : 'status-warning'}">
-                ${FormHelpers.escapeHtml(pembedahan.status || 'Perlu Follow-up')}
-              </span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    
     const tableRows = (data.length === 0)
       ? `<tr class="empty-row"><td colspan="5">Tiada Sejarah Pembedahan</td></tr>`
       : data.map((pembedahan, index) => `
@@ -295,15 +278,7 @@ export class KesihatanTab extends BaseTab {
       </div>
       
       <div class="pembedahan-content">
-        <div class="timeline-container">
-          <h5>Timeline Pembedahan</h5>
-          <div class="timeline">
-            ${timelineItems}
-          </div>
-        </div>
-        
         <div class="table-container">
-          <h5>Senarai Pembedahan</h5>
           <table class="data-table">
             <thead>
               <tr>
@@ -846,6 +821,16 @@ export class KesihatanTab extends BaseTab {
         this.kesihatanDirtyTabs.add(this.currentKesihatanSection);
         this.updateKesihatanSectionNavigation();
       });
+
+      const lainLainCheckbox = form.querySelector('input[name="penyakit_kronik"][value="Lain-lain"]');
+      const lainLainInputGroup = form.querySelector('.lain-lain-extra');
+      if (lainLainCheckbox && lainLainInputGroup) {
+        const toggleLainLainInput = () => {
+          lainLainInputGroup.style.display = lainLainCheckbox.checked ? '' : 'none';
+        };
+        lainLainCheckbox.addEventListener('change', toggleLainLainInput);
+        toggleLainLainInput();
+      }
     }
   }
 
@@ -1002,10 +987,12 @@ export class KesihatanTab extends BaseTab {
       checkboxes.forEach(checkbox => {
         penyakitKronik.push(checkbox.value);
       });
+      const penyakitKronikLain = formData.get('penyakit_kronik_lain') || '';
       
       sectionData = {
         kumpulan_darah: formData.get('kumpulan_darah'),
         penyakit_kronik: penyakitKronik,
+        penyakit_kronik_lain: penyakitKronik.includes('Lain-lain') ? penyakitKronikLain : '',
         status_merokok: formData.get('status_merokok'),
         catatan_kesihatan: formData.get('catatan_kesihatan')
       };
