@@ -60,6 +60,11 @@ export class PasanganService {
     }
   }
 
+  // Backward compatibility alias
+  static async getPKIRByKIRId(kirId) {
+    return this.getPKIRByKirId(kirId);
+  }
+
   /**
    * Create a new PKIR record
    * @param {string} kirId - The KIR ID

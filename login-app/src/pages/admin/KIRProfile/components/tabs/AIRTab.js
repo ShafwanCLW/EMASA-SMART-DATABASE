@@ -710,7 +710,7 @@ export class AIRTab extends BaseTab {
     }
     
     try {
-      await this.kirProfile.AIRService.deleteAIR(airId);
+      await this.kirProfile.airService.deleteAIR(airId);
       this.kirProfile.showToast('AIR berjaya dipadam', 'success');
       await this.loadAIRData();
       
@@ -752,11 +752,11 @@ export class AIRTab extends BaseTab {
       
       if (this.currentAIR?.id) {
         // Update existing AIR
-        await this.kirProfile.AIRService.updateAIR(this.currentAIR.id, data);
+        await this.kirProfile.airService.updateAIR(this.currentAIR.id, data);
         this.kirProfile.showToast('AIR berjaya dikemaskini', 'success');
       } else {
         // Create new AIR
-        const newAIR = await this.kirProfile.AIRService.createAIR(this.kirProfile.kirId, data);
+        const newAIR = await this.kirProfile.airService.createAIR(this.kirProfile.kirId, data);
         this.currentAIR = newAIR;
         this.kirProfile.showToast('AIR berjaya ditambah', 'success');
       }
@@ -808,7 +808,7 @@ export class AIRTab extends BaseTab {
         return;
       }
       
-      this.airData = await this.kirProfile.AIRService.getAIRByKIRId(this.kirProfile.kirId) || [];
+      this.airData = await this.kirProfile.airService.listAIR(this.kirProfile.kirId) || [];
     } catch (error) {
       console.error('Error loading AIR data:', error);
       this.airData = [];
@@ -882,7 +882,7 @@ export class AIRTab extends BaseTab {
     }
     
     try {
-      await this.kirProfile.AIRService.deleteAIR(airId);
+      await this.kirProfile.airService.deleteAIR(airId);
       this.kirProfile.showToast('AIR berjaya dipadam', 'success');
       await this.loadAIRData();
       this.refreshAIRList();
@@ -903,11 +903,11 @@ export class AIRTab extends BaseTab {
     try {
       if (this.currentEditingId) {
         // Update existing AIR
-        await this.kirProfile.AIRService.updateAIR(this.currentEditingId, formData);
+        await this.kirProfile.airService.updateAIR(this.currentEditingId, formData);
         this.kirProfile.showToast('AIR berjaya dikemaskini', 'success');
       } else {
         // Create new AIR
-        await this.kirProfile.AIRService.createAIR(this.kirProfile.kirId, formData);
+        await this.kirProfile.airService.createAIR(this.kirProfile.kirId, formData);
         this.kirProfile.showToast('AIR berjaya ditambah', 'success');
       }
       
@@ -944,7 +944,7 @@ export class AIRTab extends BaseTab {
         return;
       }
       
-      this.airData = await this.kirProfile.AIRService.getAIRByKIRId(this.kirProfile.kirId) || [];
+      this.airData = await this.kirProfile.airService.listAIR(this.kirProfile.kirId) || [];
     } catch (error) {
       console.error('Error loading AIR data:', error);
       this.airData = [];

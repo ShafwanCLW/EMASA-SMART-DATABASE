@@ -58,6 +58,11 @@ export class AIRService {
     }
   }
 
+  // Backward compatibility alias
+  static async getAIRByKIRId(kirId) {
+    return this.listAIR(kirId);
+  }
+
   /**
    * Create a new AIR record
    * @param {string} kirId - The KIR ID

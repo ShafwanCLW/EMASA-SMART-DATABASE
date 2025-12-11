@@ -373,7 +373,7 @@ export class PKIRTab extends BaseTab {
     }
     
     try {
-      await this.kirProfile.PasanganService.deletePKIR(pkirId);
+      await this.kirProfile.pasanganService.deletePKIR(pkirId);
       this.kirProfile.showToast('PKIR berjaya dipadam', 'success');
       await this.loadPKIRData();
       this.refreshPKIRList();
@@ -394,11 +394,11 @@ export class PKIRTab extends BaseTab {
     try {
       if (this.currentEditingId) {
         // Update existing PKIR
-        await this.kirProfile.PasanganService.updatePKIR(this.currentEditingId, formData);
+        await this.kirProfile.pasanganService.updatePKIR(this.currentEditingId, formData);
         this.kirProfile.showToast('PKIR berjaya dikemaskini', 'success');
       } else {
         // Create new PKIR
-        await this.kirProfile.PasanganService.createPKIR(this.kirProfile.kirId, formData);
+        await this.kirProfile.pasanganService.createPKIR(this.kirProfile.kirId, formData);
         this.kirProfile.showToast('PKIR berjaya ditambah', 'success');
       }
       
@@ -435,7 +435,7 @@ export class PKIRTab extends BaseTab {
         return;
       }
       
-      this.pkirData = await this.kirProfile.PasanganService.getPKIRByKIRId(this.kirProfile.kirId) || [];
+      this.pkirData = await this.kirProfile.pasanganService.getPKIRByKirId(this.kirProfile.kirId) || [];
     } catch (error) {
       console.error('Error loading PKIR data:', error);
       this.pkirData = [];
