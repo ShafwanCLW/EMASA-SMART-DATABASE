@@ -142,11 +142,25 @@ export class PKIRTab extends BaseTab {
             
             <div class="form-group">
               <label for="jenis_pekerjaan">Jenis Pekerjaan</label>
-              <input type="text" id="jenis_pekerjaan" name="jenis_pekerjaan">
+              <select id="jenis_pekerjaan" name="jenis_pekerjaan">
+                <option value="">Pilih Jenis</option>
+                <option value="Makan Gaji">Makan Gaji</option>
+                <option value="Bekerja Sendiri">Bekerja Sendiri</option>
+              </select>
             </div>
           </div>
           
           <div class="form-row">
+            <div class="form-group pekerjaan-sendiri" style="display:none;">
+              <label for="jenis_pekerjaan_sendiri">Jenis Pekerjaan Sendiri</label>
+              <select id="jenis_pekerjaan_sendiri" name="jenis_pekerjaan_sendiri">
+                <option value="">Pilih Jenis</option>
+                <option value="Perkhidmatan Product">Perkhidmatan Product</option>
+                <option value="Part time">Part time</option>
+                <option value="Full time">Full time</option>
+                <option value="Berasaskan Rumah">Berasaskan Rumah</option>
+              </select>
+            </div>
             <div class="form-group">
               <label for="nama_majikan">Nama Majikan</label>
               <input type="text" id="nama_majikan" name="nama_majikan">
@@ -233,159 +247,68 @@ export class PKIRTab extends BaseTab {
           </button>
         </div>
       </form>
-
-      <!-- PKIR List Section -->
-      <div class="form-section">
-        <div class="section-header">
-          <h3><i class="fas fa-list"></i> Senarai PKIR</h3>
-        </div>
-        <div id="pkirList">
-          ${this.createPKIRList()}
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Create PKIR list content
-   */
-  createPKIRList() {
-    if (!this.pkirData || this.pkirData.length === 0) {
-      return `
-        <div class="empty-state">
-          <div class="text-center py-4">
-            <i class="fas fa-users text-muted mb-3" style="font-size: 2rem;"></i>
-            <p class="text-muted">Tiada rekod PKIR dijumpai</p>
-          </div>
-        </div>
-      `;
-    }
-
-    return this.pkirData.map(pkir => this.createPKIRCard(pkir)).join('');
-  }
-
-  /**
-   * Create individual PKIR card
-   */
-  createPKIRCard(pkir) {
-    return `
-      <div class="data-card">
-        <div class="card-header">
-          <div class="card-title">
-            <h4>${this.escapeHtml(pkir.nama_pasangan || 'Tiada Nama')}</h4>
-            <span class="badge badge-info">${this.escapeHtml(pkir.no_kp_pasangan || 'Tiada No. KP')}</span>
-          </div>
-          <div class="card-actions">
-            <button class="btn btn-sm btn-outline-primary" onclick="pkirTab.editPKIR('${pkir.id}')">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-outline-danger" onclick="pkirTab.deletePKIR('${pkir.id}')">
-              <i class="fas fa-trash"></i> Padam
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="info-grid">
-            <div class="info-item">
-              <label>Jantina:</label>
-              <span>${this.escapeHtml(pkir.jantina_pasangan || '-')}</span>
-            </div>
-            <div class="info-item">
-              <label>Umur:</label>
-              <span>${pkir.umur_pasangan || '-'} tahun</span>
-            </div>
-            <div class="info-item">
-              <label>Status Pekerjaan:</label>
-              <span>${this.escapeHtml(pkir.status_pekerjaan || '-')}</span>
-            </div>
-            <div class="info-item">
-              <label>Pendapatan:</label>
-              <span>RM ${pkir.pendapatan_bulanan ? parseFloat(pkir.pendapatan_bulanan).toFixed(2) : '0.00'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
     `;
   }
 
   // Form handling methods
-  resetForm() {
+  resetForm(forceClear = false) {
     const form = document.getElementById('pkirForm');
-    if (form) {
-      form.reset();
-      this.currentEditingId = null;
-      
-      // Update form button text
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.textContent = 'Simpan PKIR';
-      }
-      
-      // Hide smoking fields
-      this.toggleSmokingFields('');
+    if (!form) return;
+
+    form.reset();
+    this.currentEditingId = null;
+    this.toggleSmokingFields('');
+    this.togglePekerjaanSendiri('');
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan PKIR';
+    }
+
+    if (!forceClear && this.pkirData) {
+      this.populateForm(this.pkirData);
     }
   }
 
-  editPKIR(pkirId) {
-    const pkir = this.pkirData.find(p => p.id === pkirId);
-    if (!pkir) return;
-    
-    this.currentEditingId = pkirId;
-    
-    // Populate form with PKIR data
+  populateForm(pkir) {
     const form = document.getElementById('pkirForm');
-    if (form) {
-      Object.keys(pkir).forEach(key => {
-        const input = form.querySelector(`[name="${key}"]`);
-        if (input) {
+    if (!form || !pkir) return;
+
+    form.reset();
+
+    Object.keys(pkir).forEach(key => {
+      const input = form.querySelector(`[name="${key}"]`);
+      if (input) {
+        if (key === 'no_kp_pasangan') {
+          input.value = this.formatICForInput(pkir[key] || '');
+        } else {
           input.value = pkir[key] || '';
         }
-      });
-      
-      // Calculate and set age
-      if (pkir.tarikh_lahir_pasangan) {
-        const age = this.calculateAge(pkir.tarikh_lahir_pasangan);
-        const ageInput = form.querySelector('[name="umur_pasangan"]');
-        if (ageInput) {
-          ageInput.value = age;
-        }
       }
+    });
+
+    if (pkir.tarikh_lahir_pasangan) {
+      const age = this.calculateAge(pkir.tarikh_lahir_pasangan);
+      const ageInput = form.querySelector('[name="umur_pasangan"]');
+      if (ageInput) {
+        ageInput.value = age;
+      }
+    } else {
       const icInput = form.querySelector('#no_kp_pasangan');
-      if (icInput && !pkir.tarikh_lahir_pasangan && icInput.value) {
+      if (icInput && icInput.value) {
         this.applyBirthInfoFromIC(icInput.value, true);
       }
-      
-      // Update form button text
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.innerHTML = '<i class="fas fa-save"></i> Kemaskini PKIR';
-      }
-      
-      // Handle smoking fields visibility
-      this.toggleSmokingFields(pkir.status_merokok || '');
-      
-      // Scroll to form
-      form.scrollIntoView({ behavior: 'smooth' });
     }
-  }
 
-  async deletePKIR(pkirId) {
-    const pkir = this.pkirData.find(p => p.id === pkirId);
-    if (!pkir) return;
-    
-    if (!confirm(`Adakah anda pasti mahu memadam ${pkir.nama_pasangan}?`)) {
-      return;
+    this.togglePekerjaanSendiri(pkir.jenis_pekerjaan || '');
+    this.toggleSmokingFields(pkir.status_merokok || '');
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.innerHTML = '<i class="fas fa-save"></i> Kemaskini PKIR';
     }
-    
-    try {
-      await this.kirProfile.pasanganService.deletePKIR(pkirId);
-      this.kirProfile.showToast('PKIR berjaya dipadam', 'success');
-      await this.loadPKIRData();
-      this.refreshPKIRList();
-    } catch (error) {
-      console.error('Error deleting PKIR:', error);
-      this.kirProfile.showToast('Ralat memadam PKIR: ' + error.message, 'error');
-    }
+
+    this.currentEditingId = pkir.id || null;
   }
 
   async savePKIR(formData) {
@@ -397,31 +320,25 @@ export class PKIRTab extends BaseTab {
     }
     
     try {
+      const payload = this.mapFormToPayload(formData);
+
       if (this.currentEditingId) {
         // Update existing PKIR
-        await this.kirProfile.pasanganService.updatePKIR(this.currentEditingId, formData);
+        await this.kirProfile.pasanganService.updatePKIR(this.currentEditingId, payload);
         this.kirProfile.showToast('PKIR berjaya dikemaskini', 'success');
       } else {
         // Create new PKIR
-        await this.kirProfile.pasanganService.createPKIR(this.kirProfile.kirId, formData);
+        await this.kirProfile.pasanganService.createPKIR(this.kirProfile.kirId, payload);
         this.kirProfile.showToast('PKIR berjaya ditambah', 'success');
       }
       
       // Refresh data and reset form
       await this.loadPKIRData();
-      this.refreshPKIRList();
       this.resetForm();
       
     } catch (error) {
       console.error('Error saving PKIR:', error);
       this.kirProfile.showToast('Ralat menyimpan PKIR: ' + error.message, 'error');
-    }
-  }
-
-  refreshPKIRList() {
-    const pkirListContainer = document.getElementById('pkirList');
-    if (pkirListContainer) {
-      pkirListContainer.innerHTML = this.createPKIRList();
     }
   }
 
@@ -432,18 +349,29 @@ export class PKIRTab extends BaseTab {
     }
   }
 
+  togglePekerjaanSendiri(value) {
+    const field = document.querySelector('.pekerjaan-sendiri');
+    if (field) {
+      field.style.display = value === 'Bekerja Sendiri' ? '' : 'none';
+    }
+  }
+
   // Data Management Methods
   async loadPKIRData() {
     try {
       if (!this.kirProfile.kirId) {
-        this.pkirData = [];
+        this.pkirData = null;
+        this.currentEditingId = null;
         return;
       }
-      
-      this.pkirData = await this.kirProfile.pasanganService.getPKIRByKirId(this.kirProfile.kirId) || [];
+
+      const rawData = await this.kirProfile.pasanganService.getPKIRByKirId(this.kirProfile.kirId);
+      this.currentEditingId = rawData?.id || null;
+      this.pkirData = rawData ? this.mapBackendToForm(rawData) : null;
     } catch (error) {
       console.error('Error loading PKIR data:', error);
-      this.pkirData = [];
+      this.pkirData = null;
+      this.currentEditingId = null;
       this.kirProfile.showToast('Ralat memuatkan data PKIR: ' + error.message, 'error');
     }
   }
@@ -481,27 +409,96 @@ export class PKIRTab extends BaseTab {
     if (!form) return;
     const birthInput = form.querySelector('[name="tarikh_lahir_pasangan"]');
     const ageInput = form.querySelector('[name="umur_pasangan"]');
+    const icInput = form.querySelector('#no_kp_pasangan');
     if (!birthInput || !ageInput) return;
 
-    const info = deriveBirthInfoFromIC(icValue);
+    const digits = this.normalizeICValue(icValue);
+    const info = deriveBirthInfoFromIC(digits);
     if (!info) {
       if (clearOnInvalid) {
         birthInput.value = '';
         ageInput.value = '';
       }
+      if (icInput) {
+        if (digits.length >= 6) {
+          icInput.setCustomValidity('No. KP mesti bermula dengan tarikh lahir (format YYMMDD) yang sah.');
+        } else {
+          icInput.setCustomValidity('');
+        }
+      }
       return;
+    }
+
+    if (icInput) {
+      icInput.setCustomValidity('');
     }
 
     birthInput.value = info.formattedDate;
     ageInput.value = info.age;
   }
 
+  normalizeICValue(value = '') {
+    return (value || '').replace(/\D/g, '').slice(0, 12);
+  }
+
+  formatICForInput(value = '') {
+    const digits = this.normalizeICValue(value);
+    if (!digits) return '';
+    const seg1 = digits.slice(0, 6);
+    const seg2 = digits.slice(6, 8);
+    const seg3 = digits.slice(8, 12);
+    return [seg1, seg2, seg3].filter(Boolean).join('-');
+  }
+
+  getICCursorPosition(digitCount, formattedValue) {
+    if (digitCount <= 0) return 0;
+    let seen = 0;
+    for (let i = 0; i < formattedValue.length; i++) {
+      if (/\d/.test(formattedValue[i])) {
+        seen++;
+        if (seen === digitCount) return i + 1;
+      }
+    }
+    return formattedValue.length;
+  }
+
+  attachICInputMask(input) {
+    if (!input) return;
+    input.setAttribute('maxlength', '14');
+
+    const formatAndMaintainCursor = (event) => {
+      const rawValue = event.target.value || '';
+      const selectionStart = event.target.selectionStart || rawValue.length;
+      const digitsBeforeCursor = this.normalizeICValue(rawValue.slice(0, selectionStart)).length;
+      const formattedValue = this.formatICForInput(rawValue);
+      event.target.value = formattedValue;
+
+      const cursorPosition = this.getICCursorPosition(digitsBeforeCursor, formattedValue);
+      window.requestAnimationFrame(() => {
+        event.target.setSelectionRange(cursorPosition, cursorPosition);
+      });
+    };
+
+    input.addEventListener('input', formatAndMaintainCursor);
+    input.addEventListener('blur', () => {
+      input.value = this.formatICForInput(input.value);
+    });
+  }
+
   setupEventListeners() {
     // Set global reference for backward compatibility
     window.pkirTab = this;
     
-    // Load initial data
-    this.loadPKIRData();
+    // Load initial data and populate the form once ready
+    this.loadPKIRData()
+      .then(() => {
+        if (this.pkirData) {
+          this.populateForm(this.pkirData);
+        } else {
+          this.resetForm(true);
+        }
+      })
+      .catch(error => console.error('PKIR initial load failed:', error));
     
     // Form submission handler
     const form = document.getElementById('pkirForm');
@@ -514,6 +511,10 @@ export class PKIRTab extends BaseTab {
         
         for (const [key, value] of formData.entries()) {
           pkirData[key] = value;
+        }
+
+        if (pkirData.no_kp_pasangan) {
+          pkirData.no_kp_pasangan = this.normalizeICValue(pkirData.no_kp_pasangan);
         }
         
         await this.savePKIR(pkirData);
@@ -538,8 +539,16 @@ export class PKIRTab extends BaseTab {
         });
       }
 
+      const jenisPekerjaanSelect = form.querySelector('#jenis_pekerjaan');
+      if (jenisPekerjaanSelect) {
+        jenisPekerjaanSelect.addEventListener('change', (e) => {
+          this.togglePekerjaanSendiri(e.target.value);
+        });
+      }
+
       const icInput = form.querySelector('#no_kp_pasangan');
       if (icInput) {
+        this.attachICInputMask(icInput);
         icInput.addEventListener('input', (e) => {
           this.applyBirthInfoFromIC(e.target.value, true);
         });
@@ -554,6 +563,149 @@ export class PKIRTab extends BaseTab {
         this.isDirty = true;
       });
     }
+  }
+
+  parseListField(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    return value
+      .split(/[\n,;]+/)
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  formatListForDisplay(value) {
+    if (!value) return '';
+    if (Array.isArray(value)) {
+      return value.join('\n');
+    }
+    return value;
+  }
+
+  mapFormToPayload(formData) {
+    const normalize = (val) => (val ?? '').toString().trim();
+    const normalizedIC = this.normalizeICValue(formData.no_kp_pasangan);
+    
+    const toNumber = (value) => {
+      if (value === null || value === undefined || value === '') return null;
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? null : parsed;
+    };
+
+    const payload = {
+      nama_pasangan: normalize(formData.nama_pasangan),
+      no_kp_pasangan: normalizedIC,
+      tarikh_lahir_pasangan: normalize(formData.tarikh_lahir_pasangan),
+      jantina_pasangan: normalize(formData.jantina_pasangan),
+      bangsa_pasangan: normalize(formData.bangsa_pasangan),
+      agama_pasangan: normalize(formData.agama_pasangan),
+      telefon_pasangan: normalize(formData.telefon_pasangan),
+      tahap_pendidikan: normalize(formData.tahap_pendidikan),
+      institusi_pendidikan: normalize(formData.institusi_pendidikan),
+      bidang_pengajian: normalize(formData.bidang_pengajian),
+      tahun_tamat: normalize(formData.tahun_tamat),
+      status_pekerjaan: normalize(formData.status_pekerjaan),
+      jenis_pekerjaan: normalize(formData.jenis_pekerjaan),
+      jenis_pekerjaan_sendiri: normalize(formData.jenis_pekerjaan_sendiri),
+      nama_majikan: normalize(formData.nama_majikan),
+      pendapatan_bulanan: toNumber(formData.pendapatan_bulanan),
+      status_kesihatan: normalize(formData.status_kesihatan),
+      kumpulan_darah: normalize(formData.kumpulan_darah),
+      penyakit_kronik: normalize(formData.penyakit_kronik),
+      ubat_tetap: normalize(formData.ubat_tetap),
+      status_merokok: normalize(formData.status_merokok),
+      bilangan_rokok: toNumber(formData.bilangan_rokok),
+      asas: {
+        nama: normalize(formData.nama_pasangan),
+        no_kp: normalizedIC,
+        tarikh_lahir: normalize(formData.tarikh_lahir_pasangan) || null,
+        telefon: normalize(formData.telefon_pasangan),
+        jantina: normalize(formData.jantina_pasangan),
+        bangsa: normalize(formData.bangsa_pasangan),
+        agama: normalize(formData.agama_pasangan)
+      },
+      pendidikan: {
+        tahap: normalize(formData.tahap_pendidikan),
+        institusi: normalize(formData.institusi_pendidikan),
+        bidang: normalize(formData.bidang_pengajian),
+        tahun_tamat: normalize(formData.tahun_tamat)
+      },
+      pekerjaan: {
+        status: normalize(formData.status_pekerjaan),
+        jenis: normalize(formData.jenis_pekerjaan),
+        jenis_pekerjaan_sendiri: normalize(formData.jenis_pekerjaan_sendiri),
+        majikan: normalize(formData.nama_majikan),
+        pendapatan_bulanan: toNumber(formData.pendapatan_bulanan) ?? 0
+      },
+      kesihatan: {
+        status: normalize(formData.status_kesihatan),
+        kumpulan_darah: normalize(formData.kumpulan_darah),
+        penyakit_kronik: this.parseListField(formData.penyakit_kronik),
+        ubat_tetap: this.parseListField(formData.ubat_tetap),
+        status_merokok: normalize(formData.status_merokok),
+        bilangan_rokok: toNumber(formData.bilangan_rokok) ?? 0
+      }
+    };
+
+    if (payload.kesihatan.bilangan_rokok === 0 && !formData.bilangan_rokok) {
+      delete payload.kesihatan.bilangan_rokok;
+      if (payload.bilangan_rokok === '') {
+        delete payload.bilangan_rokok;
+      }
+    }
+
+    return payload;
+  }
+
+  mapBackendToForm(record) {
+    if (!record) return null;
+    const asas = record.asas || {};
+    const pendidikan = record.pendidikan || {};
+    const pekerjaan = record.pekerjaan || {};
+    const kesihatan = record.kesihatan || {};
+
+    let formattedBirthDate = record.tarikh_lahir_pasangan || '';
+    if (asas.tarikh_lahir) {
+      if (typeof asas.tarikh_lahir.toDate === 'function') {
+        formattedBirthDate = asas.tarikh_lahir.toDate().toISOString().split('T')[0];
+      } else if (asas.tarikh_lahir instanceof Date) {
+        formattedBirthDate = asas.tarikh_lahir.toISOString().split('T')[0];
+      } else {
+        const parsedDate = new Date(asas.tarikh_lahir);
+        if (!Number.isNaN(parsedDate.getTime())) {
+          formattedBirthDate = parsedDate.toISOString().split('T')[0];
+        }
+      }
+    }
+
+    const noKp = asas.no_kp || record.no_kp_pasangan || '';
+
+    return {
+      id: record.id,
+      nama_pasangan: asas.nama || record.nama_pasangan || '',
+      no_kp_pasangan: this.formatICForInput(noKp),
+      tarikh_lahir_pasangan: formattedBirthDate,
+      umur_pasangan: formattedBirthDate ? this.calculateAge(formattedBirthDate) : (record.umur_pasangan || ''),
+      jantina_pasangan: asas.jantina || record.jantina_pasangan || '',
+      bangsa_pasangan: asas.bangsa || record.bangsa_pasangan || '',
+      agama_pasangan: asas.agama || record.agama_pasangan || '',
+      telefon_pasangan: asas.telefon || record.telefon_pasangan || '',
+      tahap_pendidikan: pendidikan.tahap || record.tahap_pendidikan || '',
+      institusi_pendidikan: pendidikan.institusi || record.institusi_pendidikan || '',
+      bidang_pengajian: pendidikan.bidang || record.bidang_pengajian || '',
+      tahun_tamat: pendidikan.tahun_tamat || record.tahun_tamat || '',
+      status_pekerjaan: pekerjaan.status || record.status_pekerjaan || '',
+      jenis_pekerjaan: pekerjaan.jenis || record.jenis_pekerjaan || '',
+      jenis_pekerjaan_sendiri: pekerjaan.jenis_pekerjaan_sendiri || record.jenis_pekerjaan_sendiri || '',
+      nama_majikan: pekerjaan.majikan || record.nama_majikan || '',
+      pendapatan_bulanan: pekerjaan.pendapatan_bulanan ?? record.pendapatan_bulanan ?? '',
+      status_kesihatan: kesihatan.status || record.status_kesihatan || '',
+      kumpulan_darah: kesihatan.kumpulan_darah || record.kumpulan_darah || '',
+      penyakit_kronik: this.formatListForDisplay(kesihatan.penyakit_kronik || record.penyakit_kronik),
+      ubat_tetap: this.formatListForDisplay(kesihatan.ubat_tetap || record.ubat_tetap),
+      status_merokok: kesihatan.status_merokok || record.status_merokok || '',
+      bilangan_rokok: kesihatan.bilangan_rokok ?? record.bilangan_rokok ?? ''
+    };
   }
 
   async save() {

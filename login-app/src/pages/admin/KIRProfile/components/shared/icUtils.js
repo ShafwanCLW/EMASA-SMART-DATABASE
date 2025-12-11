@@ -37,9 +37,15 @@ export function deriveBirthInfoFromIC(icValue = '') {
   }
 
   const age = calculateAge(birthDate);
+  const formattedDate = [
+    fullYear.toString().padStart(4, '0'),
+    monthPart.toString().padStart(2, '0'),
+    dayPart.toString().padStart(2, '0')
+  ].join('-');
+
   return {
     birthDate,
-    formattedDate: birthDate.toISOString().split('T')[0],
+    formattedDate,
     age
   };
 }
