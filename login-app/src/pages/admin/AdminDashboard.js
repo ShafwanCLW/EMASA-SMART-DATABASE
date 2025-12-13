@@ -306,10 +306,6 @@ export function createAdminMainContent() {
       border: 1px solid #fecaca;
     }
     
-    .setting-card.full-width {
-      grid-column: 1 / -1;
-    }
-    
     .admin-add-user-step {
       margin-bottom: 20px;
       padding: 16px;
@@ -474,6 +470,646 @@ export function createAdminMainContent() {
     .error-text {
       color: #dc3545;
     }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      padding-bottom: 10px;
+    }
+    
+    .stats-grid .stat-card {
+      min-width: auto;
+      padding: 16px;
+    }
+    
+    .dashboard-analytics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+      margin: 30px 0;
+    }
+    
+    .chart-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .chart-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    
+    .chart-body {
+      position: relative;
+      min-height: 240px;
+    }
+    
+    .chart-body canvas {
+      width: 100%;
+      height: 240px;
+    }
+    
+    .attendance-leaders {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    
+    .leaders-column h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    
+    .leader-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .leader-item {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .leader-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .leader-name {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 14px;
+    }
+    
+    .leader-meta {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    
+    .leader-score {
+      font-weight: 700;
+      font-size: 16px;
+    }
+    
+    .leader-score.positive {
+      color: #16a34a;
+    }
+    
+    .leader-score.negative {
+      color: #dc2626;
+    }
+    
+    .chart-empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    
+    .system-report-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .system-report-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .system-report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    
+    .system-report-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.05);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .system-report-card .label {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+    }
+    
+    .system-report-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .system-report-card .helper {
+      font-size: 13px;
+      color: #64748b;
+    }
+    
+    .report-sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    
+    .report-section-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 280px;
+    }
+    
+    .report-section-card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .report-section-card header h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    
+    .report-section-card table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .report-section-card table th,
+    .report-section-card table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      font-size: 13px;
+    }
+    
+    .report-section-card table th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #94a3b8;
+    }
+    
+    .report-section-card table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .report-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .report-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .report-list-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .report-list-item strong {
+      font-size: 14px;
+      color: #0f172a;
+    }
+    
+    .report-list-item span {
+      font-size: 13px;
+      color: #475569;
+    }
+    
+    .report-financial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    
+    .report-financial-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .report-financial-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    
+    .report-financial-card .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .report-financial-card .delta {
+      font-size: 13px;
+      color: #10b981;
+    }
+    
+    .report-financial-card.expense .delta {
+      color: #ef4444;
+    }
+    
+    .report-chart {
+      position: relative;
+      min-height: 240px;
+    }
+    
+    .report-empty {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      padding: 30px 10px;
+    }
+    
+    @media print {
+      body {
+        background: #fff;
+      }
+      .content-section {
+        display: none !important;
+      }
+      #reports-content {
+        display: block !important;
+      }
+      .print-hide {
+        display: none !important;
+      }
+      #reports-content {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0;
+        padding: 0 12px;
+      }
+    }
+    
+      :root {
+        --warna-utama: #6d28d9;
+        --warna-utama-gelap: #5b21b6;
+        --warna-utama-muda: #ede9fe;
+        --warna-teks-utama: #111322;
+        --warna-teks-sekunder: #4c4f6b;
+        --warna-latar: #f8f7ff;
+        --warna-sempadan: #e4dffd;
+        --radius-butang: 10px;
+        --bayang-butang: 0 8px 20px rgba(109, 40, 217, 0.25);
+      }
+
+      body {
+        background: var(--warna-latar);
+        color: var(--warna-teks-utama);
+      }
+
+      button,
+      .btn {
+        font-family: inherit;
+      }
+
+      .btn,
+      button.btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: var(--radius-butang);
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        letter-spacing: 0.01em;
+        background: var(--warna-utama);
+        color: #fff;
+        box-shadow: var(--bayang-butang);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(109, 40, 217, 0.35);
+      }
+
+      .btn:disabled,
+      .btn[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .btn.btn-primary,
+      .btn-primary {
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: #fff;
+      }
+
+      .btn.btn-secondary,
+      .btn-secondary {
+        background: #fff;
+        color: var(--warna-utama);
+        border: 1px solid var(--warna-utama);
+        box-shadow: none;
+      }
+
+      .btn.btn-secondary:hover,
+      .btn-secondary:hover {
+        background: var(--warna-utama-muda);
+        color: var(--warna-utama);
+      }
+
+      .btn-outline,
+      .btn-outline-primary {
+        background: transparent;
+        border: 1px solid var(--warna-sempadan);
+        color: var(--warna-teks-sekunder);
+        box-shadow: none;
+      }
+
+      .btn-outline:hover,
+      .btn-outline-primary:hover {
+        background: var(--warna-utama-muda);
+        color: var(--warna-utama);
+        border-color: var(--warna-utama);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-info {
+        background: linear-gradient(135deg, #0ea5e9, #0369a1);
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+      }
+
+      .btn-sm,
+      button.btn-sm {
+        padding: 8px 14px;
+        font-size: 13px;
+        border-radius: 8px;
+        box-shadow: none;
+      }
+
+      .btn-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--warna-utama-muda);
+        color: var(--warna-utama);
+        border: none;
+        box-shadow: none;
+      }
+
+      .btn-icon:hover {
+        background: var(--warna-utama);
+        color: #fff;
+      }
+
+      .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--warna-sempadan);
+        background: #fff;
+        color: var(--warna-teks-utama);
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      }
+
+      .action-btn:hover {
+        border-color: var(--warna-utama);
+        color: var(--warna-utama);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(109, 40, 217, 0.12);
+      }
+
+      .content-section {
+        width: 100%;
+        max-width: 1920px;
+        margin: 0 auto 12px;
+        padding: 26px clamp(10px, 2.2vw, 28px);
+        box-sizing: border-box;
+      }
+
+      .sub-content-section {
+        padding: 24px clamp(12px, 2.4vw, 28px);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
+        border: 1px solid var(--warna-sempadan);
+        margin-bottom: 16px;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+        color: var(--warna-teks-utama);
+      }
+
+      .section-description {
+        margin: 4px 0 0;
+        color: var(--warna-teks-sekunder);
+        font-size: 15px;
+      }
+
+      .stats-grid,
+      .program-kehadiran-grid,
+      .reports-grid,
+      .settings-grid {
+        gap: 12px;
+        align-items: stretch;
+        margin-bottom: 16px;
+      }
+
+      .table-container {
+        margin-top: 10px;
+      }
+
+      .filters-container,
+      .action-bar,
+      .reports-content,
+      .reports-dashboard,
+      .reports-grid {
+        gap: 12px;
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .setting-card {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid var(--warna-sempadan);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.05);
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .setting-card.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .setting-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .setting-header h4 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--warna-teks-utama);
+      }
+
+      .setting-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--warna-utama-muda);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--warna-utama);
+        font-size: 18px;
+      }
+
+      .setting-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .setting-option {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--warna-sempadan);
+        background: #fdfbff;
+        font-size: 14px;
+        color: var(--warna-teks-sekunder);
+      }
+
+      .setting-option input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--warna-utama);
+      }
+
+      .change-password-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px 20px;
+      }
+
+      .change-password-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .change-password-form label {
+        font-weight: 600;
+        color: var(--warna-teks-utama);
+      }
+
+      .change-password-form input {
+        border: 1px solid var(--warna-sempadan);
+        border-radius: 10px;
+        padding: 12px;
+        background: #f8f7ff;
+        font-size: 14px;
+      }
+
+      .change-password-form button {
+        margin-top: 4px;
+        grid-column: 1 / -1;
+        justify-self: flex-start;
+      }
     </style>
     
     <div id="dashboard-content" class="content-section active">
@@ -481,44 +1117,87 @@ export function createAdminMainContent() {
         <div class="stat-card">
           <div class="stat-header">
             <h3 class="stat-title">Total Users</h3>
-            <span class="stat-icon">👥</span>
+            <span class="stat-icon">&#128101;</span>
           </div>
-          <p class="stat-value">1,234</p>
+          <p class="stat-value" id="dashboard-total-users">-</p>
+          <p class="stat-helper-text">Registered accounts</p>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <h3 class="stat-title">Active KIRs</h3>
-            <span class="stat-icon">📋</span>
+            <h3 class="stat-title">Total KIR</h3>
+            <span class="stat-icon">&#128221;</span>
           </div>
-          <p class="stat-value">567</p>
+          <p class="stat-value" id="dashboard-total-kir">-</p>
+          <p class="stat-helper-text">Ketua Isi Rumah</p>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <h3 class="stat-title">Pending Reviews</h3>
-            <span class="stat-icon">⏳</span>
+            <h3 class="stat-title">Total PKIR</h3>
+            <span class="stat-icon">&#10084;</span>
           </div>
-          <p class="stat-value">89</p>
+          <p class="stat-value" id="dashboard-total-pkir">-</p>
+          <p class="stat-helper-text">Pasangan Ketua Isi Rumah</p>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <h3 class="stat-title">System Health</h3>
-            <span class="stat-icon">💚</span>
+            <h3 class="stat-title">Total AIR</h3>
+            <span class="stat-icon">&#128106;</span>
           </div>
-          <p class="stat-value">98%</p>
+          <p class="stat-value" id="dashboard-total-air">-</p>
+          <p class="stat-helper-text">Ahli Isi Rumah</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <h3 class="stat-title">Total Programs</h3>
+            <span class="stat-icon">&#128197;</span>
+          </div>
+          <p class="stat-value" id="dashboard-total-programs">-</p>
+          <p class="stat-helper-text">All scheduled programs</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <h3 class="stat-title">Account Balance</h3>
+            <span class="stat-icon">&#128184;</span>
+          </div>
+          <p class="stat-value" id="dashboard-current-balance">RM 0.00</p>
+          <p class="stat-helper-text">Income - Expenses</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <h3 class="stat-title">Next Program</h3>
+            <span class="stat-icon">&#9201;</span>
+          </div>
+          <p class="stat-value" id="dashboard-upcoming-program-name">Loading...</p>
+          <p class="stat-helper-text" id="dashboard-upcoming-program-date">Stay tuned</p>
         </div>
       </div>
-      
-      <div class="quick-actions">
-        <h3 class="section-title">Quick Actions</h3>
-        <div class="action-buttons">
-          <button class="action-btn" data-section="user-management">
-            <span>👥</span>
-            Manage Users
-          </button>
-          <button class="action-btn" data-section="cipta-kir">
-            <span>➕</span>
-            Create KIR
-          </button>
+
+      <div class="dashboard-analytics">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div>Financial Trend</div>
+              <div class="chart-subtitle">Income vs. Expenses (last 6 months)</div>
+            </div>
+            <span class="chart-period">Monthly</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="financial-trend-chart"></canvas>
+            <div class="chart-empty-state" id="financial-trend-empty">Loading financial data...</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div>Program Status Overview</div>
+              <div class="chart-subtitle">Live snapshot of program lifecycle</div>
+            </div>
+            <span class="chart-period">Real time</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="program-status-chart"></canvas>
+            <div class="chart-empty-state" id="program-status-empty">Loading program data...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1593,107 +2272,183 @@ export function createAdminMainContent() {
       <!-- Content will be dynamically loaded by ProgramKehadiranNewest.js component -->
     </div>
 
+
     <div id="reports-content" class="content-section">
       <div class="section-header">
-        <h3 class="section-title">Laporan</h3>
-        <p class="section-description">Generate and view system reports</p>
+        <div>
+          <h3 class="section-title">Laporan Menyeluruh</h3>
+          <p class="section-description">One-stop view of program performance, participants, and finances</p>
+        </div>
+        <div class="system-report-actions print-hide">
+          <button class="btn btn-secondary" id="reports-refresh-btn">Refresh Data</button>
+          <button class="btn btn-primary" id="reports-download-btn">Save as PDF</button>
+        </div>
       </div>
       
-      <div class="reports-grid">
-        <div class="report-card">
-          <div class="report-header">
-            <h4>KIR Summary Report</h4>
-            <span class="report-icon">📊</span>
+      <div id="reports-status-bar">
+        <div id="reports-loading" class="loading-text">Loading consolidated report...</div>
+        <div id="reports-error" class="error-text" style="display: none;"></div>
+      </div>
+      
+      <div id="reports-dashboard" class="system-report-dashboard" style="display: none;">
+        <div class="system-report-grid">
+          <div class="system-report-card">
+            <span class="label">Total Programs</span>
+            <span class="value" id="report-total-programs">-</span>
+            <span class="helper" id="report-program-meta">Active / Upcoming</span>
           </div>
-          <p class="report-description">Overview of all KIR records and statistics</p>
-          <button class="btn btn-primary">Generate Report</button>
+          <div class="system-report-card">
+            <span class="label">Attendance Rate</span>
+            <span class="value" id="report-attendance-rate">-</span>
+            <span class="helper" id="report-attendance-meta">Attendance records processed</span>
+          </div>
+          <div class="system-report-card">
+            <span class="label">Participants</span>
+            <span class="value" id="report-total-participants">-</span>
+            <span class="helper">Unique attendees tracked</span>
+          </div>
+          <div class="system-report-card">
+            <span class="label">Net Balance</span>
+            <span class="value" id="report-net-balance">-</span>
+            <span class="helper" id="report-financial-meta">Income - Expenses</span>
+          </div>
         </div>
-        <div class="report-card">
-          <div class="report-header">
-            <h4>User Activity Report</h4>
-            <span class="report-icon">👥</span>
-          </div>
-          <p class="report-description">User login and activity statistics</p>
-          <button class="btn btn-primary">Generate Report</button>
-        </div>
-        <div class="report-card">
-          <div class="report-header">
-            <h4>System Health Report</h4>
-            <span class="report-icon">💚</span>
-          </div>
-          <p class="report-description">System performance and health metrics</p>
-          <button class="btn btn-primary">Generate Report</button>
+        
+        <div class="report-sections-grid">
+          <section class="report-section-card" style="grid-column: span 2;">
+            <header>
+              <h4>Program Performance</h4>
+              <span id="report-program-summary" class="helper"></span>
+            </header>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Program</th>
+                    <th>Status</th>
+                    <th>Participants</th>
+                    <th>Attendance</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody id="report-program-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+          
+          <section class="report-section-card">
+            <header>
+              <h4>Attendance Trend</h4>
+              <span class="helper">Last 6 months</span>
+            </header>
+            <div class="report-chart">
+              <canvas id="report-attendance-chart"></canvas>
+            </div>
+          </section>
+          
+          <section class="report-section-card">
+            <header>
+              <h4>Top Participants</h4>
+              <span class="helper">Most consistent attendees</span>
+            </header>
+            <div id="report-top-participants" class="report-list"></div>
+          </section>
+          
+          <section class="report-section-card" style="grid-column: span 2;">
+            <header>
+              <h4>Financial Snapshot</h4>
+              <span class="helper">Income, expenses, and recent activity</span>
+            </header>
+            <div class="report-financial-grid">
+              <div class="report-financial-card">
+                <span class="label">Total Income</span>
+                <span class="value" id="report-income-total">-</span>
+              </div>
+              <div class="report-financial-card expense">
+                <span class="label">Total Expenses</span>
+                <span class="value" id="report-expense-total">-</span>
+              </div>
+              <div class="report-financial-card">
+                <span class="label">Surplus</span>
+                <span class="value" id="report-surplus-value">-</span>
+                <span class="delta" id="report-surplus-helper"></span>
+              </div>
+            </div>
+            <div>
+              <h5>Recent Transactions</h5>
+              <div id="report-financial-list" class="report-list"></div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
-    
     <div id="settings-content" class="content-section">
       <div class="section-header">
-        <h3 class="section-title">System Settings</h3>
-        <p class="section-description">Configure system preferences and options</p>
+        <h3 class="section-title">Tetapan Sistem</h3>
+        <p class="section-description">Sesuaikan keutamaan aplikasi dan keselamatan pentadbir</p>
       </div>
       
       <div class="settings-grid">
         <div class="setting-card">
           <div class="setting-header">
-            <h4>General Settings</h4>
+            <h4>Tetapan Umum</h4>
             <span class="setting-icon">⚙️</span>
           </div>
           <div class="setting-options">
             <label class="setting-option">
               <input type="checkbox" checked>
-              <span>Enable email notifications</span>
+              <span>Aktifkan pemberitahuan e-mel</span>
             </label>
             <label class="setting-option">
               <input type="checkbox">
-              <span>Auto-backup data</span>
+              <span>Sandaran automatik data</span>
             </label>
             <label class="setting-option">
               <input type="checkbox" checked>
-              <span>Enable audit logging</span>
+              <span>Catat aktiviti audit</span>
             </label>
           </div>
         </div>
         <div class="setting-card">
           <div class="setting-header">
-            <h4>Security Settings</h4>
+            <h4>Tetapan Keselamatan</h4>
             <span class="setting-icon">🔒</span>
           </div>
           <div class="setting-options">
             <label class="setting-option">
               <input type="checkbox" checked>
-              <span>Require strong passwords</span>
+              <span>Wajibkan kata laluan kukuh</span>
             </label>
             <label class="setting-option">
               <input type="checkbox" checked>
-              <span>Enable two-factor authentication</span>
+              <span>Aktifkan pengesahan dua faktor</span>
             </label>
             <label class="setting-option">
               <input type="checkbox">
-              <span>Auto-logout after inactivity</span>
+              <span>Log keluar automatik selepas tidak aktif</span>
             </label>
           </div>
         </div>
         <div class="setting-card full-width">
           <div class="setting-header">
-            <h4>Change Password</h4>
-            <span class="setting-icon">dY"?</span>
+            <h4>Tukar Kata Laluan</h4>
+            <span class="setting-icon">??</span>
           </div>
           <form id="adminChangePasswordForm" class="change-password-form">
             <div class="form-group">
-              <label for="adminCurrentPassword">Current Password</label>
-              <input type="password" id="adminCurrentPassword" name="currentPassword" required placeholder="Enter current password">
+              <label for="adminCurrentPassword">Kata laluan semasa</label>
+              <input type="password" id="adminCurrentPassword" name="currentPassword" required placeholder="Masukkan kata laluan semasa">
             </div>
             <div class="form-group">
-              <label for="adminNewPassword">New Password</label>
-              <input type="password" id="adminNewPassword" name="newPassword" required placeholder="Enter new password" minlength="6">
+              <label for="adminNewPassword">Kata laluan baharu</label>
+              <input type="password" id="adminNewPassword" name="newPassword" required placeholder="Masukkan kata laluan baharu" minlength="6">
             </div>
             <div class="form-group">
-              <label for="adminConfirmPassword">Confirm New Password</label>
-              <input type="password" id="adminConfirmPassword" name="confirmPassword" required placeholder="Confirm new password" minlength="6">
+              <label for="adminConfirmPassword">Sahkan kata laluan baharu</label>
+              <input type="password" id="adminConfirmPassword" name="confirmPassword" required placeholder="Ulang kata laluan baharu" minlength="6">
             </div>
             <div id="adminChangePasswordStatus" class="form-status"></div>
-            <button type="submit" class="btn btn-primary">Update Password</button>
+            <button type="submit" class="btn btn-primary">Kemaskini Kata Laluan</button>
           </form>
         </div>
       </div>
@@ -2275,6 +3030,30 @@ export function createAdminDashboard(user) {
       </main>
     </div>
   `;
+}
+
+let dashboardStatsLoadingPromise = null;
+let financialTrendLoadingPromise = null;
+let attendanceLeaderLoadingPromise = null;
+let chartModulePromise = null;
+let financialTrendChartInstance = null;
+let programStatusChartInstance = null;
+
+export function initializeDashboardStats() {
+  loadDashboardStats();
+  loadFinancialTrendChart();
+  
+  const dashboardNavItem = document.querySelector('.nav-item[data-section="dashboard"]');
+  if (dashboardNavItem && !dashboardNavItem.dataset.dashboardStatsBound) {
+    dashboardNavItem.dataset.dashboardStatsBound = 'true';
+    dashboardNavItem.addEventListener('click', () => {
+      loadDashboardStats();
+      loadFinancialTrendChart();
+      loadAttendanceLeaderList();
+    });
+  }
+  
+  loadAttendanceLeaderList();
 }
 
 // User Management functionality
@@ -3982,11 +4761,29 @@ export function setupSenariKIRListeners() {
 
 export function setupReportsListeners() {
   const reportsNav = document.querySelector('[data-section="reports"]');
+  const ensureInitialized = () => initializeReportsDashboard();
   if (reportsNav) {
     reportsNav.addEventListener('click', () => {
       console.log('Reports section activated');
-      // Add reports initialization logic here
+      ensureInitialized();
     });
+  }
+  
+  const refreshBtn = document.getElementById('reports-refresh-btn');
+  if (refreshBtn && refreshBtn.dataset.listenerAttached !== 'true') {
+    refreshBtn.dataset.listenerAttached = 'true';
+    refreshBtn.addEventListener('click', () => initializeReportsDashboard(true));
+  }
+  
+  const downloadBtn = document.getElementById('reports-download-btn');
+  if (downloadBtn && downloadBtn.dataset.listenerAttached !== 'true') {
+    downloadBtn.dataset.listenerAttached = 'true';
+    downloadBtn.addEventListener('click', downloadSystemReportPDF);
+  }
+  
+  const reportsContent = document.getElementById('reports-content');
+  if (reportsContent && reportsContent.classList.contains('active')) {
+    ensureInitialized();
   }
 }
 
@@ -4450,52 +5247,54 @@ function initializeMoneyOut() {
   setupExpenseFormListeners();
 }
 
-// Load and display financial summary data
-async function loadFinancialSummary() {
+async function fetchFinancialTotals() {
   try {
-    // Import Firebase functions
     const { collection, getDocs, query } = await import('firebase/firestore');
     const { db } = await import('../../services/database/firebase.js');
     const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
     
-    // Initialize totals
     let totalIncome = 0;
-    let currentBalance = 0;
+    let totalExpenses = 0;
     
-    // Fetch all income data (for total collected amount)
-    try {
-      const incomeQuery = query(
-        collection(db, COLLECTIONS.FINANCIAL_INCOME),
-        createEnvFilter()
-      );
-      const incomeSnapshot = await getDocs(incomeQuery);
-      totalIncome = incomeSnapshot.docs.reduce((sum, doc) => {
-        const data = doc.data();
-        return sum + (parseFloat(data.amount) || 0);
-      }, 0);
-    } catch (error) {
-      console.log('No income data found:', error.message);
-    }
+    const incomeQuery = query(
+      collection(db, COLLECTIONS.FINANCIAL_INCOME),
+      createEnvFilter()
+    );
+    const incomeSnapshot = await getDocs(incomeQuery);
+    totalIncome = incomeSnapshot.docs.reduce((sum, doc) => {
+      const data = doc.data();
+      return sum + (parseFloat(data.amount) || 0);
+    }, 0);
     
-    // Fetch expense data (for current balance calculation)
-    try {
-      const expenseQuery = query(
-        collection(db, COLLECTIONS.FINANCIAL_EXPENSES),
-        createEnvFilter()
-      );
-      const expenseSnapshot = await getDocs(expenseQuery);
-      const totalExpenses = expenseSnapshot.docs.reduce((sum, doc) => {
-        const data = doc.data();
-        return sum + (parseFloat(data.amount) || 0);
-      }, 0);
-      
-      // Calculate current balance (income minus expenses)
-      currentBalance = totalIncome - totalExpenses;
-    } catch (error) {
-      console.log('No expense data found:', error.message);
-      // If no expenses, current balance equals total income
-      currentBalance = totalIncome;
-    }
+    const expenseQuery = query(
+      collection(db, COLLECTIONS.FINANCIAL_EXPENSES),
+      createEnvFilter()
+    );
+    const expenseSnapshot = await getDocs(expenseQuery);
+    totalExpenses = expenseSnapshot.docs.reduce((sum, doc) => {
+      const data = doc.data();
+      return sum + (parseFloat(data.amount) || 0);
+    }, 0);
+    
+    return {
+      totalIncome,
+      totalExpenses,
+      currentBalance: totalIncome - totalExpenses
+    };
+  } catch (error) {
+    console.error('Error fetching financial totals:', error);
+    return {
+      totalIncome: 0,
+      totalExpenses: 0,
+      currentBalance: 0
+    };
+  }
+}
+
+// Load and display financial summary data
+async function loadFinancialSummary() {
+  try {
+    const { totalIncome, currentBalance } = await fetchFinancialTotals();
     
     // Today's transactions section removed as requested
   
@@ -4551,6 +5350,553 @@ async function loadFinancialSummary() {
     if (balanceChangeEl) {
       balanceChangeEl.textContent = 'No data available';
       balanceChangeEl.className = 'stat-change neutral';
+    }
+  }
+}
+
+async function loadDashboardStats() {
+  if (dashboardStatsLoadingPromise) {
+    return dashboardStatsLoadingPromise;
+  }
+  
+  const pendingLoad = (async () => {
+    try {
+      const { collection, getCountFromServer, getDocs, query } = await import('firebase/firestore');
+      const { db } = await import('../../services/database/firebase.js');
+      const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
+      
+      const buildQuery = (collectionName, useEnvFilter = true) => {
+        const baseRef = collection(db, collectionName);
+        return useEnvFilter ? query(baseRef, createEnvFilter()) : baseRef;
+      };
+      
+      const fetchCount = async (collectionName, useEnvFilter = true) => {
+        const target = buildQuery(collectionName, useEnvFilter);
+        try {
+          const snapshot = await getCountFromServer(target);
+          return snapshot.data().count || 0;
+        } catch (countError) {
+          console.warn(`Falling back to document scan for ${collectionName}:`, countError.message);
+          const docsSnapshot = await getDocs(target);
+          return docsSnapshot.size;
+        }
+      };
+      
+      const [
+        totalUsers,
+        totalKIR,
+        totalPKIR,
+        totalAIR,
+        financialTotals
+      ] = await Promise.all([
+        fetchCount(COLLECTIONS.USERS, false),
+        fetchCount(COLLECTIONS.KIR, true),
+        fetchCount(COLLECTIONS.KIR_PASANGAN, true),
+        fetchCount(COLLECTIONS.KIR_AIR, true),
+        fetchFinancialTotals()
+      ]);
+      
+      const programSnapshot = await getDocs(buildQuery(COLLECTIONS.PROGRAM));
+      const totalPrograms = programSnapshot.size;
+      const now = new Date();
+      const statusCounts = {
+        upcoming: 0,
+        active: 0,
+        completed: 0,
+        cancelled: 0
+      };
+      
+      const programDocs = programSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const startDate = normalizeToDate(data.tarikh_mula || data.startDate);
+        const endDate = normalizeToDate(data.tarikh_tamat || data.endDate);
+        const statusKey = determineProgramStatus(data, startDate, endDate, now);
+        if (statusCounts[statusKey] !== undefined) {
+          statusCounts[statusKey]++;
+        } else {
+          statusCounts.upcoming++;
+        }
+        return {
+          id: doc.id,
+          ...data,
+          startDate,
+          endDate
+        };
+      });
+      
+      const upcomingProgram = programDocs
+        .filter(program => program.startDate && program.startDate >= now)
+        .sort((a, b) => a.startDate - b.startDate)[0];
+      
+      updateStatValue('dashboard-total-users', formatNumber(totalUsers));
+      updateStatValue('dashboard-total-kir', formatNumber(totalKIR));
+      updateStatValue('dashboard-total-pkir', formatNumber(totalPKIR));
+      updateStatValue('dashboard-total-air', formatNumber(totalAIR));
+      updateStatValue('dashboard-total-programs', formatNumber(totalPrograms));
+      updateStatValue('dashboard-current-balance', formatCurrency(financialTotals.currentBalance));
+      await renderProgramStatusChart(statusCounts);
+      
+      if (upcomingProgram) {
+        const programName = upcomingProgram.nama_program || upcomingProgram.nama || upcomingProgram.name || 'Upcoming Program';
+        const programDate = formatProgramDateRange(
+          upcomingProgram.startDate,
+          upcomingProgram.endDate,
+          upcomingProgram.lokasi || upcomingProgram.location
+        );
+        updateStatValue('dashboard-upcoming-program-name', programName);
+        updateStatValue('dashboard-upcoming-program-date', programDate);
+      } else {
+        updateStatValue('dashboard-upcoming-program-name', 'No upcoming program');
+        updateStatValue('dashboard-upcoming-program-date', 'All scheduled programs are completed');
+      }
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+      resetDashboardStatsToFallback();
+      setChartEmptyState('program-status', false, 'Unable to load program data');
+    } finally {
+      dashboardStatsLoadingPromise = null;
+    }
+  })();
+  
+  dashboardStatsLoadingPromise = pendingLoad;
+  return pendingLoad;
+}
+
+function updateStatValue(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+function formatNumber(value) {
+  return Number.isFinite(value) ? value.toLocaleString('en-MY') : '-';
+}
+
+function formatCurrency(value) {
+  if (!Number.isFinite(value)) {
+    return 'RM 0.00';
+  }
+  return `RM ${value.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function normalizeToDate(value) {
+  if (!value) return null;
+  if (typeof value === 'object' && value !== null) {
+    if (typeof value.toDate === 'function') {
+      const date = value.toDate();
+      return Number.isNaN(date?.getTime()) ? null : date;
+    }
+    if (typeof value.seconds === 'number') {
+      const date = new Date(value.seconds * 1000);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatProgramDateRange(startDate, endDate, location) {
+  if (!startDate) {
+    return 'Date not available';
+  }
+  
+  const startText = formatDateForDisplay(startDate);
+  const endText = endDate && endDate.toDateString() !== startDate.toDateString()
+    ? ` - ${formatDateForDisplay(endDate)}`
+    : '';
+  const locationText = location ? ` | ${location}` : '';
+  return `${startText}${endText}${locationText}`;
+}
+
+function formatDateForDisplay(date) {
+  return date?.toLocaleDateString('en-MY', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  }) || '';
+}
+
+function resetDashboardStatsToFallback() {
+  updateStatValue('dashboard-total-users', '-');
+  updateStatValue('dashboard-total-kir', '-');
+  updateStatValue('dashboard-total-pkir', '-');
+  updateStatValue('dashboard-total-air', '-');
+  updateStatValue('dashboard-total-programs', '-');
+  updateStatValue('dashboard-current-balance', 'RM 0.00');
+  updateStatValue('dashboard-upcoming-program-name', 'Unable to load data');
+  updateStatValue('dashboard-upcoming-program-date', 'Refresh the dashboard to try again');
+}
+
+function determineProgramStatus(program, startDate, endDate, now = new Date()) {
+  const validStatuses = ['upcoming', 'active', 'completed', 'cancelled'];
+  if (typeof program?.status === 'string') {
+    const normalized = program.status.trim().toLowerCase();
+    if (validStatuses.includes(normalized)) {
+      return normalized;
+    }
+  }
+  
+  if (startDate && endDate) {
+    if (now < startDate) return 'upcoming';
+    if (now >= startDate && now <= endDate) return 'active';
+    if (now > endDate) return 'completed';
+  }
+  
+  if (startDate) {
+    return now < startDate ? 'upcoming' : 'active';
+  }
+  
+  return 'upcoming';
+}
+
+async function loadChartModule() {
+  if (!chartModulePromise) {
+    chartModulePromise = import('chart.js/auto');
+  }
+  return chartModulePromise;
+}
+
+async function loadFinancialTrendChart(monthCount = 6) {
+  if (financialTrendLoadingPromise) {
+    return financialTrendLoadingPromise;
+  }
+  
+  const pendingLoad = (async () => {
+    try {
+      const { collection, getDocs, query } = await import('firebase/firestore');
+      const { db } = await import('../../services/database/firebase.js');
+      const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
+      
+      const [incomeSnapshot, expenseSnapshot] = await Promise.all([
+        getDocs(query(collection(db, COLLECTIONS.FINANCIAL_INCOME), createEnvFilter())),
+        getDocs(query(collection(db, COLLECTIONS.FINANCIAL_EXPENSES), createEnvFilter()))
+      ]);
+      
+      const monthBuckets = createMonthBuckets(monthCount);
+      const bucketMap = new Map(monthBuckets.map(bucket => [bucket.key, bucket]));
+      
+      const accumulateRecords = (snapshot, type) => {
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const amount = parseFloat(data.amount);
+          if (!Number.isFinite(amount) || amount === 0) {
+            return;
+          }
+          const entryDate = normalizeToDate(data.date || data.tarikh || data.tarikh_cipta || data.tarikh_transaksi);
+          if (!entryDate) return;
+          const key = formatMonthKey(entryDate);
+          const bucket = bucketMap.get(key);
+          if (bucket) {
+            bucket[type] += amount;
+          }
+        });
+      };
+      
+      accumulateRecords(incomeSnapshot, 'income');
+      accumulateRecords(expenseSnapshot, 'expenses');
+      
+      await renderFinancialTrendChart(monthBuckets);
+    } catch (error) {
+      console.error('Error loading financial trend chart:', error);
+      if (financialTrendChartInstance) {
+        financialTrendChartInstance.destroy();
+        financialTrendChartInstance = null;
+      }
+      setChartEmptyState('financial-trend', false, 'Unable to load financial data');
+    } finally {
+      financialTrendLoadingPromise = null;
+    }
+  })();
+  
+  financialTrendLoadingPromise = pendingLoad;
+  return pendingLoad;
+}
+
+async function loadAttendanceLeaderList(limit = 3) {
+  if (attendanceLeaderLoadingPromise) {
+    return attendanceLeaderLoadingPromise;
+  }
+  
+  const pendingLoad = (async () => {
+    try {
+      const { ProgramService } = await import('../../services/backend/ProgramService.js');
+      const attendanceRecords = await ProgramService.listAllAttendance();
+      
+      if (!attendanceRecords || attendanceRecords.length === 0) {
+        renderAttendanceLeaderList([], []);
+        return;
+      }
+      
+      const participantMap = new Map();
+      attendanceRecords.forEach(record => {
+        const id = record.participantId;
+        if (!id) return;
+        if (!participantMap.has(id)) {
+          participantMap.set(id, {
+            id,
+            name: record.participantName || 'Unknown',
+            type: record.participantType || 'N/A',
+            presentCount: 0,
+            totalPrograms: 0
+          });
+        }
+        const participant = participantMap.get(id);
+        participant.totalPrograms++;
+        if (record.present) {
+          participant.presentCount++;
+        }
+      });
+      
+      const participants = Array.from(participantMap.values()).map(p => ({
+        ...p,
+        attendancePercentage: p.totalPrograms > 0 ? Math.round((p.presentCount / p.totalPrograms) * 100) : 0
+      }));
+      
+      if (participants.length === 0) {
+        setChartEmptyState('attendance-leaders', false, 'No attendance data recorded yet');
+        return;
+      }
+      
+      const best = [...participants]
+        .sort((a, b) => b.attendancePercentage - a.attendancePercentage)
+        .slice(0, limit);
+      const worst = [...participants]
+        .sort((a, b) => a.attendancePercentage - b.attendancePercentage)
+        .slice(0, limit);
+      
+      renderAttendanceLeaderList(best, worst);
+    } catch (error) {
+      console.error('Error loading attendance leaders chart:', error);
+      renderAttendanceLeaderList([], []);
+      const emptyElement = document.getElementById('attendance-leaders-empty');
+      if (emptyElement) {
+        emptyElement.textContent = 'Unable to load attendance data';
+      }
+    } finally {
+      attendanceLeaderLoadingPromise = null;
+    }
+  })();
+  
+  attendanceLeaderLoadingPromise = pendingLoad;
+  return pendingLoad;
+}
+
+function createMonthBuckets(monthCount) {
+  const now = new Date();
+  const buckets = [];
+  for (let i = monthCount - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = formatMonthKey(date);
+    buckets.push({
+      key,
+      label: date.toLocaleDateString('en-MY', { month: 'short', year: '2-digit' }),
+      income: 0,
+      expenses: 0
+    });
+  }
+  return buckets;
+}
+
+function formatMonthKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+async function renderFinancialTrendChart(buckets = []) {
+  const canvas = document.getElementById('financial-trend-chart');
+  if (!canvas) return;
+  
+  const hasData = buckets.some(bucket => bucket.income > 0 || bucket.expenses > 0);
+  setChartEmptyState('financial-trend', hasData, 'No financial data recorded yet');
+  
+  if (!hasData) {
+    if (financialTrendChartInstance) {
+      financialTrendChartInstance.destroy();
+      financialTrendChartInstance = null;
+    }
+    return;
+  }
+  
+  const { Chart } = await loadChartModule();
+  const labels = buckets.map(bucket => bucket.label);
+  const incomeData = buckets.map(bucket => bucket.income);
+  const expenseData = buckets.map(bucket => bucket.expenses);
+  
+  if (financialTrendChartInstance) {
+    financialTrendChartInstance.destroy();
+  }
+  
+  financialTrendChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Income',
+          data: incomeData,
+          borderColor: '#4f46e5',
+          backgroundColor: 'rgba(79, 70, 229, 0.15)',
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#4f46e5'
+        },
+        {
+          label: 'Expenses',
+          data: expenseData,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249, 115, 22, 0.15)',
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#f97316'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` ${context.dataset.label}: RM ${context.formattedValue}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => `RM ${value}`
+          },
+          grid: {
+            color: '#e2e8f0'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+}
+
+async function renderProgramStatusChart(counts = {}) {
+  const canvas = document.getElementById('program-status-chart');
+  if (!canvas) return;
+  
+  const labels = ['Upcoming', 'Active', 'Completed', 'Cancelled'];
+  const colors = ['#4f46e5', '#22c55e', '#64748b', '#ef4444'];
+  const keys = ['upcoming', 'active', 'completed', 'cancelled'];
+  const data = keys.map(key => counts[key] || 0);
+  const total = data.reduce((sum, value) => sum + value, 0);
+  const hasData = total > 0;
+  
+  setChartEmptyState('program-status', hasData, 'No program data recorded yet');
+  
+  if (!hasData) {
+    if (programStatusChartInstance) {
+      programStatusChartInstance.destroy();
+      programStatusChartInstance = null;
+    }
+    return;
+  }
+  
+  const { Chart } = await loadChartModule();
+  
+  if (programStatusChartInstance) {
+    programStatusChartInstance.destroy();
+  }
+  
+  programStatusChartInstance = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: colors,
+          borderWidth: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 16
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const value = context.raw;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+              return ` ${context.label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderAttendanceLeaderList(best = [], worst = []) {
+  const container = document.getElementById('attendance-leaders-container');
+  const bestList = document.getElementById('attendance-best-list');
+  const worstList = document.getElementById('attendance-worst-list');
+  if (!container || !bestList || !worstList) return;
+  
+  const hasData = best.length + worst.length > 0;
+  setChartEmptyState('attendance-leaders', hasData, 'No attendance data recorded yet');
+  container.style.display = hasData ? 'grid' : 'none';
+  
+  const buildItems = (items, variant) => {
+    if (!items.length) {
+      return '<li class="leader-item"><div class="leader-info"><span class="leader-name">No data</span><span class="leader-meta">-</span></div><span class="leader-score">-</span></li>';
+    }
+    return items.map((p, index) => {
+      const percentage = `${p.attendancePercentage}%`;
+      return `
+        <li class="leader-item">
+          <div class="leader-info">
+            <span class="leader-name">${index + 1}. ${p.name || 'Unknown'}</span>
+            <span class="leader-meta">${p.type || 'N/A'} • ${p.presentCount}/${p.totalPrograms} programs</span>
+          </div>
+          <span class="leader-score ${variant === 'positive' ? 'positive' : 'negative'}">${percentage}</span>
+        </li>
+      `;
+    }).join('');
+  };
+  
+  bestList.innerHTML = buildItems(best, 'positive');
+  worstList.innerHTML = buildItems(worst, 'negative');
+}
+
+function setChartEmptyState(chartId, hasData, emptyMessage) {
+  const emptyElement = document.getElementById(`${chartId}-empty`);
+  if (!emptyElement) return;
+  if (hasData) {
+    emptyElement.style.display = 'none';
+  } else {
+    emptyElement.style.display = 'flex';
+    if (emptyMessage) {
+      emptyElement.textContent = emptyMessage;
     }
   }
 }
@@ -5598,6 +6944,12 @@ export async function initializeProgramKehadiran() {
         color: #64748b;
       }
       
+      .stat-helper-text {
+        font-size: 13px;
+        color: #94a3b8;
+        margin: 4px 0 0;
+      }
+      
       .top-participants {
         margin-top: 20px;
       }
@@ -5835,20 +7187,6 @@ export async function initializeProgramKehadiranNew() {
         line-height: 1.6;
       }
       
-      .btn.btn-primary {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 12px 20px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-      
-      .btn.btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-      }
-      
       /* Enhanced table styles */
       .table-container {
         background: white;
@@ -5880,21 +7218,6 @@ export async function initializeProgramKehadiranNew() {
         gap: 12px;
         margin-bottom: 24px;
         flex-wrap: wrap;
-      }
-      
-      .btn.btn-secondary {
-        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 10px 16px;
-        color: white;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-      
-      .btn.btn-secondary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
       }
       
       /* Enhanced filters */
@@ -6877,8 +8200,7 @@ async function loadProgramReports() {
               <p>${participant.type} - ${participant.id}</p>
             </div>
             <div class="participant-stats">
-              <span class="attendance-count">${participant.attendanceCount}</span>
-              <span class="attendance-percentage">${participant.attendancePercentage}%</span>
+              <span class="attendance-count">${participant.attendanceCount} hadir</span>
             </div>
           </div>
         `;
@@ -6907,10 +8229,6 @@ async function loadProgramReports() {
                 <span class="stat-label">Participants</span>
                 <span class="stat-value">${program.participantCount}</span>
               </div>
-              <div class="stat-item">
-                <span class="stat-label">Attendance</span>
-                <span class="stat-value">${program.attendancePercentage}%</span>
-              </div>
             </div>
           </div>
         `;
@@ -6926,6 +8244,432 @@ async function loadProgramReports() {
     document.getElementById('top-participants-report').innerHTML = '<p class="error-text">Failed to load top participants. Please try again.</p>';
     document.getElementById('program-participation-report').innerHTML = '<p class="error-text">Failed to load program participation data. Please try again.</p>';
   }
+}
+
+let reportsDashboardLoadingPromise = null;
+let reportsAttendanceChartInstance = null;
+
+async function initializeReportsDashboard(forceReload = false) {
+  if (reportsDashboardLoadingPromise && !forceReload) {
+    return reportsDashboardLoadingPromise;
+  }
+  
+  const dashboard = document.getElementById('reports-dashboard');
+  if (!dashboard) return;
+  
+  setReportsDashboardState('loading');
+  
+  const pendingLoad = (async () => {
+    try {
+      const { ProgramService } = await import('../../services/backend/ProgramService.js');
+      const [programs, attendanceRecords, financialSummary] = await Promise.all([
+        ProgramService.listProgram(),
+        ProgramService.listAllAttendance(),
+        fetchFinancialSummaryData()
+      ]);
+      
+      renderReportsDashboard({ programs, attendanceRecords, financialSummary });
+      setReportsDashboardState('ready');
+    } catch (error) {
+      console.error('Error loading consolidated reports:', error);
+      setReportsDashboardState('error', error.message || 'Unable to load reports');
+    } finally {
+      reportsDashboardLoadingPromise = null;
+    }
+  })();
+  
+  reportsDashboardLoadingPromise = pendingLoad;
+  return pendingLoad;
+}
+
+function setReportsDashboardState(state, message = '') {
+  const loadingEl = document.getElementById('reports-loading');
+  const errorEl = document.getElementById('reports-error');
+  const dashboardEl = document.getElementById('reports-dashboard');
+  
+  if (!loadingEl || !errorEl || !dashboardEl) return;
+  
+  if (state === 'loading') {
+    loadingEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    dashboardEl.style.display = 'none';
+  } else if (state === 'ready') {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    dashboardEl.style.display = 'flex';
+    dashboardEl.style.flexDirection = 'column';
+  } else if (state === 'error') {
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = `Unable to load report: ${message}`;
+    dashboardEl.style.display = 'none';
+  }
+}
+
+async function fetchFinancialSummaryData() {
+  try {
+    const { collection, getDocs, query } = await import('firebase/firestore');
+    const { db } = await import('../../services/database/firebase.js');
+    const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
+    
+    const [incomeSnapshot, expenseSnapshot] = await Promise.all([
+      getDocs(query(collection(db, COLLECTIONS.FINANCIAL_INCOME), createEnvFilter())),
+      getDocs(query(collection(db, COLLECTIONS.FINANCIAL_EXPENSES), createEnvFilter()))
+    ]);
+    
+    const parseTransaction = (doc, type) => {
+      const data = doc.data();
+      const rawAmount = parseFloat(data.amount ?? data.jumlah ?? data.value ?? 0);
+      if (!Number.isFinite(rawAmount)) {
+        return null;
+      }
+      const dateValue = data.date || data.tarikh || data.tarikh_cipta || data.tarikh_transaksi;
+      const date = normalizeToDate(dateValue) || new Date();
+      return {
+        id: doc.id,
+        type,
+        title: data.title || data.nama || data.description || data.keterangan || type.toUpperCase(),
+        category: data.category || data.kategori || type,
+        amount: rawAmount,
+        date
+      };
+    };
+    
+    const incomeTransactions = incomeSnapshot.docs
+      .map(doc => parseTransaction(doc, 'income'))
+      .filter(Boolean);
+    const expenseTransactions = expenseSnapshot.docs
+      .map(doc => parseTransaction(doc, 'expense'))
+      .filter(Boolean);
+    
+    const totalIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalExpenses = expenseTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const recentTransactions = [...incomeTransactions, ...expenseTransactions]
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 5);
+    
+    return {
+      totalIncome,
+      totalExpenses,
+      netBalance: totalIncome - totalExpenses,
+      recentTransactions
+    };
+  } catch (error) {
+    console.error('Error loading financial summary data:', error);
+    return {
+      totalIncome: 0,
+      totalExpenses: 0,
+      netBalance: 0,
+      recentTransactions: []
+    };
+  }
+}
+
+function renderReportsDashboard({ programs = [], attendanceRecords = [], financialSummary = {} }) {
+  const totalPrograms = programs.length;
+  const now = new Date();
+  const activePrograms = programs.filter(program => {
+    const start = normalizeToDate(program.tarikh_mula || program.startDate);
+    const end = normalizeToDate(program.tarikh_tamat || program.endDate);
+    const status = determineProgramStatus(program, start, end, now);
+    return status === 'active';
+  }).length;
+  const upcomingPrograms = programs.filter(program => {
+    const start = normalizeToDate(program.tarikh_mula || program.startDate);
+    const end = normalizeToDate(program.tarikh_tamat || program.endDate);
+    const status = determineProgramStatus(program, start, end, now);
+    return status === 'upcoming';
+  }).length;
+  
+  const presentCount = attendanceRecords.filter(record => record.present).length;
+  const attendanceRate = attendanceRecords.length > 0
+    ? Math.round((presentCount / attendanceRecords.length) * 100)
+    : 0;
+  
+  const uniqueParticipants = new Set();
+  attendanceRecords.forEach(record => {
+    const id = record.participant_id || record.participantId || record.no_kp_display || record.id;
+    if (id) uniqueParticipants.add(id);
+  });
+  
+  updateElementText('report-total-programs', formatNumber(totalPrograms));
+  updateElementText('report-program-meta', `${activePrograms} active • ${upcomingPrograms} upcoming`);
+  updateElementText('report-attendance-rate', `${attendanceRate}%`);
+  updateElementText('report-attendance-meta', `${formatNumber(attendanceRecords.length)} attendance records`);
+  updateElementText('report-total-participants', formatNumber(uniqueParticipants.size));
+  updateElementText('report-net-balance', formatCurrency(financialSummary.netBalance ?? 0));
+  updateElementText('report-financial-meta', `${formatCurrency(financialSummary.totalIncome ?? 0)} income • ${formatCurrency(financialSummary.totalExpenses ?? 0)} expenses`);
+  updateElementText('report-income-total', formatCurrency(financialSummary.totalIncome ?? 0));
+  updateElementText('report-expense-total', formatCurrency(financialSummary.totalExpenses ?? 0));
+  updateElementText('report-surplus-value', formatCurrency((financialSummary.netBalance ?? 0)));
+  const surplusHelper = document.getElementById('report-surplus-helper');
+  if (surplusHelper) {
+    surplusHelper.textContent = financialSummary.netBalance >= 0 ? 'Healthy surplus' : 'Deficit detected';
+  }
+  
+  const programMetrics = buildProgramMetrics(programs, attendanceRecords);
+  updateElementText('report-program-summary', `${programMetrics.length} programs tracked`);
+  renderReportsProgramTable(programMetrics);
+  renderReportsTopParticipants(attendanceRecords);
+  renderReportsFinancialSection(financialSummary);
+  renderReportsAttendanceChart(attendanceRecords);
+}
+
+function updateElementText(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = value;
+  }
+}
+
+function buildProgramMetrics(programs = [], attendanceRecords = []) {
+  const attendanceMap = new Map();
+  
+  attendanceRecords.forEach(record => {
+    const programId = record.programId || record.program_id;
+    if (!programId) return;
+    if (!attendanceMap.has(programId)) {
+      attendanceMap.set(programId, { total: 0, present: 0 });
+    }
+    const info = attendanceMap.get(programId);
+    info.total += 1;
+    if (record.present) {
+      info.present += 1;
+    }
+  });
+  
+  return programs.map(program => {
+    const attendanceInfo = attendanceMap.get(program.id) || { total: 0, present: 0 };
+    const startDate = normalizeToDate(program.tarikh_mula || program.startDate);
+    const endDate = normalizeToDate(program.tarikh_tamat || program.endDate);
+    const status = determineProgramStatus(program, startDate, endDate);
+    const attendanceRate = attendanceInfo.total > 0
+      ? Math.round((attendanceInfo.present / attendanceInfo.total) * 100)
+      : 0;
+    
+    return {
+      id: program.id,
+      name: program.nama_program || program.nama || 'Unnamed Program',
+      status,
+      participants: attendanceInfo.total,
+      present: attendanceInfo.present,
+      attendanceRate,
+      duration: calculateProgramDuration(program)
+    };
+  });
+}
+
+function renderReportsProgramTable(programMetrics = []) {
+  const tableBody = document.getElementById('report-program-table-body');
+  if (!tableBody) return;
+  
+  if (!programMetrics.length) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="report-empty">No program data available</td></tr>';
+    return;
+  }
+  
+  const sorted = [...programMetrics].sort((a, b) => b.attendanceRate - a.attendanceRate || b.participants - a.participants).slice(0, 8);
+  tableBody.innerHTML = sorted.map(metric => `
+    <tr>
+      <td><strong>${metric.name}</strong></td>
+      <td><span class="status-badge ${metric.status}">${metric.status?.toUpperCase() || 'N/A'}</span></td>
+      <td>${formatNumber(metric.participants)}</td>
+      <td>${metric.attendanceRate}% (${formatNumber(metric.present)} hadir)</td>
+      <td>${metric.duration}</td>
+    </tr>
+  `).join('');
+}
+
+function renderReportsTopParticipants(attendanceRecords = []) {
+  const container = document.getElementById('report-top-participants');
+  if (!container) return;
+  
+  if (!attendanceRecords.length) {
+    container.innerHTML = '<div class="report-empty">No attendance data recorded yet</div>';
+    return;
+  }
+  
+  const participantMap = new Map();
+  attendanceRecords.forEach(record => {
+    const id = record.participant_id || record.participantId || record.no_kp_display || record.id;
+    if (!id) return;
+    if (!participantMap.has(id)) {
+      participantMap.set(id, {
+        id,
+        name: record.participant_name || record.participantName || 'Unknown',
+        type: record.participant_type || record.participantType || 'Participant',
+        total: 0,
+        present: 0
+      });
+    }
+    const info = participantMap.get(id);
+    info.total += 1;
+    if (record.present) {
+      info.present += 1;
+    }
+  });
+  
+  const topParticipants = Array.from(participantMap.values())
+    .map(p => ({ ...p, attendanceRate: p.total ? Math.round((p.present / p.total) * 100) : 0 }))
+    .sort((a, b) => b.present - a.present || b.attendanceRate - a.attendanceRate)
+    .slice(0, 5);
+  
+  if (!topParticipants.length) {
+    container.innerHTML = '<div class="report-empty">No participants to display</div>';
+    return;
+  }
+  
+  container.innerHTML = topParticipants.map((participant, index) => `
+    <div class="report-list-item">
+      <div>
+        <strong>${index + 1}. ${participant.name}</strong>
+        <span>${participant.type}</span>
+      </div>
+      <div>${participant.present} hadir</div>
+    </div>
+  `).join('');
+}
+
+function renderReportsFinancialSection(summary = {}) {
+  const list = document.getElementById('report-financial-list');
+  if (!list) return;
+  
+  const transactions = summary.recentTransactions || [];
+  if (!transactions.length) {
+    list.innerHTML = '<div class="report-empty">No financial transactions recorded</div>';
+    return;
+  }
+  
+  list.innerHTML = transactions.map(tx => `
+    <div class="report-list-item">
+      <div>
+        <strong>${tx.title || tx.category || tx.type}</strong>
+        <span>${tx.date ? new Date(tx.date).toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</span>
+      </div>
+      <div style="color: ${tx.type === 'income' ? '#10b981' : '#ef4444'};">
+        ${tx.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(tx.amount))}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function renderReportsAttendanceChart(attendanceRecords = []) {
+  const canvas = document.getElementById('report-attendance-chart');
+  if (!canvas) return;
+  
+  const buckets = buildAttendanceBuckets(attendanceRecords, 6);
+  const labels = buckets.map(bucket => bucket.label);
+  const presentData = buckets.map(bucket => bucket.present);
+  const totalData = buckets.map(bucket => bucket.total);
+  
+  const hasData = totalData.some(value => value > 0);
+  const wrapper = canvas.parentElement;
+  if (!hasData) {
+    if (reportsAttendanceChartInstance) {
+      reportsAttendanceChartInstance.destroy();
+      reportsAttendanceChartInstance = null;
+    }
+    canvas.style.display = 'none';
+    let emptyState = wrapper.querySelector('.report-empty');
+    if (!emptyState) {
+      emptyState = document.createElement('div');
+      emptyState.className = 'report-empty';
+      wrapper.appendChild(emptyState);
+    }
+    emptyState.textContent = 'No attendance activity for the selected period';
+    emptyState.style.display = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  const existingEmpty = wrapper.querySelector('.report-empty');
+  if (existingEmpty) {
+    existingEmpty.style.display = 'none';
+  }
+  
+  const { Chart } = await loadChartModule();
+  if (reportsAttendanceChartInstance) {
+    reportsAttendanceChartInstance.destroy();
+  }
+  
+  reportsAttendanceChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Present',
+          data: presentData,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.15)',
+          tension: 0.35,
+          fill: true
+        },
+        {
+          label: 'Total Records',
+          data: totalData,
+          borderColor: '#94a3b8',
+          backgroundColor: 'rgba(148, 163, 184, 0.15)',
+          tension: 0.35,
+          fill: false,
+          borderDash: [6, 6]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+function buildAttendanceBuckets(records = [], months = 6) {
+  const buckets = [];
+  const now = new Date();
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    buckets.push({
+      key: formatMonthKey(date),
+      label: date.toLocaleDateString('en-MY', { month: 'short', year: '2-digit' }),
+      total: 0,
+      present: 0
+    });
+  }
+  
+  const bucketMap = new Map(buckets.map(bucket => [bucket.key, bucket]));
+  
+  records.forEach(record => {
+    const dateValue = record.timestamp?.seconds
+      ? new Date(record.timestamp.seconds * 1000)
+      : record.timestamp
+        ? new Date(record.timestamp)
+        : record.date
+          ? new Date(record.date)
+          : null;
+    const attendanceDate = normalizeToDate(dateValue);
+    if (!attendanceDate) return;
+    const key = formatMonthKey(attendanceDate);
+    const bucket = bucketMap.get(key);
+    if (bucket) {
+      bucket.total += 1;
+      if (record.present) bucket.present += 1;
+    }
+  });
+  
+  return buckets;
+}
+
+function downloadSystemReportPDF() {
+  window.print();
 }
 
 // Helper function to format date for program section is already defined above
