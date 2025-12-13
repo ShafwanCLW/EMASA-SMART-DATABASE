@@ -48,7 +48,7 @@ export class BaseTab {
 
   // Get form data from the current tab
   getFormData() {
-    const form = document.querySelector(`[data-tab="${this.tabId}"]`);
+    const form = document.querySelector(`form.kir-form[data-tab="${this.tabId}"]`);
     if (!form) return {};
     
     const formData = new FormData(form);
