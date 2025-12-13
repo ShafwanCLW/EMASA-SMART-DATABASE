@@ -382,7 +382,7 @@ export class ProgramService {
           result.push({
             id: attendanceRecord?.id || `${kir.id}_${program.id}`,
             participantId: kir.id,
-            participantName: kir.nama || 'Unknown',
+            participantName: kir.nama_penuh || kir.nama || 'Unknown',
             participantType: 'KIR',
             programId: program.id,
             programName: program.name,
@@ -403,7 +403,7 @@ export class ProgramService {
           result.push({
             id: attendanceRecord?.id || `${pkir.id}_${program.id}`,
             participantId: pkir.id,
-            participantName: pkir.nama || 'Unknown',
+            participantName: pkir.nama || pkir.asas?.nama || 'Unknown',
             participantType: 'PKIR',
             programId: program.id,
             programName: program.name,

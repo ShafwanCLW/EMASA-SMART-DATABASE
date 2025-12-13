@@ -14,7 +14,6 @@ export class ProgramKehadiranNewest {
       attendance: [],
       filters: {
         programId: '',
-        date: '',
         search: ''
       },
       reportSelection: null
@@ -142,19 +141,6 @@ export class ProgramKehadiranNewest {
             </div>
           </div>
 
-          <div class="filters-container">
-            <label class="filter-group" style="flex:1">
-              <span>Tarikh:</span>
-              <input type="date" class="form-input" data-role="attendance-date">
-            </label>
-            <button class="btn btn-secondary" data-action="apply-attendance-filters">
-              Tapis
-            </button>
-            <button class="btn btn-outline" data-action="reset-attendance-filters">
-              Set Semula
-            </button>
-          </div>
-
           <div class="attendance-program-list" data-role="attendance-program-list"></div>
 
           <div class="search-bar">
@@ -260,7 +246,6 @@ export class ProgramKehadiranNewest {
     this.elements = {
       programsTableBody: this.root.querySelector('[data-role="program-table-body"]'),
       attendanceTableBody: this.root.querySelector('[data-role="attendance-table-body"]'),
-      attendanceDate: this.root.querySelector('[data-role="attendance-date"]'),
       attendanceSummary: this.root.querySelector('[data-role="attendance-summary"]'),
       topParticipants: this.root.querySelector('[data-role="top-participants"]'),
       programParticipation: this.root.querySelector('[data-role="program-participation"]'),
@@ -319,34 +304,7 @@ export class ProgramKehadiranNewest {
   }
 
   bindAttendanceActions() {
-    const applyBtn = this.root.querySelector('[data-action="apply-attendance-filters"]');
-    const resetBtn = this.root.querySelector('[data-action="reset-attendance-filters"]');
     const exportBtn = this.root.querySelector('[data-action="export-attendance"]');
-
-    if (applyBtn) {
-      applyBtn.addEventListener('click', () => {
-        this.state.filters.date = this.elements.attendanceDate?.value || '';
-        if (!this.state.filters.programId) {
-          this.showToast('Sila pilih program dari senarai.', 'error');
-          return;
-        }
-        this.loadAttendanceData(true);
-      });
-    }
-
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        if (this.elements.attendanceDate) {
-          this.elements.attendanceDate.value = '';
-        }
-        if (this.elements.attendanceSearch) {
-          this.elements.attendanceSearch.value = '';
-        }
-        this.state.filters = { programId: '', date: '', search: '' };
-        this.renderAttendanceProgramList();
-        this.loadAttendanceData();
-      });
-    }
 
     if (this.elements.attendanceSearch) {
       this.elements.attendanceSearch.addEventListener('input', () => {
@@ -430,61 +388,196 @@ export class ProgramKehadiranNewest {
     }
 
     const selectedProgram = this.state.programs.find(p => p.id === this.state.filters.programId);
-    const options = this.state.programs.map(program => {
-      const active = this.state.filters.programId === program.id ? 'active' : '';
+    const startLabel = selectedProgram ? this.formatDate(selectedProgram.tarikh_mula || selectedProgram.startDate) : '';
+    const endLabel = selectedProgram ? this.formatDate(selectedProgram.tarikh_tamat || selectedProgram.endDate) : '';
+
+    container.innerHTML = `
+      <div class="program-selection-card">
+        <div class="selection-details">
+          <div class="selection-label">${selectedProgram ? 'Program dipilih' : 'Tiada program dipilih'}</div>
+          <div class="selection-value">
+            ${selectedProgram ? this.escapeHtml(selectedProgram.nama_program || selectedProgram.nama || 'Program') : 'Sila pilih program untuk mula menapis kehadiran.'}
+          </div>
+          ${selectedProgram ? `<div class="selection-meta">${startLabel}${endLabel ? ' - ' + endLabel : ''}</div>` : ''}
+        </div>
+        <button class="btn btn-secondary" data-action="open-program-selector">
+          ${selectedProgram ? 'Tukar Program' : 'Pilih Program'}
+        </button>
+      </div>
+    `;
+
+    const selectorBtn = container.querySelector('[data-action="open-program-selector"]');
+    if (selectorBtn) {
+      selectorBtn.addEventListener('click', () => this.openProgramSelectionModal());
+    }
+  }
+
+  openProgramSelectionModal() {
+    if (!this.state.programs || this.state.programs.length === 0) {
+      return;
+    }
+
+    this.closeProgramSelectionModal();
+
+    const selectedId = this.state.filters.programId;
+    const items = this.state.programs.map(program => {
+      const programId = program.id;
+      const isActive = selectedId === programId ? 'active' : '';
       const start = this.formatDate(program.tarikh_mula || program.startDate);
       const end = this.formatDate(program.tarikh_tamat || program.endDate);
+      const label = program.nama_program || program.nama || 'Program';
+      const searchText = `${label} ${start} ${end}`.toLowerCase();
       return `
-        <button class="program-option ${active}" data-program-id="${program.id}">
-          <div class="option-title">${this.escapeHtml(program.nama_program || program.nama || 'Program')}</div>
-          <div class="option-meta">${start}${end ? ' - ' + end : ''}</div>
+        <button class="program-selection-item ${isActive}" data-program-option="${programId}" data-program-search="${this.escapeHtml(searchText)}">
+          <div class="item-title">${this.escapeHtml(label)}</div>
+          <div class="item-dates">${start}${end ? ' - ' + end : ''}</div>
         </button>
       `;
     }).join('');
 
-    container.innerHTML = `
-      <div class="program-dropdown">
-        <button class="program-dropdown-toggle" data-role="program-dropdown-toggle">
+    const modal = document.createElement('div');
+    modal.id = 'program-selection-modal';
+    modal.className = 'program-selection-modal';
+    modal.innerHTML = `
+      <div class="program-selection-dialog">
+        <div class="program-selection-header">
           <div>
-            <div class="toggle-label">${selectedProgram ? 'Program dipilih' : 'Pilih program'}</div>
-            <div class="toggle-value">${selectedProgram ? this.escapeHtml(selectedProgram.nama_program || selectedProgram.nama) : 'Tiada pilihan'}</div>
+            <h3>Pilih Program</h3>
+            <p>Senarai penuh program dengan tarikh bermula dan tamat.</p>
           </div>
-          <span class="toggle-icon">⌄</span>
-        </button>
-        <div class="program-dropdown-menu" data-role="program-dropdown-menu">${options}</div>
+          <button type="button" class="close-modal-btn" data-action="close-program-selector">&times;</button>
+        </div>
+        <div class="program-selection-body">
+          <input type="text" class="program-selection-search" placeholder="Cari nama program..." data-role="program-selection-search" />
+          <div class="program-selection-list" data-role="program-selection-list">${items}</div>
+        </div>
       </div>
     `;
 
-    const dropdownToggle = container.querySelector('[data-role="program-dropdown-toggle"]');
-    const dropdownMenu = container.querySelector('[data-role="program-dropdown-menu"]');
+    document.body.appendChild(modal);
 
-    const closeMenu = (event) => {
-      if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
-        dropdownMenu.classList.remove('open');
-        document.removeEventListener('click', closeMenu);
-      }
-    };
-
-    dropdownToggle.addEventListener('click', (event) => {
-      event.stopPropagation();
-      dropdownMenu.classList.toggle('open');
-      if (dropdownMenu.classList.contains('open')) {
-        document.addEventListener('click', closeMenu);
-      } else {
-        document.removeEventListener('click', closeMenu);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        this.closeProgramSelectionModal();
       }
     });
 
-    dropdownMenu.querySelectorAll('.program-option').forEach(btn => {
+    modal.querySelectorAll('[data-action="close-program-selector"]').forEach(btn => {
+      btn.addEventListener('click', () => this.closeProgramSelectionModal());
+    });
+
+    modal.querySelectorAll('[data-program-option]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const programId = btn.getAttribute('data-program-id');
+        const programId = btn.getAttribute('data-program-option');
         this.state.filters.programId = programId;
-        dropdownMenu.classList.remove('open');
-        document.removeEventListener('click', closeMenu);
         this.renderAttendanceProgramList();
+        this.closeProgramSelectionModal();
         await this.loadAttendanceData(true);
       });
     });
+
+    const searchInput = modal.querySelector('[data-role="program-selection-search"]');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.trim().toLowerCase();
+        modal.querySelectorAll('[data-program-search]').forEach(item => {
+          const text = item.getAttribute('data-program-search') || '';
+          item.style.display = !term || text.includes(term) ? '' : 'none';
+        });
+      });
+    }
+  }
+
+  closeProgramSelectionModal() {
+    const modal = document.getElementById('program-selection-modal');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
+  openReportProgramSelectionModal(programs = []) {
+    if (!programs || programs.length === 0) {
+      return;
+    }
+
+    this.closeReportProgramSelectionModal();
+
+    const resolveProgramId = (program) => program?.id || program?.programId || program?.name || program?.nama_program || program?.nama || '';
+    const selectedId = this.state.reportSelection;
+
+    const options = programs.map(program => {
+      const programId = resolveProgramId(program);
+      const active = programId === selectedId ? 'active' : '';
+      const name = program.name || program.nama_program || program.nama || 'Program';
+      const dates = `${this.formatDate(program.startDate)} - ${this.formatDate(program.endDate)}`;
+      const searchText = `${name} ${dates}`.toLowerCase();
+      return `
+        <button class="program-selection-item ${active}" data-report-program-option="${programId}" data-report-program-search="${this.escapeHtml(searchText)}">
+          <div class="item-title">${this.escapeHtml(name)}</div>
+          <div class="item-dates">${this.escapeHtml(dates)}</div>
+        </button>
+      `;
+    }).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'report-program-selection-modal';
+    modal.className = 'program-selection-modal';
+    modal.innerHTML = `
+      <div class="program-selection-dialog">
+        <div class="program-selection-header">
+          <div>
+            <h3>Pilih Program Laporan</h3>
+            <p>Pilih program untuk lihat statistik kehadiran terperinci.</p>
+          </div>
+          <button type="button" class="close-modal-btn" data-action="close-report-program-selector">&times;</button>
+        </div>
+        <div class="program-selection-body">
+          <input type="text" class="program-selection-search" placeholder="Cari program..." data-role="report-program-search" />
+          <div class="program-selection-list" data-role="report-program-list">${options}</div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close = () => this.closeReportProgramSelectionModal();
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        close();
+      }
+    });
+
+    modal.querySelectorAll('[data-action="close-report-program-selector"]').forEach(btn => {
+      btn.addEventListener('click', close);
+    });
+
+    modal.querySelectorAll('[data-report-program-option]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const programId = btn.getAttribute('data-report-program-option');
+        this.state.reportSelection = programId;
+        close();
+        this.renderProgramParticipation(programs);
+      });
+    });
+
+    const searchInput = modal.querySelector('[data-role="report-program-search"]');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.trim().toLowerCase();
+        modal.querySelectorAll('[data-report-program-search]').forEach(item => {
+          const text = item.getAttribute('data-report-program-search') || '';
+          item.style.display = !term || text.includes(term) ? '' : 'none';
+        });
+      });
+    }
+  }
+
+  closeReportProgramSelectionModal() {
+    const modal = document.getElementById('report-program-selection-modal');
+    if (modal) {
+      modal.remove();
+    }
   }
 
   buildProgramRow(program) {
@@ -1137,7 +1230,7 @@ export class ProgramKehadiranNewest {
     const target = this.elements.attendanceTableBody;
     if (!target) return;
 
-    const { programId, date } = this.state.filters;
+    const { programId } = this.state.filters;
     if (!programId) {
       target.innerHTML = `
         <tr>
@@ -1154,7 +1247,7 @@ export class ProgramKehadiranNewest {
     `;
 
     try {
-      const records = await (await import('../../services/backend/AttendanceService.js')).listAttendanceByProgram(programId, date || null);
+      const records = await (await import('../../services/backend/AttendanceService.js')).listAttendanceByProgram(programId, null);
       this.state.attendance = records || [];
       this.renderAttendanceTable();
 
@@ -1260,7 +1353,7 @@ export class ProgramKehadiranNewest {
     } catch (error) {
       console.error('ProgramKehadiranNewest: gagal kemas kini kehadiran', error);
       this.showToast(error.message || 'Gagal mengemas kini status kehadiran.', 'error');
-      await this.loadAttendanceData(Boolean(this.state.filters.programId || this.state.filters.date));
+      await this.loadAttendanceData(Boolean(this.state.filters.programId));
     }
   }
 
@@ -1269,7 +1362,7 @@ export class ProgramKehadiranNewest {
       const { updateAttendanceCatatan } = await import('../../services/backend/AttendanceService.js');
       await updateAttendanceCatatan(attendanceId, notes);
       this.showToast('Catatan kehadiran dikemas kini.', 'success');
-      await this.loadAttendanceData(Boolean(this.state.filters.programId || this.state.filters.date));
+      await this.loadAttendanceData(Boolean(this.state.filters.programId));
     } catch (error) {
       console.error('ProgramKehadiranNewest: gagal kemas kini catatan', error);
       this.showToast(error.message || 'Gagal mengemas kini catatan.', 'error');
@@ -1424,17 +1517,6 @@ export class ProgramKehadiranNewest {
     }
 
     const selectedProgram = programs.find(p => resolveProgramId(p) === this.state.reportSelection) || programs[0];
-    const dropdownOptions = programs.map(program => {
-      const programId = resolveProgramId(program);
-      const active = programId === this.state.reportSelection ? 'active' : '';
-      return `
-        <button class="program-option ${active}" data-program-report-id="${programId}">
-          <div class="option-title">${program.name || '-'}</div>
-          <div class="option-meta">${this.formatDate(program.startDate)} - ${this.formatDate(program.endDate)}</div>
-        </button>
-      `;
-    }).join('');
-
     const selectedStats = `
       <div class="program-item">
         <div class="program-name">${selectedProgram.name || '-'}</div>
@@ -1453,48 +1535,23 @@ export class ProgramKehadiranNewest {
     `;
 
     this.elements.programParticipation.innerHTML = `
-      <div class="program-dropdown">
-        <button class="program-dropdown-toggle" data-role="program-report-toggle">
-          <div>
-            <div class="toggle-label">Program dipilih</div>
-            <div class="toggle-value">${selectedProgram.name || '-'}</div>
-          </div>
-          <span class="toggle-icon">⌄</span>
+      <div class="program-selection-card report-selection">
+        <div class="selection-details">
+          <div class="selection-label">Program dipilih</div>
+          <div class="selection-value">${selectedProgram.name || '-'}</div>
+          <div class="selection-meta">${this.formatDate(selectedProgram.startDate)} - ${this.formatDate(selectedProgram.endDate)}</div>
+        </div>
+        <button class="btn btn-secondary" data-action="open-report-program-selector">
+          Tukar Program
         </button>
-        <div class="program-dropdown-menu" data-role="program-report-menu">${dropdownOptions}</div>
       </div>
       <div class="program-participation-grid">${selectedStats}</div>
     `;
 
-    const toggle = this.elements.programParticipation.querySelector('[data-role="program-report-toggle"]');
-    const menu = this.elements.programParticipation.querySelector('[data-role="program-report-menu"]');
-
-    const closeMenu = (event) => {
-      if (!menu.contains(event.target) && !toggle.contains(event.target)) {
-        menu.classList.remove('open');
-        document.removeEventListener('click', closeMenu);
-      }
-    };
-
-    toggle.addEventListener('click', (event) => {
-      event.stopPropagation();
-      menu.classList.toggle('open');
-      if (menu.classList.contains('open')) {
-        document.addEventListener('click', closeMenu);
-      } else {
-        document.removeEventListener('click', closeMenu);
-      }
-    });
-
-    menu.querySelectorAll('.program-option').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const programId = btn.getAttribute('data-program-report-id');
-        this.state.reportSelection = programId;
-        menu.classList.remove('open');
-        document.removeEventListener('click', closeMenu);
-        this.renderProgramParticipation(programs);
-      });
-    });
+    const selectBtn = this.elements.programParticipation.querySelector('[data-action="open-report-program-selector"]');
+    if (selectBtn) {
+      selectBtn.addEventListener('click', () => this.openReportProgramSelectionModal(programs));
+    }
   }
 
   formatDate(value) {
@@ -1687,6 +1744,8 @@ style.textContent = `
     border: 1px solid var(--warna-sempadan);
     padding: clamp(18px, 2vw, 26px);
     box-shadow: 0 24px 45px rgba(15, 23, 42, 0.08);
+    position: relative;
+    overflow: visible;
   }
 
   .program-newest-wrapper .section-header {
@@ -1739,17 +1798,6 @@ style.textContent = `
     background: var(--warna-utama-muda);
   }
 
-  .program-newest-wrapper .filters-container {
-    background: #fdfcff;
-    border: 1px solid var(--warna-sempadan);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
   .program-newest-wrapper .filter-group {
     flex: 1 1 200px;
     display: flex;
@@ -1764,98 +1812,152 @@ style.textContent = `
     margin-bottom: 12px;
   }
 
-  .program-newest-wrapper .program-dropdown {
-    position: relative;
-    width: 100%;
+  .program-newest-wrapper .program-selection-card.report-selection {
+    margin-bottom: 16px;
   }
 
-  .program-newest-wrapper .program-dropdown-toggle {
-    width: 100%;
+  .program-newest-wrapper .program-selection-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 14px;
+    gap: 16px;
     border: 1px solid var(--warna-sempadan);
+    border-radius: 16px;
     background: #fff;
-    padding: 14px 18px;
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
-    font-weight: 600;
-    cursor: pointer;
+    padding: 16px 20px;
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
   }
 
-  .program-newest-wrapper .toggle-label {
+  .program-newest-wrapper .selection-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .program-newest-wrapper .selection-label {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--warna-teks-sekunder);
   }
 
-  .program-newest-wrapper .toggle-value {
-    font-size: 16px;
-    color: var(--warna-teks-utama);
-  }
-
-  .program-newest-wrapper .toggle-icon {
+  .program-newest-wrapper .selection-value {
     font-size: 18px;
-    color: var(--warna-teks-sekunder);
-  }
-
-  .program-newest-wrapper .program-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    width: 100%;
-    max-height: min(70vh, 600px);
-    min-height: 180px;
-    overflow-y: auto;
-    border: 1px solid var(--warna-sempadan);
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 24px 45px rgba(15, 23, 42, 0.14);
-    padding: 12px;
-    display: none;
-    z-index: 30;
-    overscroll-behavior: contain;
-  }
-
-  .program-newest-wrapper .program-dropdown-menu.open {
-    display: block;
-  }
-
-  .program-newest-wrapper .program-option {
-    width: 100%;
-    text-align: left;
-    border: 1px solid transparent;
-    background: #f9fafc;
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    transition: all 0.2s ease;
-  }
-
-  .program-newest-wrapper .program-option:last-child {
-    margin-bottom: 0;
-  }
-
-  .program-newest-wrapper .program-option:hover {
-    border-color: var(--warna-sempadan);
-    background: #fff;
-  }
-
-  .program-newest-wrapper .program-option.active {
-    border-color: var(--warna-utama);
-    background: var(--warna-utama-muda);
-    color: var(--warna-utama);
-  }
-
-  .program-newest-wrapper .option-title {
     font-weight: 600;
     color: var(--warna-teks-utama);
   }
 
-  .program-newest-wrapper .option-meta {
-    font-size: 12px;
+  .program-newest-wrapper .selection-meta {
+    font-size: 13px;
     color: var(--warna-teks-sekunder);
+  }
+
+  .program-selection-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 2000;
+  }
+
+  .program-selection-dialog {
+    background: #fff;
+    border-radius: 20px;
+    width: min(640px, 100%);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.3);
+    border: 1px solid var(--warna-sempadan);
+  }
+
+  .program-selection-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--warna-sempadan);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .program-selection-header h3 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  .program-selection-header p {
+    margin: 6px 0 0;
+    color: var(--warna-teks-sekunder);
+    font-size: 14px;
+  }
+
+  .program-selection-body {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .program-selection-search {
+    border: 1px solid var(--warna-sempadan);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .program-selection-list {
+    max-height: 55vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .program-selection-item {
+    width: 100%;
+    text-align: left;
+    border: 1px solid var(--warna-sempadan);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #f9fafc;
+    transition: all 0.2s ease;
+  }
+
+  .program-selection-item .item-title {
+    font-weight: 600;
+    color: var(--warna-teks-utama);
+  }
+
+  .program-selection-item .item-dates {
+    font-size: 13px;
+    color: var(--warna-teks-sekunder);
+  }
+
+  .program-selection-item:hover {
+    border-color: var(--warna-utama);
+    background: #fff;
+  }
+
+  .program-selection-item.active {
+    background: var(--warna-utama-muda);
+    border-color: var(--warna-utama);
+  }
+
+  .close-modal-btn {
+    border: none;
+    background: #f1f5f9;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--warna-teks-utama);
+  }
+
+  .close-modal-btn:hover {
+    background: #e2e8f0;
   }
 
   .program-newest-wrapper .attendance-program-card {
