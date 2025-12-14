@@ -39,7 +39,7 @@ export function createAdminSidebar(user) {
         </a>
         <a href="#" class="nav-item" data-section="user-management">
           <span class="nav-icon">👥</span>
-          User Management
+          Pengurusan Pengguna
         </a>
         
         <a href="#" class="nav-item" data-section="senarai-kir-new">
@@ -53,7 +53,7 @@ export function createAdminSidebar(user) {
         </a>
         <a href="#" class="nav-item" data-section="financial-tracking-newest">
             <span class="nav-icon">💰</span>
-            Financial Tracking 
+            Penjejakan Kewangan
         </a>
         <a href="#" class="nav-item" data-section="reports">
           <span class="nav-icon">📈</span>
@@ -61,11 +61,11 @@ export function createAdminSidebar(user) {
         </a>
         <a href="#" class="nav-item" data-section="settings">
           <span class="nav-icon">⚙️</span>
-          Settings
+          Tetapan 
         </a>
         <a href="#" class="nav-item logout-nav-item" id="logoutBtn">
           <span class="nav-icon">🚪</span>
-          Logout
+          Log Keluar
         </a>
       </nav>
     </aside>
@@ -2319,7 +2319,7 @@ export function createAdminMainContent() {
     <div id="senarai-kir-content" class="content-section">
       <div class="section-header">
         <h3 class="section-title">Senarai KIR</h3>
-        <p class="section-description">View and manage all KIR records</p>
+        <p class="section-description">Lihat dan urus semua rekod KIR</p>
       </div>
       
       <div class="table-container">
@@ -2327,11 +2327,11 @@ export function createAdminMainContent() {
           <thead>
             <tr>
               <th>KIR ID</th>
-              <th>Name</th>
-              <th>IC Number</th>
+              <th>Nama</th>
+              <th>Nombor IC</th>
               <th>Status</th>
-              <th>Created Date</th>
-              <th>Actions</th>
+              <th>Tarikh Dicipta</th>
+              <th>Tindakan</th>
             </tr>
           </thead>
           <tbody id="senariKirTableBody">
@@ -3250,7 +3250,7 @@ export function createAdminDashboard(user) {
       
       <main class="main-content">
         <div class="content-header">
-          <h1 class="content-title">Admin Dashboard</h1>
+          <h1 class="content-title">Emasa Smart Database</h1>
           <p class="content-subtitle">Selamat Datang, ${user.name} - Urus pengguna, KIR, dan operasi sistem</p>
         </div>
         
