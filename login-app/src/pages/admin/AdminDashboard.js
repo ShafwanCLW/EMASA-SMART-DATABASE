@@ -1376,22 +1376,22 @@ export function createAdminMainContent() {
     <div id="dashboard-content" class="content-section active">
       <section class="dashboard-hero-layer">
         <div class="hero-primary">
-          <span class="hero-eyebrow">Smart overview</span>
-          <h2 class="hero-title">Community command center</h2>
-          <p class="hero-copy">Monitor registrations, programs, and cashflow in tiers so data never feels cramped.</p>
+          
+          <h2 class="hero-title">Paparan Keseluruhan</h2>
+          <p class="hero-copy">Pantau pendaftaran, program, dan aliran tunai dalam lapisan supaya data tidak terasa sesak.</p>
           <div class="hero-quick-stats">
             <div class="stat-card hero-stat-card">
-              <div class="stat-label">Total Users</div>
+              <div class="stat-label">Jumlah Pengguna</div>
               <div class="stat-value" id="dashboard-total-users">-</div>
-              <div class="stat-helper-text">Registered accounts</div>
+              <div class="stat-helper-text">Akaun berdaftar</div>
             </div>
             <div class="stat-card hero-stat-card">
-              <div class="stat-label">Total Programs</div>
+              <div class="stat-label">Jumlah Program</div>
               <div class="stat-value" id="dashboard-total-programs">-</div>
-              <div class="stat-helper-text">All scheduled programs</div>
+              <div class="stat-helper-text">Semua program yang dijadualkan</div>
             </div>
             <div class="stat-card hero-stat-card">
-              <div class="stat-label">Household Records</div>
+              <div class="stat-label">Rekod Isi Rumah</div>
               <div class="stat-value" id="dashboard-total-household-records">-</div>
               <div class="stat-helper-text">KIR + PKIR + AIR</div>
             </div>
@@ -1399,16 +1399,16 @@ export function createAdminMainContent() {
         </div>
         <div class="hero-insight-card">
           <div class="hero-insight-header">
-            <span>Account Balance</span>
-            <span class="insight-chip">Income vs Expenses</span>
+            <span>Baki Akaun</span>
+            <span class="insight-chip">Pendapatan vs Perbelanjaan</span>
           </div>
           <p class="hero-balance" id="dashboard-current-balance">RM 0.00</p>
-          <p class="balance-helper">Updated automatically from the finance tracker</p>
+          <p class="balance-helper">Dikemas kini secara automatik dari penjejak kewangan</p>
           <div class="insight-divider"></div>
           <div class="next-program-snippet">
-            <div class="snippet-label">Next Program</div>
-            <div class="snippet-title" id="dashboard-upcoming-program-name">Loading...</div>
-            <div class="snippet-meta" id="dashboard-upcoming-program-date">Stay tuned</div>
+            <div class="snippet-label">Program Seterusnya</div>
+            <div class="snippet-title" id="dashboard-upcoming-program-name">Memuatkan...</div>
+            <div class="snippet-meta" id="dashboard-upcoming-program-date">Sila tunggu</div>
           </div>
         </div>
       </section>
@@ -1417,24 +1417,24 @@ export function createAdminMainContent() {
         <div class="layer-card households-card">
           <div class="layer-card-header">
             <div>
-              <span class="hero-eyebrow">Household breakdown</span>
-              <h4>Family coverage snapshot</h4>
+              <span class="hero-eyebrow">Isi Rumah</span>
+              <h4>Gambaran Keseluruhan Keluarga</h4>
             </div>
-            <span class="layer-chip">Live data</span>
+            <span class="layer-chip">Data Terkini</span>
           </div>
           <div class="layer-card-body">
             <div class="stat-card subtle-stat-card">
-              <div class="stat-label">Total KIR</div>
+              <div class="stat-label">Jumlah KIR</div>
               <div class="stat-value" id="dashboard-total-kir">-</div>
               <div class="stat-helper-text">Ketua Isi Rumah</div>
             </div>
             <div class="stat-card subtle-stat-card">
-              <div class="stat-label">Total PKIR</div>
+              <div class="stat-label">Jumlah PKIR</div>
               <div class="stat-value" id="dashboard-total-pkir">-</div>
               <div class="stat-helper-text">Pasangan Ketua Isi Rumah</div>
             </div>
             <div class="stat-card subtle-stat-card">
-              <div class="stat-label">Total AIR</div>
+              <div class="stat-label">Jumlah AIR</div>
               <div class="stat-value" id="dashboard-total-air">-</div>
               <div class="stat-helper-text">Ahli Isi Rumah</div>
             </div>
@@ -1446,10 +1446,10 @@ export function createAdminMainContent() {
         <div class="chart-card">
           <div class="chart-header">
             <div>
-              <div>Financial Trend</div>
-              <div class="chart-subtitle">Income vs. Expenses (last 6 months)</div>
+              <div>Graf Kewangan</div>
+              <div class="chart-subtitle">Pendapatan vs Perbelanjaan (6 bulan terakhir)</div>
             </div>
-            <span class="chart-period">Monthly</span>
+            <span class="chart-period">Bulanan</span>
           </div>
           <div class="chart-body">
             <canvas id="financial-trend-chart"></canvas>
@@ -1459,10 +1459,9 @@ export function createAdminMainContent() {
         <div class="chart-card">
           <div class="chart-header">
             <div>
-              <div>Program Status Overview</div>
-              <div class="chart-subtitle">Live snapshot of program lifecycle</div>
+              <div>Gambaran Status Program</div>
             </div>
-            <span class="chart-period">Real time</span>
+            <span class="chart-period">Data Terkini</span>
           </div>
           <div class="chart-body">
             <canvas id="program-status-chart"></canvas>
@@ -1474,10 +1473,10 @@ export function createAdminMainContent() {
     
     <div id="user-management-content" class="content-section">
       <div class="section-header">
-        <h3 class="section-title">User Management</h3>
+        <h3 class="section-title">Pengurusan Pengguna</h3>
         <button class="btn btn-primary" id="addUserBtn">
           <span class="btn-icon">➕</span>
-          Add User
+          Tambah Pengguna
         </button>
       </div>
       
@@ -3252,7 +3251,7 @@ export function createAdminDashboard(user) {
       <main class="main-content">
         <div class="content-header">
           <h1 class="content-title">Admin Dashboard</h1>
-          <p class="content-subtitle">Welcome, ${user.name} - Manage users, KIRs, and system operations</p>
+          <p class="content-subtitle">Selamat Datang, ${user.name} - Urus pengguna, KIR, dan operasi sistem</p>
         </div>
         
         ${mainContent}
@@ -5676,8 +5675,8 @@ async function loadDashboardStats() {
         updateStatValue('dashboard-upcoming-program-name', programName);
         updateStatValue('dashboard-upcoming-program-date', programDate);
       } else {
-        updateStatValue('dashboard-upcoming-program-name', 'No upcoming program');
-        updateStatValue('dashboard-upcoming-program-date', 'All scheduled programs are completed');
+        updateStatValue('dashboard-upcoming-program-name', 'Tiada Program Dijadualkan');
+        updateStatValue('dashboard-upcoming-program-date', 'Semua program yang dijadualkan telah selesai');
       }
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
@@ -6032,7 +6031,7 @@ async function renderProgramStatusChart(counts = {}) {
   const total = data.reduce((sum, value) => sum + value, 0);
   const hasData = total > 0;
   
-  setChartEmptyState('program-status', hasData, 'No program data recorded yet');
+  setChartEmptyState('program-status', hasData, 'Tiada Program Dijadualkan');
   
   if (!hasData) {
     if (programStatusChartInstance) {
