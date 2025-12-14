@@ -25,9 +25,9 @@ export class FinancialTrackingNewest {
         <header class="financial-hero">
           <div class="hero-text">
             <p class="hero-subtitle">Laporan Kewangan</p>
-            <h3 class="section-title">Financial Tracking (Newest)</h3>
+            <h3 class="section-title">Penjejakan Kewangan Terkini</h3>
             <p class="section-description">
-              Streamlined tools to manage income, expenses, and transaction insights independently.
+              Alat yang dipermudahkan untuk menguruskan pendapatan, perbelanjaan, dan wawasan transaksi secara berdikari.
             </p>
           </div>
           <div class="hero-actions">
@@ -35,7 +35,7 @@ export class FinancialTrackingNewest {
               <span>&#8635;</span> Refresh Data
             </button>
             <button class="btn btn-primary" data-view-target="transactions">
-              <span>&#128179;</span> View Transactions
+              <span>&#128179;</span> Lihat Transaksi
             </button>
           </div>
         </header>
@@ -50,7 +50,7 @@ export class FinancialTrackingNewest {
                 </div>
                 <span class="metric-icon">&#128176;</span>
               </div>
-              <p class="metric-subtext">Updated from database</p>
+              <p class="metric-subtext">Maklumat daripada database</p>
             </article>
             <article class="metric-card expense">
               <div class="metric-card-top">
@@ -60,7 +60,7 @@ export class FinancialTrackingNewest {
                 </div>
                 <span class="metric-icon">&#128184;</span>
               </div>
-              <p class="metric-subtext">Tracked expenses</p>
+              <p class="metric-subtext">Perbelanjaan yang dijejak</p>
             </article>
             <article class="metric-card balance">
               <div class="metric-card-top">
@@ -89,64 +89,40 @@ export class FinancialTrackingNewest {
               <div class="panel-header">
                 <div>
                   <p class="panel-eyebrow">Transactions</p>
-                  <h4>Recent Activity</h4>
+                  <h4>Aktiviti Terkini</h4>
                 </div>
-                <button class="btn btn-outline" data-view-target="transactions">Show All</button>
+                <button class="btn btn-outline" data-view-target="transactions">Lihat Semua</button>
               </div>
               <div class="recent-activity-list" data-role="recent-transactions">
-                <p class="empty-text">No financial transactions recorded.</p>
+                <p class="empty-text">Tiada transaksi kewangan direkodkan.</p>
               </div>
             </article>
 
-            <article class="financial-panel quick-actions-panel">
-              <div class="panel-header">
-                <div>
-                  <p class="panel-eyebrow">Actions</p>
-                  <h4>Quick Actions</h4>
-                </div>
-              </div>
-              <div class="quick-action-grid">
-                <button class="action-chip" data-view-target="income">
-                  <span>&#10133;</span> Money In
-                </button>
-                <button class="action-chip danger" data-view-target="expense">
-                  <span>&#10134;</span> Money Out
-                </button>
-                <button class="action-chip ghost" data-action="generate-income-report">
-                  <span>&#128202;</span> Income Report
-                </button>
-                <button class="action-chip ghost" data-action="generate-expense-report">
-                  <span>&#128200;</span> Expense Report
-                </button>
-                <button class="action-chip ghost" data-action="export">
-                  <span>&#128190;</span> Export Data
-                </button>
-              </div>
-            </article>
+            
 
             <article class="financial-panel snapshot-panel">
               <div class="panel-header">
                 <div>
                   <p class="panel-eyebrow">Snapshot</p>
-                  <h4>Financial Health</h4>
+                  <h4>Status Kewangan</h4>
                 </div>
               </div>
               <div class="snapshot-grid">
                 <div class="snapshot-item">
-                  <p>Total Income</p>
+                  <p>Jumlah Pendapatan</p>
                   <span id="ftn-newest-total-income-mini">RM 0.00</span>
                 </div>
                 <div class="snapshot-item">
-                  <p>Total Expenses</p>
+                  <p>Jumlah Perbelanjaan</p>
                   <span id="ftn-newest-total-expense-mini">RM 0.00</span>
                 </div>
                 <div class="snapshot-item">
-                  <p>Net Balance</p>
+                  <p>Baki Bersih</p>
                   <span id="ftn-newest-net-balance-mini">RM 0.00</span>
                 </div>
               </div>
               <div class="health-indicator" data-role="financial-health">
-                No financial data recorded yet.
+                Tiada data kewangan direkodkan lagi.
               </div>
             </article>
           </div>
@@ -775,8 +751,8 @@ export class FinancialTrackingNewest {
         totalIncome === 0 && totalExpense === 0
           ? 'No transactions recorded yet.'
           : balance >= 0
-            ? `Surplus of ${this.formatCurrency(balance)}`
-            : `Deficit of ${this.formatCurrency(Math.abs(balance))}`
+            ? `Baki sebanyak ${this.formatCurrency(balance)}`
+            : `Defisit sebanyak ${this.formatCurrency(Math.abs(balance))}`
     };
   }
 
@@ -931,8 +907,8 @@ export class FinancialTrackingNewest {
     }
     if (this.transactionLabelEl) {
       this.transactionLabelEl.textContent = count
-        ? `${count} transactions tracked`
-        : 'No transactions recorded.';
+        ? `${count} transaksi direkodkan`
+        : 'Tiada transaksi direkodkan.';
     }
   }
 
@@ -944,7 +920,7 @@ export class FinancialTrackingNewest {
 
     const recent = (this.state.transactions || []).slice(0, 4);
     if (!recent.length) {
-      container.innerHTML = '<p class="empty-text">No financial transactions recorded.</p>';
+      container.innerHTML = '<p class="empty-text">Tiada transaksi kewangan direkodkan.</p>';
       return;
     }
 

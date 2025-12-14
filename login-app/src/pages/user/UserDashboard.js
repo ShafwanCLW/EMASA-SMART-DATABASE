@@ -19,18 +19,11 @@ export function createUserSidebar(user) {
           <span class="nav-icon">📊</span>
           Dashboard
         </a>
-        <a href="#" class="nav-item" data-section="profile">
-          <span class="nav-icon">👤</span>
-          My Profile
-        </a>
-        <a href="#" class="nav-item" data-section="activity">
+
         <a href="#" class="nav-item" data-section="kir-profile"
-          <span class="nav-icon">dY"<</span>
+          <span class="nav-icon">🏠</span>
           My KIR Profile
-        </a>
-          <span class="nav-icon">📋</span>
-          My Activity
-        </a>
+        
         <a href="#" class="nav-item" data-section="settings">
           <span class="nav-icon">⚙️</span>
           Settings
