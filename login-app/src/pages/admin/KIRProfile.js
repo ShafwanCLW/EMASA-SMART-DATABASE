@@ -382,12 +382,21 @@ export class KIRProfile {
 
   // Create header with KIR info and actions
   createHeader() {
-    const completeness = this.calculateCompleteness();
     const statusChip = this.getStatusChip(this.kirData?.status_rekod);
     const initials = this.getInitials(this.kirData?.nama_penuh);
+    const lastUpdatedValue = this.kirData?.tarikh_kemas_kini ||
+      this.kirData?.updated_at ||
+      this.kirData?.tarikh_kemaskini ||
+      this.kirData?.updatedAt ||
+      this.kirData?.created_at;
+    const lastUpdatedLabel = this.formatDate(lastUpdatedValue, {
+      fallback: 'Belum direkod',
+      includeTime: true
+    });
+    const quickStats = this.renderQuickStats();
     const showBackButton = this.allowNavigation !== false && (this.mode === 'admin' || typeof this.customBackHandler === 'function');
     const backButtonHTML = showBackButton ? `
-          <button class="back-btn-modern" onclick="kirProfile.goBack()">
+          <button class="back-btn-modern" type="button" onclick="kirProfile.goBack()">
             <i class="fas fa-arrow-left"></i>
             <span>${this.mode === 'self-service' ? 'Kembali ke Dashboard' : 'Kembali ke Senarai KIR'}</span>
           </button>` : '';
@@ -402,7 +411,7 @@ export class KIRProfile {
           <div class="header-meta">
             <span class="last-updated">
               <i class="fas fa-clock"></i>
-              Dikemas kini: ${this.formatDate(this.kirData?.tarikh_kemas_kini)}
+              Dikemas kini: ${lastUpdatedLabel}
             </span>
           </div>
         </div>
@@ -423,53 +432,12 @@ export class KIRProfile {
               </div>
               
               <div class="profile-details-grid">
-                <div class="detail-card">
-                  <div class="detail-icon">
-                    <i class="fas fa-id-card"></i>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">No. KP</span>
-                    <span class="detail-value">${this.kirData?.no_kp || 'Tiada'}</span>
-                  </div>
-                </div>
-                
-                <div class="detail-card">
-                  <div class="detail-icon">
-                    <i class="fas fa-map-marker-alt"></i>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Negeri</span>
-                    <span class="detail-value">${this.kirData?.negeri || 'Tiada'}</span>
-                  </div>
-                </div>
-                
-                <div class="detail-card">
-                  <div class="detail-icon">
-                    <i class="fas fa-phone"></i>
-                  </div>
-                  <div class="detail-content">
-                    <span class="detail-label">Telefon</span>
-                    <span class="detail-value">${this.kirData?.telefon_utama || 'Tiada'}</span>
-                  </div>
-                </div>
+                ${this.createDetailCard('fas fa-id-card', 'No. KP', this.formatNoKP(this.kirData?.no_kp))}
+                ${this.createDetailCard('fas fa-map-marker-alt', 'Negeri', this.kirData?.negeri || 'Tiada')}
+                ${this.createDetailCard('fas fa-phone', 'Telefon', this.kirData?.telefon_utama || this.kirData?.telefon || 'Tiada')}
               </div>
-              
-              <div class="completion-section">
-                <div class="completion-header">
-                  <span class="completion-label">
-                    <i class="fas fa-chart-pie"></i>
-                    Kelengkapan Profil
-                  </span>
-                  <span class="completion-percentage">${completeness}%</span>
-                </div>
-                <div class="progress-bar-modern">
-                  <div class="progress-fill-modern" style="width: ${completeness}%"></div>
-                  <div class="progress-glow" style="width: ${completeness}%"></div>
-                </div>
-                <div class="completion-description">
-                  ${this.getCompletenessDescription(completeness)}
-                </div>
-              </div>
+
+              ${quickStats}
             </div>
           </div>
           
@@ -491,7 +459,7 @@ export class KIRProfile {
     
     if (currentStatus === 'Draf' || currentStatus === 'Dihantar') {
       actions.push(`
-        <button class="btn-modern btn-primary-modern" onclick="kirProfile.updateStatus('Dihantar')">
+        <button class="btn-modern btn-primary-modern" type="button" onclick="kirProfile.updateStatus('Dihantar')">
           <i class="fas fa-paper-plane"></i>
           <span>Hantar</span>
         </button>
@@ -500,7 +468,7 @@ export class KIRProfile {
     
     if (currentStatus === 'Dihantar') {
       actions.push(`
-        <button class="btn-modern btn-success-modern" onclick="kirProfile.updateStatus('Disahkan')">
+        <button class="btn-modern btn-success-modern" type="button" onclick="kirProfile.updateStatus('Disahkan')">
           <i class="fas fa-check-circle"></i>
           <span>Sahkan</span>
         </button>
@@ -509,20 +477,12 @@ export class KIRProfile {
     
     if (currentStatus !== 'Tidak Aktif') {
       actions.push(`
-        <button class="btn-modern btn-danger-modern" onclick="kirProfile.updateStatus('Tidak Aktif')">
+        <button class="btn-modern btn-danger-modern" type="button" onclick="kirProfile.updateStatus('Tidak Aktif')">
           <i class="fas fa-ban"></i>
           <span>Tidak Aktif</span>
         </button>
       `);
     }
-    
-    // Add edit button
-    actions.unshift(`
-      <button class="btn-modern btn-outline-modern" onclick="kirProfile.enableEditMode()">
-        <i class="fas fa-edit"></i>
-        <span>Edit Profil</span>
-      </button>
-    `);
     
     return actions.join('');
   }
@@ -1870,6 +1830,66 @@ export class KIRProfile {
     return `<span class="status-chip-modern ${statusClass}">${status || 'Tidak Diketahui'}</span>`;
   }
 
+  createDetailCard(icon, label, value) {
+    const displayValue = value === null || value === undefined || value === '' ? 'Tiada' : value;
+    return `
+      <div class="detail-card">
+        <div class="detail-content">
+          <span class="detail-label">${label}</span>
+          <span class="detail-value">${displayValue}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  renderQuickStats() {
+    const stats = this.getHeroInsightData();
+    if (!stats.length) return '';
+    
+    return `
+      <div class="hero-quick-insights">
+        ${stats.map(stat => `
+      <div class="hero-insight-pill">
+        <div class="pill-body">
+          <span class="pill-label">${stat.label}</span>
+          <span class="pill-value">${stat.value}</span>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+`;
+  }
+
+  getHeroInsightData() {
+    const maritalStatus =
+      this.relatedData?.kekeluargaan?.status_perkahwinan ||
+      this.relatedData?.kekeluargaan?.status ||
+      this.kirData?.status_perkahwinan ||
+      'Tidak diketahui';
+    const householdCount = Array.isArray(this.airData) ? this.airData.length : 0;
+    const pkirStatus = this.pkirData ? 'Berdaftar' : 'Belum Ada';
+    
+    return [
+      { label: 'Umur', value: this.getAgeDisplay(), icon: 'fas fa-user-clock' },
+      { label: 'Status Perkahwinan', value: maritalStatus, icon: 'fas fa-ring' },
+      { label: 'Ahli Isi Rumah', value: `${householdCount} orang`, icon: 'fas fa-users' },
+      { label: 'PKIR', value: pkirStatus, icon: 'fas fa-heart' }
+    ].filter(stat => stat.value && stat.value !== 'Tidak diketahui');
+  }
+
+  getAgeDisplay() {
+    if (this.kirData?.umur) {
+      return `${this.kirData.umur} tahun`;
+    }
+    
+    const icInfo = deriveBirthInfoFromIC(this.kirData?.no_kp || '');
+    if (icInfo?.age) {
+      return `${icInfo.age} tahun (anggaran)`;
+    }
+    
+    return 'Tidak diketahui';
+  }
+
   // Get initials from full name
   getInitials(name) {
     if (!name) return 'N/A';
@@ -1877,6 +1897,15 @@ export class KIRProfile {
       .map(word => word.charAt(0).toUpperCase())
       .slice(0, 2)
       .join('');
+  }
+
+  formatNoKP(noKp) {
+    if (!noKp) return 'Tiada';
+    const digits = `${noKp}`.replace(/\D/g, '');
+    if (digits.length === 12) {
+      return `${digits.slice(0, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
+    }
+    return noKp;
   }
 
   // Get status class for avatar indicator
@@ -1890,32 +1919,44 @@ export class KIRProfile {
     return statusClasses[status] || 'status-unknown';
   }
 
-  // Get completion description
-  getCompletenessDescription(percentage) {
-    if (percentage >= 90) {
-      return '<span class="completion-excellent"><i class="fas fa-star"></i> Profil hampir lengkap</span>';
-    } else if (percentage >= 70) {
-      return '<span class="completion-good"><i class="fas fa-thumbs-up"></i> Profil dalam keadaan baik</span>';
-    } else if (percentage >= 50) {
-      return '<span class="completion-fair"><i class="fas fa-exclamation-triangle"></i> Profil perlu dilengkapkan</span>';
-    } else {
-      return '<span class="completion-poor"><i class="fas fa-times-circle"></i> Profil tidak lengkap</span>';
-    }
-  }
-
-  formatDate(dateString) {
-    if (!dateString) return 'Tiada';
+  formatDate(value, options = {}) {
+    const { fallback = 'Tiada', includeTime = false } = options;
+    if (!value) return fallback;
+    
+    let dateValue = null;
     
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ms-MY', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      if (value && typeof value.toDate === 'function') {
+        dateValue = value.toDate();
+      } else if (value?.seconds) {
+        dateValue = new Date(value.seconds * 1000);
+      } else if (value instanceof Date) {
+        dateValue = value;
+      } else if (typeof value === 'number') {
+        dateValue = new Date(value);
+      } else if (typeof value === 'string') {
+        dateValue = new Date(value);
+      }
     } catch (error) {
-      return 'Tarikh tidak sah';
+      return fallback;
     }
+    
+    if (!dateValue || Number.isNaN(dateValue.getTime())) {
+      return fallback;
+    }
+    
+    const formatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    if (includeTime) {
+      formatOptions.hour = '2-digit';
+      formatOptions.minute = '2-digit';
+    }
+    
+    return dateValue.toLocaleDateString('ms-MY', formatOptions);
   }
 
   getDateInputValue(value) {
@@ -1939,31 +1980,6 @@ export class KIRProfile {
     }
 
     return dateValue.toISOString().slice(0, 10);
-  }
-
-  // Calculate completeness percentage
-  calculateCompleteness() {
-    const requiredFields = {
-      // Maklumat Asas
-      'nama_penuh': this.kirData?.nama_penuh,
-      'no_kp': this.kirData?.no_kp,
-      'telefon_utama': this.kirData?.telefon_utama,
-      'alamat': this.kirData?.alamat,
-      // KAFA
-      'tahap_iman': this.relatedData?.kafa?.tahap_iman,
-      'tahap_islam': this.relatedData?.kafa?.tahap_islam,
-      // Pekerjaan
-      'status': this.relatedData?.pekerjaan?.status,
-      // Kekeluargaan
-      'status_perkahwinan': this.relatedData?.keluarga?.status_perkahwinan
-    };
-    
-    const totalFields = Object.keys(requiredFields).length;
-    const completedFields = Object.values(requiredFields).filter(value => 
-      value !== null && value !== undefined && value !== ''
-    ).length;
-    
-    return Math.round((completedFields / totalFields) * 100);
   }
 
   // Event handlers and utility methods
@@ -2358,6 +2374,24 @@ export class KIRProfile {
         : 'Ralat mengemas kini status. Sila cuba lagi.';
       this.showToast(message, 'error');
     }
+  }
+
+  async enableEditMode() {
+    if (this.currentTab !== 'maklumat-asas') {
+      await this.switchTab('maklumat-asas');
+    }
+    
+    const focusEditableField = () => {
+      const editableSelector = '.tab-pane.active input:not([type=\"hidden\"]):not([disabled]):not([readonly]), .tab-pane.active select:not([disabled]), .tab-pane.active textarea:not([disabled])';
+      const firstEditable = document.querySelector(editableSelector);
+      if (firstEditable) {
+        firstEditable.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstEditable.focus();
+      }
+    };
+    
+    setTimeout(focusEditableField, 150);
+    this.showToast('Mod edit dibuka. Sila kemas kini maklumat dan klik Simpan pada tab berkaitan.', 'info');
   }
 
   // AIR Form Methods (for drawer form)
