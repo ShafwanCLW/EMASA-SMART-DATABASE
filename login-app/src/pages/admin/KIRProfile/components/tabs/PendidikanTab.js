@@ -88,7 +88,7 @@ export class PendidikanTab extends BaseTab {
       }
 
       // Save via KIRService
-      await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, formData);
+      await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'pendidikan', formData);
       
       // Update local data
       if (!this.kirProfile.relatedData) {

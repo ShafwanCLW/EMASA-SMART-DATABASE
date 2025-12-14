@@ -33,11 +33,15 @@ const KIR_SCHEMA = {
   
   // Family
   status_perkahwinan: 'string',
+  bilangan_isteri: 'number',
   bilangan_anak: 'number',
+  bilangan_adik_beradik: 'number',
   tarikh_nikah: 'timestamp',
   tarikh_cerai: 'timestamp',
   ayah_nama: 'string',
   ibu_nama: 'string',
+  status_ayah: 'string',
+  status_ibu: 'string',
   
   // Official numbers
   no_kwsp: 'string',
