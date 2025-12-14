@@ -374,13 +374,14 @@ export class FinancialTrackingNewest {
             <div class="table-container">
               <table class="data-table">
                 <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Amount (RM)</th>
-                  </tr>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount (RM)</th>
+                  <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody id="ftn-newest-transaction-body">
                   <tr>
@@ -913,10 +914,14 @@ export class FinancialTrackingNewest {
             <td>${item.category}</td>
             <td>${item.description}</td>
             <td>${this.formatCurrency(item.amount)}</td>
+            <td class="transaction-actions">
+              <button class="btn btn-danger" data-action="delete-transaction" data-transaction-id="${item.id}" data-transaction-type="${item.type}">Delete</button>
+            </td>
           </tr>
         `;
       })
       .join('');
+    this.bindTransactionRowActions();
   }
 
   updateTransactionSummary() {
@@ -962,6 +967,43 @@ export class FinancialTrackingNewest {
         `;
       })
       .join('');
+  }
+
+  bindTransactionRowActions() {
+    this.root.querySelectorAll('[data-action="delete-transaction"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-transaction-id');
+        const type = btn.getAttribute('data-transaction-type');
+        this.handleDeleteTransaction(id, type);
+      });
+    });
+  }
+
+  async handleDeleteTransaction(id, type) {
+    if (!id || !type) return;
+    const confirmed = window.confirm('Delete this transaction? This action cannot be undone.');
+    if (!confirmed) return;
+
+    try {
+      await this.deleteTransaction(id, type);
+      alert('Transaction deleted.');
+      await this.refreshSummary();
+      await this.loadTransactions(true);
+    } catch (error) {
+      console.error('FinancialTrackingNewest: delete transaction failed', error);
+      alert(error.message || 'Failed to delete transaction.');
+    }
+  }
+
+  async deleteTransaction(id, type) {
+    const { doc, deleteDoc } = await import('firebase/firestore');
+    const { db } = await import('../../services/database/firebase.js');
+    const { COLLECTIONS } = await import('../../services/database/collections.js');
+
+    const collectionName =
+      type === 'income' ? COLLECTIONS.FINANCIAL_INCOME : COLLECTIONS.FINANCIAL_EXPENSES;
+
+    await deleteDoc(doc(db, collectionName, id));
   }
 
   escapeHtml(text = '') {

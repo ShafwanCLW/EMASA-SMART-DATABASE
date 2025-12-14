@@ -2764,6 +2764,16 @@ body.kir-profile-active #app {
   color: #312e81;
 }
 
+.financial-newest .btn.btn-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.financial-newest .btn.btn-danger:hover {
+  background: #fecaca;
+  color: #991b1b;
+}
+
 .financial-newest .btn.btn-ghost {
   background: #f5f3ff;
   border: 1px solid #e4e4ff;
@@ -3148,6 +3158,16 @@ body.kir-profile-active #app {
   border: 1px solid #e2e8f0;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
   overflow: hidden;
+}
+
+.financial-layer .transaction-actions {
+  text-align: right;
+}
+
+.financial-layer .transaction-actions .btn {
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
 }
 
 .financial-newest .status-badge.positive {

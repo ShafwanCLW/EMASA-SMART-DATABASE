@@ -87,16 +87,14 @@ export class ProgramKehadiranNewest {
 
           <div class="program-action-bar">
             <div class="program-action-buttons">
-              <button class="btn btn-secondary" data-action="create-test-program">
-                <span>&#10133;</span> Program Ujian
-              </button>
+              
               <button class="btn btn-primary" data-action="add-program">
                 <span>&#9998;</span> Tambah Program
               </button>
             </div>
             <div class="program-refresh">
               <button class="btn btn-outline" data-action="refresh-programs">
-                Segar Semula
+                Refresh
               </button>
             </div>
           </div>
@@ -352,9 +350,7 @@ export class ProgramKehadiranNewest {
       if (!programs || programs.length === 0) {
         target.innerHTML = `
           <tr>
-            <td colspan="7" class="empty-text">
-              Tiada program ditemui. Gunakan butang "Program Ujian" untuk menambah contoh.
-            </td>
+            
           </tr>
         `;
         this.populateProgramFilter([]);
@@ -593,7 +589,7 @@ export class ProgramKehadiranNewest {
         <td>${endDate}</td>
         <td>${program.kategori || '-'}</td>
         <td>
-          <span class="status-badge ${status.classNama}">${status.label}</span>
+            <span class="status-badge ${status.className}">${status.label}</span>
         </td>
         <td>
           <div class="program-row-actions">
@@ -666,7 +662,7 @@ export class ProgramKehadiranNewest {
 
     const modal = document.createElement('div');
     modal.id = 'program-newest-details-modal';
-    modal.classNama = 'program-newest-modal visible';
+    modal.className = 'program-newest-modal visible';
     modal.innerHTML = `
       <div class="modal-panel program-details-panel">
         <div class="modal-header">
@@ -684,7 +680,7 @@ export class ProgramKehadiranNewest {
           </div>
           <div class="detail-item">
             <span class="detail-label">Status</span>
-            <span class="status-badge ${status.classNama}">${status.label}</span>
+            <span class="status-badge ${status.className}">${status.label}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Lokasi</span>
@@ -735,7 +731,7 @@ export class ProgramKehadiranNewest {
 
     const modal = document.createElement('div');
     modal.id = 'program-newest-qr-modal';
-    modal.classNama = 'program-newest-modal visible';
+    modal.className = 'program-newest-modal visible';
     modal.innerHTML = `
       <div class="modal-panel program-details-panel">
         <div class="modal-header">
@@ -793,7 +789,7 @@ export class ProgramKehadiranNewest {
 
     const modal = document.createElement("div");
     modal.id = "program-newest-create-modal";
-    modal.classNama = "program-newest-modal";
+    modal.className = "program-newest-modal";
     modal.innerHTML = `
       <div class="modal-panel">
         <div class="modal-header">
@@ -1021,7 +1017,7 @@ export class ProgramKehadiranNewest {
 
     const modal = document.createElement("div");
     modal.id = "program-newest-edit-modal";
-    modal.classNama = "program-newest-modal";
+    modal.className = "program-newest-modal";
     modal.innerHTML = `
       <div class="modal-panel">
         <div class="modal-header">
@@ -1590,33 +1586,33 @@ export class ProgramKehadiranNewest {
     const endDate = normalizeDate(end);
 
     let label = 'Upcoming';
-    let classNama = 'upcoming';
+    let className = 'upcoming';
 
     if (status === 'active' || status === 'ongoing') {
       label = 'Active';
-      classNama = 'active';
+      className = 'active';
     } else if (status === 'completed') {
       label = 'Completed';
-      classNama = 'completed';
+      className = 'completed';
     } else if (status === 'cancelled') {
       label = 'Cancelled';
-      classNama = 'cancelled';
+      className = 'cancelled';
     } else if (startDate && endDate) {
       if (now > endDate) {
         label = 'Completed';
-        classNama = 'completed';
+        className = 'completed';
       } else if (now >= startDate && now <= endDate) {
         label = 'Active';
-        classNama = 'active';
+        className = 'active';
       }
     }
 
-    return { label, classNama };
+    return { label, className };
   }
 
   showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.classNama = `program-newest-toast ${type}`;
+    toast.className = `program-newest-toast ${type}`;
     toast.textContent = message;
 
     document.body.appendChild(toast);
@@ -1677,10 +1673,23 @@ export class ProgramKehadiranNewest {
     style.id = STYLE_ID;
     
 style.textContent = `
+  #program-kehadiran-newest-content.content-section {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: clamp(8px, 1vw, 16px);
+    padding-right: clamp(10px, 1.8vw, 24px);
+  }
+
+  #program-kehadiran-newest-content .program-newest-wrapper {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .program-newest-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 10px;
     padding: 0;
   }
 
@@ -2149,6 +2158,223 @@ style.textContent = `
     background: #f9fafc;
     border-radius: 12px;
     padding: 14px;
+  }
+
+  .program-newest-modal {
+    position: fixed;
+    inset: 0;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 3000;
+  }
+
+  .program-newest-modal.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .program-newest-modal .modal-panel {
+    width: min(720px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid var(--warna-sempadan);
+    box-shadow: 0 35px 60px rgba(15, 23, 42, 0.25);
+    padding: clamp(18px, 2vw, 26px);
+  }
+
+  .program-newest-modal .program-details-panel {
+    width: min(540px, 100%);
+  }
+
+  .program-newest-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .program-newest-modal .modal-header h3 {
+    margin: 0;
+    font-size: clamp(18px, 2vw, 22px);
+  }
+
+  .program-newest-modal .modal-close {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: none;
+    background: #f3f4ff;
+    color: var(--warna-teks-utama);
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .program-newest-modal .modal-close:hover {
+    background: #e4e6fb;
+  }
+
+  .program-newest-modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .program-newest-modal .form-group label {
+    font-weight: 600;
+    color: var(--warna-teks-utama);
+  }
+
+  .program-newest-modal .form-input {
+    border: 1px solid var(--warna-sempadan);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #fff;
+    font-size: 15px;
+  }
+
+  .program-newest-modal textarea.form-input {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .program-newest-modal .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .program-newest-modal .form-row .form-group {
+    flex: 1 1 220px;
+  }
+
+  .program-newest-modal .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .program-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .program-details-grid .detail-item {
+    background: #f9f7ff;
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+
+  .program-details-grid .detail-label {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--warna-teks-sekunder);
+  }
+
+  .program-details-grid .detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--warna-teks-utama);
+  }
+
+  .program-details-grid .detail-span {
+    grid-column: span 2;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-badge.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #15803d;
+  }
+
+  .status-badge.completed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #1d4ed8;
+  }
+
+  .status-badge.upcoming {
+    background: rgba(249, 115, 22, 0.15);
+    color: #c2410c;
+  }
+
+  .status-badge.cancelled {
+    background: rgba(248, 113, 113, 0.15);
+    color: #b91c1c;
+  }
+
+  .qr-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+
+  .qr-container img {
+    width: 260px;
+    height: 260px;
+    object-fit: contain;
+  }
+
+  .qr-link {
+    word-break: break-all;
+    font-size: 13px;
+    color: var(--warna-teks-sekunder);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .program-newest-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: #1e293b;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 3200;
+  }
+
+  .program-newest-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .program-newest-toast.success {
+    background: #16a34a;
+  }
+
+  .program-newest-toast.error {
+    background: #dc2626;
+  }
+
+  .program-newest-toast.info {
+    background: #2563eb;
   }
 `;
 

@@ -18,7 +18,7 @@ export class SenaraiKIR {
     createContent() {
         return `
             <div class="content-header">
-                <h2>Senarai KIR (New)</h2>
+                <h2>Senarai KIR</h2>
                 <p class="content-description">View and manage all KIR records</p>
             </div>
 

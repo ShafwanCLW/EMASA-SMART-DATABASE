@@ -41,25 +41,19 @@ export function createAdminSidebar(user) {
           <span class="nav-icon">👥</span>
           User Management
         </a>
-        <a href="#" class="nav-item" data-section="senarai-kir">
+        
+        <a href="#" class="nav-item" data-section="senarai-kir-new">
           <span class="nav-icon">📋</span>
           Senarai KIR
         </a>
-        <a href="#" class="nav-item" data-section="senarai-kir-new">
-          <span class="nav-icon">📋</span>
-          Senarai KIR (New)
-        </a>
-        <a href="#" class="nav-item" data-section="cipta-kir">
-          <span class="nav-icon">➕</span>
-          Cipta KIR
-        </a>
+       
         <a href="#" class="nav-item" data-section="program-kehadiran-newest">
           <span class="nav-icon">📅</span>
-          Program & Kehadiran (Newest)
+          Program & Kehadiran
         </a>
         <a href="#" class="nav-item" data-section="financial-tracking-newest">
             <span class="nav-icon">💰</span>
-            Financial Tracking (Newest)
+            Financial Tracking 
         </a>
         <a href="#" class="nav-item" data-section="reports">
           <span class="nav-icon">📈</span>
@@ -107,7 +101,7 @@ export function createAdminMainContent() {
     /* Primary Action Button Styles */
     .action-btn.primary-action {
       background-color: #6366f1;
-      color: black;
+      color: #fff;
       font-weight: bold;
       font-size: 1.1em;
       padding: 12px 20px;
@@ -481,6 +475,264 @@ export function createAdminMainContent() {
     .stats-grid .stat-card {
       min-width: auto;
       padding: 16px;
+    }
+
+    .dashboard-hero-layer {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+      align-items: stretch;
+    }
+
+    .hero-primary {
+      position: relative;
+      border-radius: 28px;
+      padding: clamp(20px, 3vw, 36px);
+      background: linear-gradient(135deg, #4c1d95, #6d28d9 60%, #a855f7);
+      color: #fff;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(76, 29, 149, 0.45);
+    }
+
+    .hero-primary::after {
+      content: '';
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 70%);
+      top: -120px;
+      right: -60px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      opacity: 0.7;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: clamp(1.8rem, 3.2vw, 2.75rem);
+      margin: 0;
+      z-index: 1;
+      position: relative;
+    }
+
+    .hero-copy {
+      margin: 12px 0 28px;
+      color: rgba(255, 255, 255, 0.86);
+      max-width: 620px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-stat-card {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 18px;
+      box-shadow: none;
+      backdrop-filter: blur(6px);
+      color: #fff;
+      text-align: left;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-stat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .hero-stat-card:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+    }
+
+    .hero-stat-card:hover::after {
+      opacity: 1;
+    }
+
+    .hero-stat-card .stat-value {
+      color: #fff;
+      font-size: 2rem;
+    }
+
+    .hero-stat-card .stat-label {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero-stat-card .stat-helper-text {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .hero-insight-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 24px 42px rgba(15, 23, 42, 0.12);
+      border: 1px solid #ede9fe;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-insight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.2), transparent 55%);
+      pointer-events: none;
+    }
+
+    .hero-insight-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-insight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .hero-balance {
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      margin: 0;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .balance-helper {
+      margin: 0;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .insight-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .insight-divider {
+      width: 100%;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 8px 0;
+    }
+
+    .next-program-snippet .snippet-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .snippet-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .snippet-meta {
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    .layered-stat-grid {
+      display: block;
+      margin-bottom: 30px;
+    }
+
+    .layer-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      border: 1px solid #ede9fe;
+    }
+
+    .layer-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .layer-card-header h4 {
+      margin: 4px 0 0;
+      font-size: 1.1rem;
+      color: #0f172a;
+    }
+
+    .layer-card-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .subtle-stat-card {
+      background: #f8f7ff;
+      border: 1px dashed #ddd6fe;
+      border-radius: 16px;
+      box-shadow: none;
+      text-align: left;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .subtle-stat-card:hover {
+      transform: translateY(-4px);
+      border-color: #c4b5fd;
+      background: #f1edff;
+      box-shadow: 0 18px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .layer-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .layer-card.compact,
+    .layer-chip-row,
+    .layer-copy {
+      display: none;
     }
     
     .dashboard-analytics {
@@ -1105,72 +1357,90 @@ export function createAdminMainContent() {
         font-size: 14px;
       }
 
-      .change-password-form button {
-        margin-top: 4px;
-        grid-column: 1 / -1;
-        justify-self: flex-start;
+    .change-password-form button {
+      margin-top: 4px;
+      grid-column: 1 / -1;
+      justify-self: flex-start;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-hero-layer,
+      .hero-primary,
+      .hero-insight-card,
+      .layer-card {
+        border-radius: 20px;
       }
+    }
     </style>
     
     <div id="dashboard-content" class="content-section active">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Total Users</h3>
-            <span class="stat-icon">&#128101;</span>
+      <section class="dashboard-hero-layer">
+        <div class="hero-primary">
+          <span class="hero-eyebrow">Smart overview</span>
+          <h2 class="hero-title">Community command center</h2>
+          <p class="hero-copy">Monitor registrations, programs, and cashflow in tiers so data never feels cramped.</p>
+          <div class="hero-quick-stats">
+            <div class="stat-card hero-stat-card">
+              <div class="stat-label">Total Users</div>
+              <div class="stat-value" id="dashboard-total-users">-</div>
+              <div class="stat-helper-text">Registered accounts</div>
+            </div>
+            <div class="stat-card hero-stat-card">
+              <div class="stat-label">Total Programs</div>
+              <div class="stat-value" id="dashboard-total-programs">-</div>
+              <div class="stat-helper-text">All scheduled programs</div>
+            </div>
+            <div class="stat-card hero-stat-card">
+              <div class="stat-label">Household Records</div>
+              <div class="stat-value" id="dashboard-total-household-records">-</div>
+              <div class="stat-helper-text">KIR + PKIR + AIR</div>
+            </div>
           </div>
-          <p class="stat-value" id="dashboard-total-users">-</p>
-          <p class="stat-helper-text">Registered accounts</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Total KIR</h3>
-            <span class="stat-icon">&#128221;</span>
+        <div class="hero-insight-card">
+          <div class="hero-insight-header">
+            <span>Account Balance</span>
+            <span class="insight-chip">Income vs Expenses</span>
           </div>
-          <p class="stat-value" id="dashboard-total-kir">-</p>
-          <p class="stat-helper-text">Ketua Isi Rumah</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Total PKIR</h3>
-            <span class="stat-icon">&#10084;</span>
+          <p class="hero-balance" id="dashboard-current-balance">RM 0.00</p>
+          <p class="balance-helper">Updated automatically from the finance tracker</p>
+          <div class="insight-divider"></div>
+          <div class="next-program-snippet">
+            <div class="snippet-label">Next Program</div>
+            <div class="snippet-title" id="dashboard-upcoming-program-name">Loading...</div>
+            <div class="snippet-meta" id="dashboard-upcoming-program-date">Stay tuned</div>
           </div>
-          <p class="stat-value" id="dashboard-total-pkir">-</p>
-          <p class="stat-helper-text">Pasangan Ketua Isi Rumah</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Total AIR</h3>
-            <span class="stat-icon">&#128106;</span>
+      </section>
+
+      <section class="layered-stat-grid">
+        <div class="layer-card households-card">
+          <div class="layer-card-header">
+            <div>
+              <span class="hero-eyebrow">Household breakdown</span>
+              <h4>Family coverage snapshot</h4>
+            </div>
+            <span class="layer-chip">Live data</span>
           </div>
-          <p class="stat-value" id="dashboard-total-air">-</p>
-          <p class="stat-helper-text">Ahli Isi Rumah</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Total Programs</h3>
-            <span class="stat-icon">&#128197;</span>
+          <div class="layer-card-body">
+            <div class="stat-card subtle-stat-card">
+              <div class="stat-label">Total KIR</div>
+              <div class="stat-value" id="dashboard-total-kir">-</div>
+              <div class="stat-helper-text">Ketua Isi Rumah</div>
+            </div>
+            <div class="stat-card subtle-stat-card">
+              <div class="stat-label">Total PKIR</div>
+              <div class="stat-value" id="dashboard-total-pkir">-</div>
+              <div class="stat-helper-text">Pasangan Ketua Isi Rumah</div>
+            </div>
+            <div class="stat-card subtle-stat-card">
+              <div class="stat-label">Total AIR</div>
+              <div class="stat-value" id="dashboard-total-air">-</div>
+              <div class="stat-helper-text">Ahli Isi Rumah</div>
+            </div>
           </div>
-          <p class="stat-value" id="dashboard-total-programs">-</p>
-          <p class="stat-helper-text">All scheduled programs</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Account Balance</h3>
-            <span class="stat-icon">&#128184;</span>
-          </div>
-          <p class="stat-value" id="dashboard-current-balance">RM 0.00</p>
-          <p class="stat-helper-text">Income - Expenses</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-title">Next Program</h3>
-            <span class="stat-icon">&#9201;</span>
-          </div>
-          <p class="stat-value" id="dashboard-upcoming-program-name">Loading...</p>
-          <p class="stat-helper-text" id="dashboard-upcoming-program-date">Stay tuned</p>
-        </div>
-      </div>
+      </section>
 
       <div class="dashboard-analytics">
         <div class="chart-card">
@@ -2354,7 +2624,7 @@ export function createAdminMainContent() {
             <div id="report-top-participants" class="report-list"></div>
           </section>
           
-          <section class="report-section-card" style="grid-column: span 2;">
+          <section class="report-section-card" style="grid-column: span 4 ;">
             <header>
               <h4>Financial Snapshot</h4>
               <span class="helper">Income, expenses, and recent activity</span>
@@ -2389,46 +2659,8 @@ export function createAdminMainContent() {
       </div>
       
       <div class="settings-grid">
-        <div class="setting-card">
-          <div class="setting-header">
-            <h4>Tetapan Umum</h4>
-            <span class="setting-icon">⚙️</span>
-          </div>
-          <div class="setting-options">
-            <label class="setting-option">
-              <input type="checkbox" checked>
-              <span>Aktifkan pemberitahuan e-mel</span>
-            </label>
-            <label class="setting-option">
-              <input type="checkbox">
-              <span>Sandaran automatik data</span>
-            </label>
-            <label class="setting-option">
-              <input type="checkbox" checked>
-              <span>Catat aktiviti audit</span>
-            </label>
-          </div>
-        </div>
-        <div class="setting-card">
-          <div class="setting-header">
-            <h4>Tetapan Keselamatan</h4>
-            <span class="setting-icon">🔒</span>
-          </div>
-          <div class="setting-options">
-            <label class="setting-option">
-              <input type="checkbox" checked>
-              <span>Wajibkan kata laluan kukuh</span>
-            </label>
-            <label class="setting-option">
-              <input type="checkbox" checked>
-              <span>Aktifkan pengesahan dua faktor</span>
-            </label>
-            <label class="setting-option">
-              <input type="checkbox">
-              <span>Log keluar automatik selepas tidak aktif</span>
-            </label>
-          </div>
-        </div>
+       
+        
         <div class="setting-card full-width">
           <div class="setting-header">
             <h4>Tukar Kata Laluan</h4>
@@ -2650,9 +2882,6 @@ export function createAdminMainContent() {
             <div style="width: 100%; height: 15px;"></div>
             
             <button class="action-btn" id="generate-income-report">
-              <span>📊</span>
-              Generate Income Report
-            </button>
             <button class="action-btn" id="generate-expense-report">
               <span>📈</span>
               Generate Expense Report
@@ -5433,6 +5662,7 @@ async function loadDashboardStats() {
       updateStatValue('dashboard-total-pkir', formatNumber(totalPKIR));
       updateStatValue('dashboard-total-air', formatNumber(totalAIR));
       updateStatValue('dashboard-total-programs', formatNumber(totalPrograms));
+      updateStatValue('dashboard-total-household-records', formatNumber(totalKIR + totalPKIR + totalAIR));
       updateStatValue('dashboard-current-balance', formatCurrency(financialTotals.currentBalance));
       await renderProgramStatusChart(statusCounts);
       
@@ -5523,6 +5753,7 @@ function resetDashboardStatsToFallback() {
   updateStatValue('dashboard-total-pkir', '-');
   updateStatValue('dashboard-total-air', '-');
   updateStatValue('dashboard-total-programs', '-');
+  updateStatValue('dashboard-total-household-records', '-');
   updateStatValue('dashboard-current-balance', 'RM 0.00');
   updateStatValue('dashboard-upcoming-program-name', 'Unable to load data');
   updateStatValue('dashboard-upcoming-program-date', 'Refresh the dashboard to try again');
