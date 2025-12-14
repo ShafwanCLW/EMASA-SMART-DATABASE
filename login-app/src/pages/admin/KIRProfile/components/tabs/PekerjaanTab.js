@@ -152,7 +152,7 @@ export class PekerjaanTab extends BaseTab {
       }
 
       // Save via KIRService
-      await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, formData);
+      await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'pekerjaan', formData);
       
       // Update local data
       if (!this.kirProfile.relatedData) {

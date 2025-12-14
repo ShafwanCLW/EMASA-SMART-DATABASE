@@ -863,7 +863,10 @@ export class KIRService {
         'kafa': COLLECTIONS.KIR_KAFA,
         'pendidikan': COLLECTIONS.KIR_PENDIDIKAN,
         'pekerjaan': COLLECTIONS.KIR_PEKERJAAN,
-        'kesihatan': COLLECTIONS.KIR_KESIHATAN
+        'kesihatan': COLLECTIONS.KIR_KESIHATAN,
+        'pendapatan': COLLECTIONS.KIR_PENDAPATAN,
+        'perbelanjaan': COLLECTIONS.KIR_PERBELANJAAN,
+        'bantuan_bulanan': COLLECTIONS.KIR_BANTUAN_BULANAN
         // Note: 'keluarga' data should be handled via PasanganService for spouse data
         // Basic family status fields should be stored in main KIR record
       };
@@ -885,8 +888,9 @@ export class KIRService {
       
       const updateData = {
         ...normalizedData,
+        env: getEnvironment(),
         kir_id: kirId,
-        updated_at: serverTimestamp()
+        tarikh_kemas_kini: serverTimestamp()
       };
       
       console.log(`Updating ${collectionKey} data (normalized):`, JSON.stringify(updateData, null, 2));
@@ -897,7 +901,7 @@ export class KIRService {
         await updateDoc(docRef, updateData);
       } else {
         // Create new document
-        updateData.created_at = serverTimestamp();
+        updateData.tarikh_cipta = serverTimestamp();
         await addDoc(collection(db, collectionName), updateData);
       }
       

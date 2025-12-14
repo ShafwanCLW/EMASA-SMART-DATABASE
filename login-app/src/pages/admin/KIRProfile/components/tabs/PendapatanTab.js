@@ -69,12 +69,6 @@ export class PendapatanTab extends BaseTab {
   }
 
   async save() {
-    // Validate form first
-    if (!this.validate()) {
-      this.showToast('Sila lengkapkan semua medan yang diperlukan', 'error');
-      return false;
-    }
-
     try {
       const formData = this.getFormData();
       
@@ -108,18 +102,6 @@ export class PendapatanTab extends BaseTab {
   }
 
   validate() {
-    const form = document.querySelector(`[data-tab="${this.tabId}"]`);
-    if (!form) return false;
-
-    // Basic validation - at least one income source should be provided
-    const utama = form.querySelector('[name="pendapatan_utama"]')?.value?.trim();
-    const jumlahUtama = form.querySelector('[name="jumlah_pendapatan_utama"]')?.value;
-    
-    if (!utama && !jumlahUtama) {
-      this.showToast('Sila masukkan sekurang-kurangnya satu sumber pendapatan', 'error');
-      return false;
-    }
-
     return true;
   }
 

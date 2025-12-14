@@ -90,12 +90,6 @@ export class PerbelanjaanTab extends BaseTab {
   }
 
   async save() {
-    // Validate form first
-    if (!this.validate()) {
-      this.showToast('Sila lengkapkan semua medan yang diperlukan', 'error');
-      return false;
-    }
-
     try {
       const formData = this.getFormData();
       const jenisKenderaan = formData.jenis_kenderaan || 'Tiada';
@@ -141,25 +135,6 @@ export class PerbelanjaanTab extends BaseTab {
   }
 
   validate() {
-    const form = document.querySelector(`[data-tab="${this.tabId}"]`);
-    if (!form) return false;
-
-    // Basic validation - at least one expense should be provided
-    const expenseFields = [
-      'utiliti_air', 'utiliti_elektrik', 'sewa_rumah', 'ansuran_kenderaan',
-      'makanan', 'sekolah_anak', 'rawatan_kesihatan', 'perbelanjaan_lain'
-    ];
-    
-    const hasAnyExpense = expenseFields.some(fieldName => {
-      const value = form.querySelector(`[name="${fieldName}"]`)?.value;
-      return value && parseFloat(value) > 0;
-    });
-    
-    if (!hasAnyExpense) {
-      this.showToast('Sila masukkan sekurang-kurangnya satu perbelanjaan', 'error');
-      return false;
-    }
-
     return true;
   }
 

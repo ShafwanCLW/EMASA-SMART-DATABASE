@@ -127,7 +127,7 @@ export class KAFATab extends BaseTab {
       }
 
       // Save via KIRService
-      await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, formData);
+      await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'kafa', formData);
       
       // Update local data
       if (!this.kirProfile.relatedData) {
