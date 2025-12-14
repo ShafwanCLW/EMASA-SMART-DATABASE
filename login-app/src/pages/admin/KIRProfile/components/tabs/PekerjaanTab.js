@@ -152,13 +152,10 @@ export class PekerjaanTab extends BaseTab {
       }
 
       // Save via KIRService
-      await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, formData);
+      await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'pekerjaan', formData);
       
-      // Update local data
-      if (!this.kirProfile.relatedData) {
-        this.kirProfile.relatedData = {};
-      }
-      this.kirProfile.relatedData.pekerjaan = { ...this.kirProfile.relatedData.pekerjaan, ...formData };
+      // Update local cache
+      this.updateRelatedDataCache(formData);
       
       // Clear dirty state
       this.clearDirty();

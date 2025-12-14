@@ -1004,22 +1004,26 @@ export class KesihatanTab extends BaseTab {
     }
     
     // Update KIR with kesihatan data
-    const kesihatanData = { ...this.kirProfile.relatedData?.kesihatan };
-    kesihatanData[sectionId] = sectionData;
+    const kesihatanData = { ...(this.kirProfile.relatedData?.kesihatan || {}) };
+    if (sectionId === 'ringkasan') {
+      Object.assign(kesihatanData, sectionData);
+    } else {
+      kesihatanData[sectionId] = sectionData;
+    }
     kesihatanData.updated_at = new Date().toISOString();
     
     await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'kesihatan', kesihatanData);
     
-    // Update local data
+    // Update local data cache so UI reflects saved values immediately
     if (!this.kirProfile.relatedData) this.kirProfile.relatedData = {};
-    if (!this.kirProfile.relatedData.kesihatan) this.kirProfile.relatedData.kesihatan = {};
-    this.kirProfile.relatedData.kesihatan[sectionId] = sectionData;
-    this.kirProfile.relatedData.kesihatan.updated_at = kesihatanData.updated_at;
+    this.kirProfile.relatedData.kesihatan = { ...kesihatanData };
     
     this.kesihatanDirtyTabs.delete(sectionId);
     this.updateKesihatanSectionNavigation();
     this.updateKesihatanHeader();
     
+    this.clearDirty();
+    this.showToast('Data kesihatan berjaya disimpan', 'success');
     return sectionData;
   }
 }

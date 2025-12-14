@@ -3,14 +3,15 @@ import { BaseTab } from '../shared/BaseTab.js';
 export class BantuanBulananTab extends BaseTab {
   constructor(kirProfile) {
     super(kirProfile);
-    this.tabId = 'bantuan_bulanan';
+    this.tabId = 'bantuan-bulanan';
   }
 
   render() {
+    const tabId = this.tabId;
     const data = this.data || {};
     
     return `
-      <form class="kir-form" data-tab="bantuan_bulanan">
+      <form class="kir-form" data-tab="${tabId}">
         <div class="form-section">
           <h3>Bantuan Bulanan</h3>
           
@@ -60,19 +61,13 @@ export class BantuanBulananTab extends BaseTab {
         </div>
         
         <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('bantuan_bulanan')">Simpan</button>
+          <button type="button" class="btn btn-primary" onclick="kirProfile.saveTab('${tabId}')">Simpan</button>
         </div>
       </form>
     `;
   }
 
   async save() {
-    // Validate form first
-    if (!this.validate()) {
-      this.showToast('Sila lengkapkan semua medan yang diperlukan', 'error');
-      return false;
-    }
-
     try {
       const formData = this.getFormData();
       
@@ -89,11 +84,8 @@ export class BantuanBulananTab extends BaseTab {
       // Save via KIRService
       await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'bantuan_bulanan', formData);
       
-      // Update local data
-      if (!this.kirProfile.relatedData) {
-        this.kirProfile.relatedData = {};
-      }
-      this.kirProfile.relatedData.bantuan_bulanan = { ...this.kirProfile.relatedData.bantuan_bulanan, ...formData };
+      // Update local cache
+      this.updateRelatedDataCache(formData);
       
       // Clear dirty state
       this.clearDirty();
@@ -109,25 +101,6 @@ export class BantuanBulananTab extends BaseTab {
   }
 
   validate() {
-    const form = document.querySelector(`[data-tab="${this.tabId}"]`);
-    if (!form) return false;
-
-    // Basic validation - at least one assistance should be provided
-    const assistanceFields = [
-      'bantuan_jkm', 'bantuan_zakat',
-      'bantuan_baitulmal', 'bantuan_kerajaan_negeri', 'bantuan_lain_lain'
-    ];
-    
-    const hasAnyAssistance = assistanceFields.some(fieldName => {
-      const value = form.querySelector(`[name="${fieldName}"]`)?.value;
-      return value && parseFloat(value) > 0;
-    });
-    
-    if (!hasAnyAssistance) {
-      this.showToast('Sila masukkan sekurang-kurangnya satu bantuan', 'error');
-      return false;
-    }
-
     return true;
   }
 

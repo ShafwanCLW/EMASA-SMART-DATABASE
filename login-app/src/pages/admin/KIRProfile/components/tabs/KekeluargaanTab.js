@@ -4,7 +4,8 @@ import { DokumenService } from '../../../../../services/backend/DokumenService.j
 
 export class KekeluargaanTab extends BaseTab {
   constructor(kirProfile) {
-    super(kirProfile, 'kekeluargaan');
+    super(kirProfile);
+    this.tabId = 'kekeluargaan';
   }
 
   render() {
@@ -89,22 +90,22 @@ export class KekeluargaanTab extends BaseTab {
         <div class="form-row">
           <div class="form-group">
             <label for="tarikh_nikah_${index}">Tarikh Nikah</label>
-            <input type="date" id="tarikh_nikah_${index}" name="tarikh_nikah_${index}" value="${tarikhNikah}" required>
+            <input type="date" id="tarikh_nikah_${index}" name="tarikh_nikah_${index}" value="${tarikhNikah}">
           </div>
           <div class="form-group">
             <label for="nama_pasangan_${index}">Nama Pasangan</label>
-            <input type="text" id="nama_pasangan_${index}" name="nama_pasangan_${index}" value="${FormHelpers.escapeHtml(name)}" required>
+            <input type="text" id="nama_pasangan_${index}" name="nama_pasangan_${index}" value="${FormHelpers.escapeHtml(name)}">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="no_kp_pasangan_${index}">No. KP Pasangan</label>
-            <input type="text" id="no_kp_pasangan_${index}" name="no_kp_pasangan_${index}" value="${FormHelpers.escapeHtml(noKp)}" required>
+            <input type="text" id="no_kp_pasangan_${index}" name="no_kp_pasangan_${index}" value="${FormHelpers.escapeHtml(noKp)}">
           </div>
           <div class="form-group">
             <label for="status_pasangan_${index}">Status Pasangan</label>
-            <select id="status_pasangan_${index}" name="status_pasangan_${index}" required>
+            <select id="status_pasangan_${index}" name="status_pasangan_${index}">
               <option value="">Pilih Status</option>
               <option value="Masih berkahwin" ${status === 'Masih berkahwin' ? 'selected' : ''}>Masih berkahwin</option>
               <option value="Sudah Bercerai" ${status === 'Sudah Bercerai' ? 'selected' : ''}>Sudah Bercerai</option>
@@ -114,7 +115,7 @@ export class KekeluargaanTab extends BaseTab {
 
         <div class="form-group">
           <label for="alamat_pasangan_${index}" id="alamat_label_${index}">${ceraiSelected ? 'Alamat Bekas Pasangan' : 'Alamat Pasangan'}</label>
-          <textarea id="alamat_pasangan_${index}" name="alamat_pasangan_${index}" rows="3" required>${FormHelpers.escapeHtml(alamat)}</textarea>
+          <textarea id="alamat_pasangan_${index}" name="alamat_pasangan_${index}" rows="3">${FormHelpers.escapeHtml(alamat)}</textarea>
         </div>
 
         <div class="form-row">
@@ -124,7 +125,7 @@ export class KekeluargaanTab extends BaseTab {
           </div>
           <div class="form-group" id="cerai_group_${index}" style="${ceraiSelected ? '' : 'display:none;'}">
             <label for="sijil_cerai_${index}">Sijil Cerai (wajib jika bercerai)</label>
-            <input type="file" id="sijil_cerai_${index}" name="sijil_cerai_${index}" accept=".pdf,image/*" ${ceraiSelected ? 'required' : ''}>
+            <input type="file" id="sijil_cerai_${index}" name="sijil_cerai_${index}" accept=".pdf,image/*">
           </div>
         </div>
         <hr>
@@ -270,7 +271,7 @@ export class KekeluargaanTab extends BaseTab {
     window.kekeluargaanTab = this;
     
     // Set up form change tracking
-    const form = document.querySelector('[data-tab="kekeluargaan"]');
+    const form = document.querySelector('form.kir-form[data-tab="kekeluargaan"]');
     if (form) {
       form.addEventListener('input', () => {
         this.markTabDirty();
@@ -335,7 +336,7 @@ export class KekeluargaanTab extends BaseTab {
             ceraiGroup.style.display = isCerai ? '' : 'none';
           }
           if (ceraiInput) {
-            ceraiInput.required = isCerai;
+            ceraiInput.required = false;
           }
           if (alamatLabel) {
             alamatLabel.textContent = isCerai ? 'Alamat Bekas Pasangan' : 'Alamat Pasangan';
@@ -346,18 +347,9 @@ export class KekeluargaanTab extends BaseTab {
   }
 
   async save() {
-    const form = document.querySelector('[data-tab="kekeluargaan"]');
+    const form = document.querySelector('form.kir-form[data-tab="kekeluargaan"]');
     if (!form) {
       throw new Error('Form tidak dijumpai');
-    }
-
-    // Validate required fields
-    const requiredFields = form.querySelectorAll('[required]');
-    for (const field of requiredFields) {
-      if (!field.value.trim()) {
-        field.focus();
-        throw new Error(`Sila isi medan ${field.previousElementSibling?.textContent || field.name}`);
-      }
     }
 
     // Collect form data
@@ -372,32 +364,20 @@ export class KekeluargaanTab extends BaseTab {
     }
 
     // Validate dynamic spouse blocks and upload documents
-    const bilanganIsteri = parseInt(formData.get('bilangan_isteri') || '1', 10);
+    const statusPerkahwinan = (formData.get('status_perkahwinan') || '').toString();
+    const bilanganIsteri = statusPerkahwinan === 'Bujang'
+      ? 0
+      : parseInt(formData.get('bilangan_isteri') || '0', 10) || 0;
+
     for (let i = 1; i <= bilanganIsteri; i++) {
-      const tarikhNikah = formData.get(`tarikh_nikah_${i}`)?.toString() || '';
-      const nama = formData.get(`nama_pasangan_${i}`)?.toString() || '';
-      const noKp = formData.get(`no_kp_pasangan_${i}`)?.toString() || '';
-      const alamat = formData.get(`alamat_pasangan_${i}`)?.toString() || '';
-      const status = formData.get(`status_pasangan_${i}`)?.toString() || '';
+      const tarikhNikah = (formData.get(`tarikh_nikah_${i}`) || '').toString();
+      const nama = (formData.get(`nama_pasangan_${i}`) || '').toString();
+      const noKp = (formData.get(`no_kp_pasangan_${i}`) || '').toString();
+      const alamat = (formData.get(`alamat_pasangan_${i}`) || '').toString();
+      const status = (formData.get(`status_pasangan_${i}`) || '').toString();
       const sijilNikah = formData.get(`sijil_nikah_${i}`);
       const sijilCerai = formData.get(`sijil_cerai_${i}`);
 
-      // Validate required spouse fields
-      const missingField = !tarikhNikah ? `Tarikh Nikah (Pasangan ${i})` :
-                          !nama ? `Nama Pasangan ${i}` :
-                          !noKp ? `No. KP Pasangan ${i}` :
-                          !alamat ? `Alamat Pasangan ${i}` :
-                          !status ? `Status Pasangan ${i}` : '';
-      if (missingField) {
-        throw new Error(`Sila isi medan ${missingField}`);
-      }
-
-      // If bercerai, require sijil cerai
-      if (status === 'Sudah Bercerai' && (!sijilCerai || (sijilCerai && !sijilCerai.name))) {
-        throw new Error(`Sila muat naik Sijil Cerai untuk Pasangan ${i}`);
-      }
-
-      // Upload sijil nikah if provided
       if (sijilNikah && sijilNikah.name) {
         try {
           await DokumenService.uploadDokumen(this.kirProfile.kirId, sijilNikah, 'Sijil Nikah');
@@ -407,8 +387,7 @@ export class KekeluargaanTab extends BaseTab {
         }
       }
 
-      // Upload sijil cerai if provided
-      if (status === 'Sudah Bercerai' && sijilCerai && sijilCerai.name) {
+      if (sijilCerai && sijilCerai.name) {
         try {
           await DokumenService.uploadDokumen(this.kirProfile.kirId, sijilCerai, 'Sijil Cerai');
         } catch (err) {
@@ -419,11 +398,13 @@ export class KekeluargaanTab extends BaseTab {
     }
 
     // Save via KIR service (scalar fields only)
-    await this.kirProfile.KIRService.updateKIR(this.kirProfile.kirId, data);
+    await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, data);
     
     // Update local data
     Object.assign(this.kirProfile.kirData, data);
     
-    return data;
+    this.clearDirty();
+    this.showToast('Data kekeluargaan berjaya disimpan', 'success');
+    return true;
   }
 }

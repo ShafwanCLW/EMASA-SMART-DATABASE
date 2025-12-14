@@ -88,13 +88,10 @@ export class PendidikanTab extends BaseTab {
       }
 
       // Save via KIRService
-      await this.kirProfile.kirService.updateKIR(this.kirProfile.kirId, formData);
+      await this.kirProfile.kirService.updateRelatedDocument(this.kirProfile.kirId, 'pendidikan', formData);
       
-      // Update local data
-      if (!this.kirProfile.relatedData) {
-        this.kirProfile.relatedData = {};
-      }
-      this.kirProfile.relatedData.pendidikan = { ...this.kirProfile.relatedData.pendidikan, ...formData };
+      // Update local cache
+      this.updateRelatedDataCache(formData);
       
       // Clear dirty state
       this.clearDirty();

@@ -863,7 +863,10 @@ export class KIRService {
         'kafa': COLLECTIONS.KIR_KAFA,
         'pendidikan': COLLECTIONS.KIR_PENDIDIKAN,
         'pekerjaan': COLLECTIONS.KIR_PEKERJAAN,
-        'kesihatan': COLLECTIONS.KIR_KESIHATAN
+        'kesihatan': COLLECTIONS.KIR_KESIHATAN,
+        'pendapatan': COLLECTIONS.KIR_PENDAPATAN,
+        'perbelanjaan': COLLECTIONS.KIR_PERBELANJAAN,
+        'bantuan_bulanan': COLLECTIONS.KIR_BANTUAN_BULANAN
         // Note: 'keluarga' data should be handled via PasanganService for spouse data
         // Basic family status fields should be stored in main KIR record
       };
@@ -885,8 +888,9 @@ export class KIRService {
       
       const updateData = {
         ...normalizedData,
+        env: getEnvironment(),
         kir_id: kirId,
-        updated_at: serverTimestamp()
+        tarikh_kemas_kini: serverTimestamp()
       };
       
       console.log(`Updating ${collectionKey} data (normalized):`, JSON.stringify(updateData, null, 2));
@@ -897,7 +901,7 @@ export class KIRService {
         await updateDoc(docRef, updateData);
       } else {
         // Create new document
-        updateData.created_at = serverTimestamp();
+        updateData.tarikh_cipta = serverTimestamp();
         await addDoc(collection(db, collectionName), updateData);
       }
       
@@ -1006,6 +1010,111 @@ export class KIRService {
         console.log('✅ Kesihatan data loaded and normalized');
       } else {
         console.log('❌ No Kesihatan data found');
+      }
+
+      // Get Pendapatan (profile) data
+      try {
+        console.log('Querying Pendapatan collection (profile)...');
+        let pendapatanProfileQuery = query(
+          collection(db, COLLECTIONS.KIR_PENDAPATAN),
+          where('kir_id', '==', kirId),
+          createEnvFilter()
+        );
+        let pendapatanProfileSnapshot;
+        try {
+          pendapatanProfileSnapshot = await getDocs(pendapatanProfileQuery);
+        } catch (error) {
+          if (error.code === 'failed-precondition') {
+            console.warn('Pendapatan query missing composite index, retrying without env filter');
+            pendapatanProfileQuery = query(
+              collection(db, COLLECTIONS.KIR_PENDAPATAN),
+              where('kir_id', '==', kirId)
+            );
+            pendapatanProfileSnapshot = await getDocs(pendapatanProfileQuery);
+          } else {
+            throw error;
+          }
+        }
+        console.log(`Pendapatan profile query result: ${pendapatanProfileSnapshot.size} documents found`);
+        if (!pendapatanProfileSnapshot.empty) {
+          const pendapatanData = pendapatanProfileSnapshot.docs[0].data();
+          relatedData.pendapatan = normalizeFieldNames('kir_pendapatan', pendapatanData);
+          console.log('OK Pendapatan profile data loaded and normalized');
+        } else {
+          console.log('No Pendapatan profile data found');
+        }
+      } catch (error) {
+        console.error('Error loading profile pendapatan data:', error);
+      }
+
+      // Get Perbelanjaan data
+      try {
+        console.log('Querying Perbelanjaan collection (profile)...');
+        let perbelanjaanProfileQuery = query(
+          collection(db, COLLECTIONS.KIR_PERBELANJAAN),
+          where('kir_id', '==', kirId),
+          createEnvFilter()
+        );
+        let perbelanjaanProfileSnapshot;
+        try {
+          perbelanjaanProfileSnapshot = await getDocs(perbelanjaanProfileQuery);
+        } catch (error) {
+          if (error.code === 'failed-precondition') {
+            console.warn('Perbelanjaan query missing composite index, retrying without env filter');
+            perbelanjaanProfileQuery = query(
+              collection(db, COLLECTIONS.KIR_PERBELANJAAN),
+              where('kir_id', '==', kirId)
+            );
+            perbelanjaanProfileSnapshot = await getDocs(perbelanjaanProfileQuery);
+          } else {
+            throw error;
+          }
+        }
+        console.log(`Perbelanjaan profile query result: ${perbelanjaanProfileSnapshot.size} documents found`);
+        if (!perbelanjaanProfileSnapshot.empty) {
+          const perbelanjaanData = perbelanjaanProfileSnapshot.docs[0].data();
+          relatedData.perbelanjaan = normalizeFieldNames('kir_perbelanjaan', perbelanjaanData);
+          console.log('OK Perbelanjaan profile data loaded and normalized');
+        } else {
+          console.log('No Perbelanjaan profile data found');
+        }
+      } catch (error) {
+        console.error('Error loading profile perbelanjaan data:', error);
+      }
+
+      // Get Bantuan Bulanan data
+      try {
+        console.log('Querying Bantuan Bulanan collection (profile)...');
+        let bantuanProfileQuery = query(
+          collection(db, COLLECTIONS.KIR_BANTUAN_BULANAN),
+          where('kir_id', '==', kirId),
+          createEnvFilter()
+        );
+        let bantuanProfileSnapshot;
+        try {
+          bantuanProfileSnapshot = await getDocs(bantuanProfileQuery);
+        } catch (error) {
+          if (error.code === 'failed-precondition') {
+            console.warn('Bantuan Bulanan query missing composite index, retrying without env filter');
+            bantuanProfileQuery = query(
+              collection(db, COLLECTIONS.KIR_BANTUAN_BULANAN),
+              where('kir_id', '==', kirId)
+            );
+            bantuanProfileSnapshot = await getDocs(bantuanProfileQuery);
+          } else {
+            throw error;
+          }
+        }
+        console.log(`Bantuan Bulanan profile query result: ${bantuanProfileSnapshot.size} documents found`);
+        if (!bantuanProfileSnapshot.empty) {
+          const bantuanData = bantuanProfileSnapshot.docs[0].data();
+          relatedData.bantuan_bulanan = normalizeFieldNames('kir_bantuan_bulanan', bantuanData);
+          console.log('OK Bantuan Bulanan data loaded and normalized');
+        } else {
+          console.log('No Bantuan Bulanan data found');
+        }
+      } catch (error) {
+        console.error('Error loading profile bantuan bulanan data:', error);
       }
 
       // Note: Keluarga (family) data is handled differently:

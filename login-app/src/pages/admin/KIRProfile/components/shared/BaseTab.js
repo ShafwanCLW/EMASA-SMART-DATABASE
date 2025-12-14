@@ -4,17 +4,51 @@
 export class BaseTab {
   constructor(kirProfile) {
     this.kirProfile = kirProfile;
-    this.kirData = kirProfile.kirData;
-    this.relatedData = kirProfile.relatedData;
     this.tabId = null; // Must be set by subclasses
+  }
+
+  // Always read the latest data from the parent profile
+  get kirData() {
+    return this.kirProfile.kirData || {};
+  }
+
+  get relatedData() {
+    return this.kirProfile.relatedData || {};
   }
 
   // Get current tab data from kirData or relatedData
   get data() {
     if (this.tabId === 'maklumat-asas') {
-      return this.kirData || {};
+      return this.kirData;
     }
-    return this.relatedData?.[this.tabId] || {};
+    const storageKey = this.getStorageKey();
+    return (
+      this.relatedData?.[this.tabId] ||
+      (storageKey ? this.relatedData?.[storageKey] : null) ||
+      {}
+    );
+  }
+
+  getStorageKey() {
+    if (!this.tabId) return null;
+    return this.tabId.replace(/-/g, '_');
+  }
+
+  updateRelatedDataCache(patch = {}) {
+    if (!this.kirProfile.relatedData) {
+      this.kirProfile.relatedData = {};
+    }
+
+    const keys = new Set();
+    if (this.tabId) keys.add(this.tabId);
+    const storageKey = this.getStorageKey();
+    if (storageKey) keys.add(storageKey);
+
+    keys.forEach(key => {
+      if (!key) return;
+      const existing = this.kirProfile.relatedData[key] || {};
+      this.kirProfile.relatedData[key] = { ...existing, ...patch };
+    });
   }
 
   // Mark this tab as having unsaved changes
