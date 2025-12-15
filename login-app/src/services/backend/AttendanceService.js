@@ -5,6 +5,14 @@ import { COLLECTIONS, createEnvFilter, getEnvironment } from '../database/collec
 const PARTICIPANT_COLLECTION = 'index_nokp';
 
 const normalizeNoKP = (value = '') => value.toString().replace(/\D/g, '');
+const formatDateKey = (value) => {
+  if (!value) return new Date().toISOString().split('T')[0];
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString().split('T')[0];
+  }
+  return date.toISOString().split('T')[0];
+};
 
 export async function getParticipantByNoKP(no_kp) {
   const normalized = normalizeNoKP(no_kp);
@@ -21,7 +29,7 @@ export async function getProgram(programId) {
   return programDoc.exists() ? { id: programDoc.id, ...programDoc.data() } : null;
 }
 
-export async function recordAttendance({ programId, no_kp }) {
+export async function recordAttendance({ programId, no_kp, recordDate }) {
   const participant = await getParticipantByNoKP(no_kp);
   if (!participant) {
     throw new Error('Peserta tidak ditemui dalam index_nokp');
@@ -32,7 +40,8 @@ export async function recordAttendance({ programId, no_kp }) {
   }
 
   const participantId = participant.id || participant.no_kp || normalizeNoKP(no_kp);
-  const attendanceId = `${programId}_${participantId}`;
+  const dateKey = formatDateKey(recordDate || new Date());
+  const attendanceId = `${programId}_${participantId}_${dateKey}`;
   const ref = doc(db, COLLECTIONS.KEHADIRAN_PROGRAM, attendanceId);
 
   const payload = {
@@ -43,6 +52,7 @@ export async function recordAttendance({ programId, no_kp }) {
     hadir: true,
     source: 'qr-self-checkin',
     scanned_at: serverTimestamp(),
+    record_date: dateKey,
     tarikh_kemas_kini: serverTimestamp(),
     env: getEnvironment()
   };
@@ -53,15 +63,18 @@ export async function recordAttendance({ programId, no_kp }) {
 
 export async function listAttendanceByProgram(programId, date) {
   const constraints = [where('program_id', '==', programId), createEnvFilter()];
-  if (date) {
-    const targetDate = new Date(date);
-    const nextDate = new Date(targetDate);
-    nextDate.setDate(targetDate.getDate() + 1);
-    constraints.push(where('scanned_at', '>=', targetDate));
-    constraints.push(where('scanned_at', '<', nextDate));
-  }
   const snap = await getDocs(query(collection(db, COLLECTIONS.KEHADIRAN_PROGRAM), ...constraints));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const dateKey = date ? formatDateKey(date) : null;
+  return snap.docs
+    .map(d => {
+      const data = d.data();
+      const recordDate = data.record_date || (data.scanned_at ? formatDateKey(data.scanned_at.toDate ? data.scanned_at.toDate() : data.scanned_at) : '');
+      return { id: d.id, ...data, record_date: recordDate };
+    })
+    .filter(record => {
+      if (!dateKey) return true;
+      return record.record_date === dateKey;
+    });
 }
 
 export async function updateAttendanceStatus(attendanceId, hadir) {

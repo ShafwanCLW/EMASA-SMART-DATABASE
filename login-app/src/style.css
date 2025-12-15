@@ -3173,6 +3173,22 @@ body.kir-profile-active #app {
   margin-bottom: 16px;
 }
 
+.financial-layer .transaction-filter-bar {
+  align-items: flex-end;
+}
+
+.financial-layer .transaction-filter-bar .filter-group {
+  min-width: 160px;
+}
+
+.financial-layer .transaction-filter-bar .reset-group {
+  align-self: flex-end;
+}
+
+.financial-layer .transaction-filter-bar .reset-group .btn {
+  width: 100%;
+}
+
 .financial-layer .filter-group {
   display: flex;
   flex-direction: column;

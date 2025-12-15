@@ -856,6 +856,14 @@ export function createAdminMainContent() {
       gap: 12px;
       align-items: center;
     }
+
+    .system-report-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 20px;
+    }
     
     .system-report-grid {
       display: grid;
@@ -2563,7 +2571,10 @@ export function createAdminMainContent() {
           <p class="section-description">One-stop view of program performance, participants, and finances</p>
         </div>
         <div class="system-report-actions print-hide">
-          <button class="btn btn-secondary" id="reports-refresh-btn">Refresh Data</button>
+          <button class="btn btn-secondary" id="reports-refresh-btn" style="margin-top: 16px;">
+  Refresh Data
+</button>
+
           <button class="btn btn-primary" id="reports-download-btn">Save as PDF</button>
         </div>
       </div>
@@ -8507,13 +8518,14 @@ async function initializeReportsDashboard(forceReload = false) {
   const pendingLoad = (async () => {
     try {
       const { ProgramService } = await import('../../services/backend/ProgramService.js');
-      const [programs, attendanceRecords, financialSummary] = await Promise.all([
+      const [programs, attendanceRecords, financialSummary, participantSummary] = await Promise.all([
         ProgramService.listProgram(),
         ProgramService.listAllAttendance(),
-        fetchFinancialSummaryData()
+        fetchFinancialSummaryData(),
+        fetchParticipantSummary()
       ]);
       
-      renderReportsDashboard({ programs, attendanceRecords, financialSummary });
+      renderReportsDashboard({ programs, attendanceRecords, financialSummary, participantSummary });
       setReportsDashboardState('ready');
     } catch (error) {
       console.error('Error loading consolidated reports:', error);
@@ -8674,7 +8686,29 @@ async function fetchFinancialSummaryData() {
   }
 }
 
-function renderReportsDashboard({ programs = [], attendanceRecords = [], financialSummary = {} }) {
+async function fetchParticipantSummary() {
+  try {
+    const { collection, getDocs, query } = await import('firebase/firestore');
+    const { db } = await import('../../services/database/firebase.js');
+    const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
+    const snapshot = await getDocs(query(collection(db, COLLECTIONS.INDEX_NOKP), createEnvFilter()));
+    const summary = snapshot.docs.reduce(
+      (acc, docSnap) => {
+        const data = docSnap.data() || {};
+        const ownerType = (data.owner_type || data.ownerType || 'UNKNOWN').toUpperCase();
+        acc.byType[ownerType] = (acc.byType[ownerType] || 0) + 1;
+        return acc;
+      },
+      { total: snapshot.size, byType: {} }
+    );
+    return summary;
+  } catch (error) {
+    console.error('Error loading participant summary:', error);
+    return { total: 0, byType: {} };
+  }
+}
+
+function renderReportsDashboard({ programs = [], attendanceRecords = [], financialSummary = {}, participantSummary = { total: 0, byType: {} } }) {
   const totalPrograms = programs.length;
   const now = new Date();
   const activePrograms = programs.filter(program => {
@@ -8705,7 +8739,8 @@ function renderReportsDashboard({ programs = [], attendanceRecords = [], financi
   updateElementText('report-program-meta', `${activePrograms} active • ${upcomingPrograms} upcoming`);
   updateElementText('report-attendance-rate', `${attendanceRate}%`);
   updateElementText('report-attendance-meta', `${formatNumber(attendanceRecords.length)} attendance records`);
-  updateElementText('report-total-participants', formatNumber(uniqueParticipants.size));
+  const registeredParticipants = participantSummary?.total ?? 0;
+  updateElementText('report-total-participants', formatNumber(registeredParticipants || uniqueParticipants.size));
   updateElementText('report-net-balance', formatCurrency(financialSummary.netBalance ?? 0));
   updateElementText('report-financial-meta', `${formatCurrency(financialSummary.totalIncome ?? 0)} income • ${formatCurrency(financialSummary.totalExpenses ?? 0)} expenses`);
   updateElementText('report-income-total', formatCurrency(financialSummary.totalIncome ?? 0));
@@ -8716,7 +8751,7 @@ function renderReportsDashboard({ programs = [], attendanceRecords = [], financi
     surplusHelper.textContent = financialSummary.netBalance >= 0 ? 'Healthy surplus' : 'Deficit detected';
   }
   
-  const programMetrics = buildProgramMetrics(programs, attendanceRecords);
+  const programMetrics = buildProgramMetrics(programs, attendanceRecords, participantSummary);
   updateElementText('report-program-summary', `${programMetrics.length} programs tracked`);
   renderReportsProgramTable(programMetrics);
   renderReportsTopParticipants(attendanceRecords);
@@ -8731,7 +8766,7 @@ function updateElementText(id, value) {
   }
 }
 
-function buildProgramMetrics(programs = [], attendanceRecords = []) {
+function buildProgramMetrics(programs = [], attendanceRecords = [], participantSummary = { total: 0 }) {
   const attendanceMap = new Map();
   
   attendanceRecords.forEach(record => {
@@ -8747,20 +8782,25 @@ function buildProgramMetrics(programs = [], attendanceRecords = []) {
     }
   });
   
+  const totalParticipants = participantSummary?.total ?? 0;
   return programs.map(program => {
     const attendanceInfo = attendanceMap.get(program.id) || { total: 0, present: 0 };
     const startDate = normalizeToDate(program.tarikh_mula || program.startDate);
     const endDate = normalizeToDate(program.tarikh_tamat || program.endDate);
     const status = determineProgramStatus(program, startDate, endDate);
-    const attendanceRate = attendanceInfo.total > 0
-      ? Math.round((attendanceInfo.present / attendanceInfo.total) * 100)
-      : 0;
+    const denominator = totalParticipants || attendanceInfo.total || 0;
+    let attendanceRate = 0;
+    if (denominator > 0) {
+      attendanceRate = Math.round((attendanceInfo.present / denominator) * 100);
+      if (attendanceRate > 100) attendanceRate = 100;
+      if (attendanceRate < 0) attendanceRate = 0;
+    }
     
     return {
       id: program.id,
       name: program.nama_program || program.nama || 'Unnamed Program',
       status,
-      participants: attendanceInfo.total,
+      participants: totalParticipants || attendanceInfo.total,
       present: attendanceInfo.present,
       attendanceRate,
       duration: calculateProgramDuration(program)

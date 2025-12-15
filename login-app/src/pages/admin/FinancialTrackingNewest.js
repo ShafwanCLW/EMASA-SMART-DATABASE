@@ -15,7 +15,14 @@ export class FinancialTrackingNewest {
     this.state = {
       grants: [],
       transactions: [],
-      totals: { received: 0, deducted: 0, available: 0, grantCount: 0 }
+      totals: { received: 0, deducted: 0, available: 0, grantCount: 0 },
+      transactionFilters: {
+        type: '',
+        grantId: '',
+        dateFrom: '',
+        dateTo: '',
+        sort: 'date-desc'
+      }
     };
     this.deductionRowIndex = 0;
   }
@@ -155,6 +162,45 @@ export class FinancialTrackingNewest {
               <button class="btn btn-secondary" data-view-target="overview">
                 <span>&larr;</span> Tutup
               </button>
+            </div>
+
+            <div class="filters-container transaction-filter-bar">
+              <div class="filter-group">
+                <label>Jenis Transaksi</label>
+                <select class="form-select" data-role="txn-filter-type">
+                  <option value="">Semua</option>
+                  <option value="grant-addition">Penambahan</option>
+                  <option value="deduction">Tolakan</option>
+                  <option value="adjustment">Pelarasan</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Geran</label>
+                <select class="form-select" data-role="txn-filter-grant">
+                  <option value="">Semua Geran</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Dari Tarikh</label>
+                <input type="date" class="form-input" data-role="txn-filter-from" />
+              </div>
+              <div class="filter-group">
+                <label>Hingga Tarikh</label>
+                <input type="date" class="form-input" data-role="txn-filter-to" />
+              </div>
+              <div class="filter-group">
+                <label>Isih</label>
+                <select class="form-select" data-role="txn-sort">
+                  <option value="date-desc">Tarikh ↓</option>
+                  <option value="date-asc">Tarikh ↑</option>
+                  <option value="amount-desc">Jumlah ↓</option>
+                  <option value="amount-asc">Jumlah ↑</option>
+                </select>
+              </div>
+              <div class="filter-group reset-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-outline btn-sm" data-action="reset-transaction-filters">Set Semula</button>
+              </div>
             </div>
 
             <div class="table-container">
@@ -321,6 +367,7 @@ export class FinancialTrackingNewest {
     this.setupNavigation();
     this.setupActions();
     this.setupForms();
+    this.setupTransactionFilters();
     this.setGrantFormMode('create');
     this.setupDeductionControls();
     await this.refreshAllData();
@@ -347,6 +394,13 @@ export class FinancialTrackingNewest {
     this.containers.deductionRows = this.root.querySelector('[data-role="deduction-rows"]');
 
     this.tables.transactionBody = this.root.querySelector(`#${NEWEST_PREFIX}-transaction-body`);
+
+    this.elements = this.elements || {};
+    this.elements.txnFilterType = this.root.querySelector('[data-role="txn-filter-type"]');
+    this.elements.txnFilterGrant = this.root.querySelector('[data-role="txn-filter-grant"]');
+    this.elements.txnFilterFrom = this.root.querySelector('[data-role="txn-filter-from"]');
+    this.elements.txnFilterTo = this.root.querySelector('[data-role="txn-filter-to"]');
+    this.elements.txnSort = this.root.querySelector('[data-role="txn-sort"]');
 
     this.messages.grant = this.root.querySelector(`#${NEWEST_PREFIX}-grant-message`);
     this.messages.fund = this.root.querySelector(`#${NEWEST_PREFIX}-fund-message`);
@@ -406,6 +460,8 @@ export class FinancialTrackingNewest {
       this.setGrantFormMode('create');
     }
     if (view === 'transactions') {
+      this.updateTransactionFilterGrantOptions();
+      this.updateTransactionFilterInputs();
       this.renderTransactionsTable(this.state.transactions);
     }
   }
@@ -428,6 +484,10 @@ export class FinancialTrackingNewest {
   handleAction(action, target) {
     if (action === 'refresh-summary') {
       this.refreshAllData();
+      return;
+    }
+    if (action === 'reset-transaction-filters') {
+      this.resetTransactionFilters();
       return;
     }
     if (action === 'export-excel') {
@@ -485,6 +545,96 @@ export class FinancialTrackingNewest {
     this.containers.deductionRows.innerHTML = '';
     this.deductionRowIndex = 0;
     this.addDeductionRow();
+  }
+
+  setupTransactionFilters() {
+    this.updateTransactionFilterInputs();
+    const bindChange = (element, handler) => {
+      if (!element || element.dataset.listenerAttached) return;
+      element.addEventListener('change', handler);
+      element.dataset.listenerAttached = 'true';
+    };
+
+    bindChange(this.elements.txnFilterType, () => {
+      this.state.transactionFilters.type = this.elements.txnFilterType.value || '';
+      this.renderTransactionsTable();
+    });
+
+    bindChange(this.elements.txnFilterGrant, () => {
+      this.state.transactionFilters.grantId = this.elements.txnFilterGrant.value || '';
+      this.renderTransactionsTable();
+    });
+
+    bindChange(this.elements.txnFilterFrom, () => {
+      this.state.transactionFilters.dateFrom = this.elements.txnFilterFrom.value || '';
+      this.renderTransactionsTable();
+    });
+
+    bindChange(this.elements.txnFilterTo, () => {
+      this.state.transactionFilters.dateTo = this.elements.txnFilterTo.value || '';
+      this.renderTransactionsTable();
+    });
+
+    bindChange(this.elements.txnSort, () => {
+      this.state.transactionFilters.sort = this.elements.txnSort.value || 'date-desc';
+      this.renderTransactionsTable();
+    });
+  }
+
+  updateTransactionFilterInputs() {
+    const filters = this.state.transactionFilters || {};
+    if (this.elements.txnFilterType) {
+      this.elements.txnFilterType.value = filters.type || '';
+    }
+    if (this.elements.txnFilterGrant) {
+      this.elements.txnFilterGrant.value = filters.grantId || '';
+    }
+    if (this.elements.txnFilterFrom) {
+      this.elements.txnFilterFrom.value = filters.dateFrom || '';
+    }
+    if (this.elements.txnFilterTo) {
+      this.elements.txnFilterTo.value = filters.dateTo || '';
+    }
+    if (this.elements.txnSort) {
+      this.elements.txnSort.value = filters.sort || 'date-desc';
+    }
+  }
+
+  updateTransactionFilterGrantOptions() {
+    const select = this.elements.txnFilterGrant;
+    if (!select) return;
+    const grants = this.state.grants || [];
+    const currentValue = this.state.transactionFilters?.grantId || '';
+    if (!grants.length) {
+      select.innerHTML = '<option value="">Tiada geran</option>';
+      select.value = '';
+      select.disabled = true;
+      return;
+    }
+    select.disabled = false;
+    const options = ['<option value=\"\">Semua Geran</option>'];
+    grants.forEach(grant => {
+      options.push(`<option value=\"${grant.id}\">${this.escapeHtml(grant.name)}</option>`);
+    });
+    select.innerHTML = options.join('');
+    if (currentValue && grants.some(grant => grant.id === currentValue)) {
+      select.value = currentValue;
+    } else {
+      select.value = '';
+      this.state.transactionFilters.grantId = '';
+    }
+  }
+
+  resetTransactionFilters() {
+    this.state.transactionFilters = {
+      type: '',
+      grantId: '',
+      dateFrom: '',
+      dateTo: '',
+      sort: 'date-desc'
+    };
+    this.updateTransactionFilterInputs();
+    this.renderTransactionsTable();
   }
 
   updateFundBalanceDisplay() {
@@ -673,6 +823,8 @@ export class FinancialTrackingNewest {
     this.renderTransactionsPreview();
     this.renderTransactionsTable(this.state.transactions);
     this.populateGrantSelects(true);
+    this.updateTransactionFilterGrantOptions();
+    this.updateTransactionFilterInputs();
   }
 
   async fetchGrants() {
@@ -842,8 +994,7 @@ export class FinancialTrackingNewest {
     }
     container.innerHTML = subset
       .map(item => {
-        const typeLabel = item.type === 'deduction' ? 'Tolakan' : 'Penambahan';
-        const badgeClass = item.type === 'deduction' ? 'negative' : 'positive';
+        const { label: typeLabel, badge: badgeClass } = this.getTransactionPresentation(item.type);
         const grantSummary = item.grantImpacts
           .map(impact => `${this.escapeHtml(impact.grantName || 'Geran')}: ${this.formatCurrency(impact.amount)}`)
           .join('<br>');
@@ -864,23 +1015,64 @@ export class FinancialTrackingNewest {
       .join('');
   }
 
-  renderTransactionsTable(transactions) {
+  getFilteredTransactions(transactions = []) {
+    const filters = this.state.transactionFilters || {};
+    const typeFilter = filters.type || '';
+    const grantFilter = filters.grantId || '';
+    const fromTs = filters.dateFrom ? new Date(`${filters.dateFrom}T00:00:00`).getTime() : null;
+    const toTs = filters.dateTo ? new Date(`${filters.dateTo}T23:59:59`).getTime() : null;
+
+    const filtered = transactions.filter(item => {
+      if (typeFilter && item.type !== typeFilter) {
+        return false;
+      }
+      if (grantFilter) {
+        const matchesGrant = (item.grantImpacts || []).some(impact => impact.grantId === grantFilter);
+        if (!matchesGrant) {
+          return false;
+        }
+      }
+      const itemTime = item.date instanceof Date ? item.date.getTime() : 0;
+      if (fromTs && itemTime < fromTs) {
+        return false;
+      }
+      if (toTs && itemTime > toTs) {
+        return false;
+      }
+      return true;
+    });
+
+    const sorted = [...filtered];
+    const getTime = (txn) => (txn.date instanceof Date ? txn.date.getTime() : 0);
+    const comparatorMap = {
+      'date-asc': (a, b) => getTime(a) - getTime(b),
+      'date-desc': (a, b) => getTime(b) - getTime(a),
+      'amount-asc': (a, b) => (a.amount || 0) - (b.amount || 0),
+      'amount-desc': (a, b) => (b.amount || 0) - (a.amount || 0)
+    };
+    const sortKey = filters.sort || 'date-desc';
+    const comparator = comparatorMap[sortKey] || comparatorMap['date-desc'];
+    sorted.sort((a, b) => comparator(a, b));
+    return sorted;
+  }
+
+  renderTransactionsTable(transactions = this.state.transactions) {
     const body = this.tables.transactionBody;
     if (!body) {
       return;
     }
-    if (!transactions.length) {
+    const filtered = this.getFilteredTransactions(transactions || []);
+    if (!filtered.length) {
       body.innerHTML = `
         <tr>
-          <td colspan="5" class="empty-text">Tiada transaksi direkodkan.</td>
+          <td colspan="5" class="empty-text">Tiada transaksi mengikut penapis semasa.</td>
         </tr>
       `;
       return;
     }
-    body.innerHTML = transactions
+    body.innerHTML = filtered
       .map(item => {
-        const typeLabel = item.type === 'deduction' ? 'Tolakan' : 'Penambahan';
-        const badgeClass = item.type === 'deduction' ? 'negative' : 'positive';
+        const { label: typeLabel, badge: badgeClass } = this.getTransactionPresentation(item.type);
         const grantDetails = item.grantImpacts
           .map(impact => `${this.escapeHtml(impact.grantName || 'Geran')} (${this.formatCurrency(impact.amount)})`)
           .join('<br>');
@@ -898,6 +1090,15 @@ export class FinancialTrackingNewest {
         `;
       })
       .join('');
+  }
+  getTransactionPresentation(type) {
+    if (type === 'deduction') {
+      return { label: 'Tolakan', badge: 'negative' };
+    }
+    if (type === 'adjustment') {
+      return { label: 'Pelarasan', badge: 'positive' };
+    }
+    return { label: 'Penambahan', badge: 'positive' };
   }
   populateGrantSelects(updateInfo = false) {
     const selects = this.root.querySelectorAll('[data-role="grant-options"]');

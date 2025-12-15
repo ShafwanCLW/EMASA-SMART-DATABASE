@@ -20,6 +20,32 @@ import { COLLECTIONS, STANDARD_FIELDS, addStandardFields, createEnvFilter, getEn
 
 const pickFirst = (...values) => values.find(value => value !== undefined && value !== null);
 
+const toDate = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  if (typeof value === 'object' && typeof value.toDate === 'function') {
+    try {
+      return value.toDate();
+    } catch (error) {
+      console.warn('ProgramService: failed to convert timestamp via toDate', error);
+      return null;
+    }
+  }
+  if (typeof value === 'object' && typeof value.seconds === 'number') {
+    return new Date(value.seconds * 1000);
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatDateKey = (value) => {
+  const dateValue = toDate(value);
+  if (!dateValue) return '';
+  return dateValue.toISOString().split('T')[0];
+};
+
 const normalizeProgramPayload = (programData = {}, { includeDefaults = false } = {}) => {
   const data = {};
 
@@ -71,6 +97,42 @@ const normalizeProgramPayload = (programData = {}, { includeDefaults = false } =
   const timeScale = pickFirst(programData.time_scale, programData.timeScale);
   if (timeScale !== undefined || includeDefaults) {
     data.time_scale = timeScale ?? '';
+  }
+
+  const expenseGrantId = pickFirst(programData.expense_grant_id, programData.expenseGrantId);
+  if (expenseGrantId !== undefined || includeDefaults) {
+    data.expense_grant_id = expenseGrantId ?? '';
+  }
+
+  const expenseGrantName = pickFirst(programData.expense_grant_name, programData.expenseGrantName);
+  if (expenseGrantName !== undefined || includeDefaults) {
+    data.expense_grant_name = expenseGrantName ?? '';
+  }
+
+  const expenseGrantNotes = pickFirst(programData.expense_grant_notes, programData.expenseGrantNotes);
+  if (expenseGrantNotes !== undefined || includeDefaults) {
+    data.expense_grant_notes = expenseGrantNotes ?? '';
+  }
+
+  const expenseDeductedAmount = pickFirst(
+    programData.expense_deducted_amount,
+    programData.expenseDeductedAmount
+  );
+  if (expenseDeductedAmount !== undefined || includeDefaults) {
+    data.expense_deducted_amount = expenseDeductedAmount ?? 0;
+  }
+
+  const expenseDeductedAt = pickFirst(programData.expense_deducted_at, programData.expenseDeductedAt);
+  if (expenseDeductedAt !== undefined || includeDefaults) {
+    data.expense_deducted_at = expenseDeductedAt ?? null;
+  }
+
+  const expenseDeductionTransactionId = pickFirst(
+    programData.expense_deduction_transaction_id,
+    programData.expenseDeductionTransactionId
+  );
+  if (expenseDeductionTransactionId !== undefined || includeDefaults) {
+    data.expense_deduction_transaction_id = expenseDeductionTransactionId ?? '';
   }
 
   return data;
@@ -322,121 +384,66 @@ export class ProgramService {
     }
   }
   
-  // List all attendance records
+  // List all recorded attendance entries
   static async listAllAttendance() {
     try {
-      // Get all KIR, PKIR, and AIR records
-      const kirQuery = query(
-        collection(db, 'kir'),
+      const attendanceQuery = query(
+        collection(db, COLLECTIONS.KEHADIRAN_PROGRAM),
         createEnvFilter()
       );
-      
-      const pkirQuery = query(
-        collection(db, 'pkir'),
-        createEnvFilter()
-      );
-      
-      const airQuery = query(
-        collection(db, 'air'),
-        createEnvFilter()
-      );
-      
-      const [kirSnapshot, pkirSnapshot, airSnapshot] = await Promise.all([
-        getDocs(kirQuery),
-        getDocs(pkirQuery),
-        getDocs(airQuery)
-      ]);
-      
-      // Get all programs
-      const programQuery = query(
-        collection(db, 'program'),
-        createEnvFilter()
-      );
-      
-      const programSnapshot = await getDocs(programQuery);
-      const programs = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      // Get all attendance records
-      const attendanceSnapshot = await getDocs(collection(db, COLLECTIONS.KEHADIRAN_PROGRAM));
-      const currentEnv = getEnvironment();
-      const attendanceRecords = attendanceSnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(record => !record.env || record.env === currentEnv);
-      
-      // Create a map of attendance records by participant ID and program ID
-      const attendanceMap = new Map();
-      attendanceRecords.forEach(record => {
-        const key = `${record.kir_id || record.pkir_id || record.air_id}_${record.program_id}`;
-        attendanceMap.set(key, record);
+      const snapshot = await getDocs(attendanceQuery);
+      return snapshot.docs.map(doc => {
+        const data = doc.data();
+        const programId = data.program_id || data.programId;
+        const participantId =
+          data.participant_id ||
+          data.participantId ||
+          data.kir_id ||
+          data.pkir_id ||
+          data.air_id ||
+          data.no_kp_display ||
+          doc.id;
+        const participantName =
+          data.participant_name ||
+          data.participantName ||
+          data.nama ||
+          data.nama_penuh ||
+          'Unknown';
+        const participantType =
+          data.participant_type ||
+          data.participantType ||
+          data.owner_type ||
+          (data.kir_id ? 'KIR' : data.pkir_id ? 'PKIR' : data.air_id ? 'AIR' : 'PARTICIPANT');
+        const timestamp =
+          toDate(data.scanned_at) ||
+          toDate(data.timestamp) ||
+          toDate(data.tarikh) ||
+          toDate(data.tarikh_cipta) ||
+          toDate(data.date) ||
+          new Date();
+        const recordDate = data.record_date || data.tarikh_kehadiran || formatDateKey(timestamp);
+        return {
+          id: doc.id,
+          programId,
+          program_id: programId,
+          programName: data.program_name || data.programName || '',
+          participantId,
+          participant_id: participantId,
+          participantName,
+          participant_name: participantName,
+          participantType,
+          participant_type: participantType,
+          no_kp_display: data.no_kp_display || data.no_kp || '',
+          present: Boolean(data.hadir),
+          hadir: Boolean(data.hadir),
+          notes: data.catatan || data.notes || '',
+          source: data.source || data.sumber || '',
+          recordDate,
+          record_date: recordDate,
+          timestamp,
+          date: timestamp ? timestamp.toISOString() : null
+        };
       });
-      
-      // Create attendance records for all participants and programs
-      const result = [];
-      
-      // Process KIR records
-      kirSnapshot.docs.forEach(kirDoc => {
-        const kir = { id: kirDoc.id, ...kirDoc.data() };
-        programs.forEach(program => {
-          const key = `${kir.id}_${program.id}`;
-          const attendanceRecord = attendanceMap.get(key);
-          
-          result.push({
-            id: attendanceRecord?.id || `${kir.id}_${program.id}`,
-            participantId: kir.id,
-            participantName: kir.nama_penuh || kir.nama || 'Unknown',
-            participantType: 'KIR',
-            programId: program.id,
-            programName: program.nama_program || program.name || 'Unknown Program',
-            present: attendanceRecord?.hadir || false,
-            notes: attendanceRecord?.catatan || '',
-            date: program.tarikh_mula || program.startDate || program.tarikh || null
-          });
-        });
-      });
-      
-      // Process PKIR records
-      pkirSnapshot.docs.forEach(pkirDoc => {
-        const pkir = { id: pkirDoc.id, ...pkirDoc.data() };
-        programs.forEach(program => {
-          const key = `${pkir.id}_${program.id}`;
-          const attendanceRecord = attendanceMap.get(key);
-          
-          result.push({
-            id: attendanceRecord?.id || `${pkir.id}_${program.id}`,
-            participantId: pkir.id,
-            participantName: pkir.nama || pkir.asas?.nama || 'Unknown',
-            participantType: 'PKIR',
-            programId: program.id,
-            programName: program.nama_program || program.name || 'Unknown Program',
-            present: attendanceRecord?.hadir || false,
-            notes: attendanceRecord?.catatan || '',
-            date: program.tarikh_mula || program.startDate || program.tarikh || null
-          });
-        });
-      });
-      
-      // Process AIR records
-      airSnapshot.docs.forEach(airDoc => {
-        const air = { id: airDoc.id, ...airDoc.data() };
-        programs.forEach(program => {
-          const key = `${air.id}_${program.id}`;
-          const attendanceRecord = attendanceMap.get(key);
-          
-          result.push({
-            id: attendanceRecord?.id || `${air.id}_${program.id}`,
-            participantId: air.id,
-            participantName: air.nama || 'Unknown',
-            participantType: 'AIR',
-            programId: program.id,
-            programName: program.nama_program || program.name || 'Unknown Program',
-            present: attendanceRecord?.hadir || false,
-            notes: attendanceRecord?.catatan || '',
-            date: program.tarikh_mula || program.startDate || program.tarikh || null
-          });
-        });
-      });
-      
-      return result;
     } catch (error) {
       console.error('Error listing all attendance:', error);
       throw new Error('Failed to load attendance records: ' + error.message);

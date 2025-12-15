@@ -14,11 +14,41 @@ export class ProgramKehadiranNewest {
       attendance: [],
       filters: {
         programId: '',
-        search: ''
+        search: '',
+        attendanceDate: this.getToday()
       },
       reportSelection: null,
-      programStatusFilter: 'active'
+      programStatusFilter: 'active',
+      financialGrants: [],
+      financialGrantsLoaded: false,
+      financialGrantsLoading: false
     };
+  }
+
+  handleSectionLoad(sectionKey) {
+    if (sectionKey === 'management') {
+      this.loadPrograms();
+      return;
+    }
+    if (sectionKey === 'attendance') {
+      if (!this.state.programs || this.state.programs.length === 0) {
+        this.loadPrograms().then(() => {
+          this.renderAttendanceProgramList();
+          this.loadAttendanceData();
+        });
+      } else {
+        this.renderAttendanceProgramList();
+        this.loadAttendanceData();
+      }
+      return;
+    }
+    if (sectionKey === 'reports') {
+      this.loadReports();
+    }
+  }
+
+  getToday() {
+    return new Date().toISOString().split('T')[0];
   }
 
   createContent() {
@@ -31,60 +61,34 @@ export class ProgramKehadiranNewest {
           </p>
         </div>
 
-        <div class="program-newest-section active" data-section="overview">
-          <div class="program-newest-grid">
-            <article class="program-newest-card">
-              <header class="card-header">
-                <h4>Pengurusan Program</h4>
-                <span class="card-icon">&#128736;</span>
-              </header>
-              <p class="card-description">
-                Cipta dan urus program komuniti dengan pantas.
-              </p>
-              <button class="btn btn-primary" data-action="open-management">
-                Masuk Modul
-              </button>
-            </article>
-            <article class="program-newest-card">
-              <header class="card-header">
-                <h4>Jejak Kehadiran</h4>
-                <span class="card-icon">&#128338;</span>
-              </header>
-              <p class="card-description">
-                Pantau kehadiran peserta secara langsung.
-              </p>
-              <button class="btn btn-primary" data-action="open-attendance">
-                Jejak Kehadiran
-              </button>
-            </article>
-            <article class="program-newest-card">
-              <header class="card-header">
-                <h4>Laporan Program</h4>
-                <span class="card-icon">&#128202;</span>
-              </header>
-              <p class="card-description">
-                Jana ringkasan dan statistik kehadiran.
-              </p>
-              <button class="btn btn-primary" data-action="open-reports">
-                Lihat Laporan
-              </button>
-            </article>
+        <div class="program-tab-shell">
+          <div class="program-tab-header">
+            <button class="program-tab active" data-tab-target="management">
+              <span class="tab-icon">&#9881;</span>
+              <div class="tab-details">
+                <span class="tab-title">Pengurusan Program</span>
+                
+              </div>
+            </button>
+            <button class="program-tab" data-tab-target="attendance">
+              <span class="tab-icon">&#9200;</span>
+              <div class="tab-details">
+                <span class="tab-title">Jejak Kehadiran</span>
+                
+              </div>
+            </button>
+            <button class="program-tab" data-tab-target="reports">
+              <span class="tab-icon">&#128202;</span>
+              <div class="tab-details">
+                <span class="tab-title">Laporan Program</span>
+                
+              </div>
+            </button>
           </div>
         </div>
 
-        <div class="program-newest-section" data-section="management">
-          <div class="section-header">
-            <div class="section-header-start">
-              <button class="back-btn" data-action="back-to-overview">
-                <span>&larr;</span>
-                Kembali
-              </button>
-              <h3 class="section-title">Pengurusan Program</h3>
-            </div>
-            <p class="section-description">
-              Cipta, kemas kini dan pantau program komuniti secara menyeluruh.
-            </p>
-          </div>
+        <div class="program-newest-section active" data-section="management">
+          
 
           <div class="program-action-bar">
             <div class="program-action-buttons">
@@ -139,15 +143,8 @@ export class ProgramKehadiranNewest {
         <div class="program-newest-section" data-section="attendance">
         <div class="section-card">
           <div class="section-header">
-            <div class="section-header-left">
-              <div class="header-icon">&#128197;</div>
-              <div>
-                <h3 class="section-title">Jejak Kehadiran</h3>
-                <p class="section-description">Pantau kehadiran peserta mengikut program atau tarikh.</p>
-              </div>
-            </div>
+            
             <div class="section-header-actions">
-              <button class="btn btn-ghost" data-action="back-to-overview">&larr; Kembali</button>
               <button class="btn btn-ghost" data-action="export-attendance">&#8681; Export</button>
             </div>
           </div>
@@ -156,6 +153,16 @@ export class ProgramKehadiranNewest {
 
           <div class="search-bar">
             <input type="text" class="form-input" placeholder="Cari nama atau NO KP..." data-role="attendance-search" />
+          </div>
+
+          <div class="attendance-date-filter">
+            <div class="filter-label">Tarikh Kehadiran</div>
+            <div class="date-control-group">
+              <button class="btn btn-outline" data-action="attendance-prev-date">&#8592;</button>
+              <input type="date" class="form-input" data-role="attendance-date">
+              <button class="btn btn-outline" data-action="attendance-next-date">&#8594;</button>
+            </div>
+            <p class="date-helper" data-role="attendance-date-helper">-</p>
           </div>
 
           <div class="table-container">
@@ -184,47 +191,57 @@ export class ProgramKehadiranNewest {
         </div>
 
         <div class="program-newest-section" data-section="reports">
-          <div class="section-header">
-            <div class="section-header-start">
-              <button class="back-btn" data-action="back-to-overview">
-                <span>&larr;</span>
-                Kembali
-              </button>
-              <h3 class="section-title">Laporan Program</h3>
-            </div>
-            <p class="section-description">
-              Lihat ringkasan prestasi program dan statistik kehadiran.
-            </p>
-          </div>
+          <div class="reports-layered-shell">
+            <div class="reports-layered-backdrop"></div>
+            <div class="reports-layered-panel">
+              <div class="report-hero">
+                <div class="report-hero-text">
+                  
+                </div>
+                <div class="report-hero-actions">
+                  
+                </div>
+              </div>
 
-          <div class="reports-grid">
-            <section class="report-card">
-              <header class="report-header">
-                <h4>Ringkasan Kehadiran</h4>
-                <span class="report-icon">&#128202;</span>
-              </header>
-              <div class="report-content" data-role="attendance-summary">
-                <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
+              <div class="reports-grid">
+                <section class="report-card span-2">
+                  <header class="report-header">
+                    <div>
+                      <p class="report-eyebrow">Ringkasan</p>
+                      <h4>Ringkasan Kehadiran</h4>
+                    </div>
+                    <span class="report-icon">&#128202;</span>
+                  </header>
+                  <div class="report-content" data-role="attendance-summary">
+                    <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
+                  </div>
+                </section>
+                <section class="report-card">
+                  <header class="report-header">
+                    <div>
+                      <p class="report-eyebrow">Peserta</p>
+                      <h4>Peserta Terbaik</h4>
+                    </div>
+                    <span class="report-icon">&#11088;</span>
+                  </header>
+                  <div class="report-content" data-role="top-participants">
+                    <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
+                  </div>
+                </section>
+                <section class="report-card span-full">
+                  <header class="report-header">
+                    <div>
+                      <p class="report-eyebrow">Program</p>
+                      <h4>Penyertaan Program</h4>
+                    </div>
+                    <span class="report-icon">&#128200;</span>
+                  </header>
+                  <div class="report-content" data-role="program-participation">
+                    <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
+                  </div>
+                </section>
               </div>
-            </section>
-            <section class="report-card">
-              <header class="report-header">
-                <h4>Peserta Terbaik</h4>
-                <span class="report-icon">&#11088;</span>
-              </header>
-              <div class="report-content" data-role="top-participants">
-                <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
-              </div>
-            </section>
-            <section class="report-card">
-              <header class="report-header">
-                <h4>Penyertaan Program</h4>
-                <span class="report-icon">&#128200;</span>
-              </header>
-              <div class="report-content" data-role="program-participation">
-                <p class="placeholder-text">Tekan "Lihat Laporan" untuk memuatkan data.</p>
-              </div>
-            </section>
+            </div>
           </div>
         </div>
       </div>
@@ -245,11 +262,11 @@ export class ProgramKehadiranNewest {
     this.setupProgramStatusTabs();
     this.bindAttendanceActions();
     this.bindReportActions();
+    this.handleSectionLoad('management');
   }
 
   cacheDom() {
     this.sections = {
-      overview: this.root.querySelector('[data-section="overview"]'),
       management: this.root.querySelector('[data-section="management"]'),
       attendance: this.root.querySelector('[data-section="attendance"]'),
       reports: this.root.querySelector('[data-section="reports"]')
@@ -264,40 +281,26 @@ export class ProgramKehadiranNewest {
       programParticipation: this.root.querySelector('[data-role="program-participation"]'),
       attendanceProgramList: this.root.querySelector('[data-role="attendance-program-list"]'),
       attendanceSearch: this.root.querySelector('[data-role="attendance-search"]'),
-      attendanceFooter: this.root.querySelector('[data-role="attendance-footer"]')
+      attendanceFooter: this.root.querySelector('[data-role="attendance-footer"]'),
+      attendanceDateInput: this.root.querySelector('[data-role="attendance-date"]'),
+      attendanceDateHelper: this.root.querySelector('[data-role="attendance-date-helper"]'),
+      attendancePrevBtn: this.root.querySelector('[data-action="attendance-prev-date"]'),
+      attendanceNextBtn: this.root.querySelector('[data-action="attendance-next-date"]')
     };
   }
 
   bindOverviewNavigation() {
-    this.root.querySelectorAll('[data-action="open-management"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        this.showSection('management');
-        await this.loadPrograms();
+    const tabs = this.root.querySelectorAll('[data-tab-target]');
+    if (tabs.length) {
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.getAttribute('data-tab-target');
+          if (target) {
+            this.showSection(target);
+          }
+        });
       });
-    });
-
-    this.root.querySelectorAll('[data-action="open-attendance"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        this.showSection('attendance');
-        if (!this.state.programs || this.state.programs.length === 0) {
-          await this.loadPrograms();
-        } else {
-          this.renderAttendanceProgramList();
-        }
-        await this.loadAttendanceData();
-      });
-    });
-
-    this.root.querySelectorAll('[data-action="open-reports"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        this.showSection('reports');
-        await this.loadReports();
-      });
-    });
-
-    this.root.querySelectorAll('[data-action="back-to-overview"]').forEach(btn => {
-      btn.addEventListener('click', () => this.showSection('overview'));
-    });
+    }
   }
 
   bindManagementActions() {
@@ -343,6 +346,24 @@ export class ProgramKehadiranNewest {
       });
     }
 
+    if (this.elements.attendanceDateInput) {
+      this.elements.attendanceDateInput.value = this.state.filters.attendanceDate;
+      this.elements.attendanceDateInput.addEventListener('change', () => {
+        const dateValue = this.elements.attendanceDateInput.value;
+        if (dateValue) {
+          this.setAttendanceDate(dateValue, true);
+        }
+      });
+    }
+
+    if (this.elements.attendancePrevBtn) {
+      this.elements.attendancePrevBtn.addEventListener('click', () => this.shiftAttendanceDate(-1));
+    }
+
+    if (this.elements.attendanceNextBtn) {
+      this.elements.attendanceNextBtn.addEventListener('click', () => this.shiftAttendanceDate(1));
+    }
+
     if (exportBtn) {
       exportBtn.addEventListener('click', () => this.exportAttendance());
     }
@@ -350,6 +371,125 @@ export class ProgramKehadiranNewest {
 
   bindReportActions() {
     // Reports load automatically when the section opens, so no extra listeners are required here.
+  }
+
+  getSelectedProgram() {
+    const programId = this.state.filters.programId;
+    if (!programId) return null;
+    return (this.state.programs || []).find(program => program.id === programId) || null;
+  }
+
+  getProgramTimeScale(program) {
+    const scale = (program?.time_scale || program?.timeScale || '').toLowerCase();
+    const allowed = ['one off', 'one-off', 'daily', 'weekly', 'monthly', 'berkala'];
+    if (allowed.includes(scale)) {
+      return scale.replace('one-off', 'one off');
+    }
+    return 'one off';
+  }
+
+  normalizeDateValue(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
+  }
+
+  setAttendanceDate(dateValue, reload = false) {
+    const normalized = this.normalizeDateValue(dateValue) || this.getToday();
+    const program = this.getSelectedProgram();
+    const clamped = this.clampAttendanceDate(normalized, program);
+    this.state.filters.attendanceDate = clamped;
+    this.updateAttendanceDateUI();
+    if (reload) {
+      this.loadAttendanceData(true);
+    }
+  }
+
+  clampAttendanceDate(dateValue, program) {
+    if (!program) {
+      return dateValue;
+    }
+    const start = this.normalizeDateValue(program.tarikh_mula || program.startDate);
+    const end = this.normalizeDateValue(program.tarikh_tamat || program.endDate);
+    if (start && dateValue < start) {
+      return start;
+    }
+    if (end && dateValue > end) {
+      return end;
+    }
+    return dateValue;
+  }
+
+  shiftAttendanceDate(direction = 1) {
+    const program = this.getSelectedProgram();
+    const current = this.state.filters.attendanceDate || this.getToday();
+    const scale = this.getProgramTimeScale(program);
+    let nextDate = current;
+    if (scale === 'daily') {
+      nextDate = this.shiftDateByDays(current, direction);
+    } else if (scale === 'weekly') {
+      nextDate = this.shiftDateByDays(current, 7 * direction);
+    } else if (scale === 'monthly') {
+      nextDate = this.shiftDateByMonths(current, direction);
+    } else {
+      nextDate = this.shiftDateByDays(current, direction);
+    }
+    this.setAttendanceDate(nextDate, true);
+  }
+
+  shiftDateByDays(dateValue, days) {
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return this.getToday();
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
+  }
+
+  shiftDateByMonths(dateValue, months) {
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return this.getToday();
+    const targetDay = date.getDate();
+    date.setMonth(date.getMonth() + months);
+    if (date.getDate() !== targetDay) {
+      date.setDate(0); // fallback to last day of previous month
+    }
+    return date.toISOString().split('T')[0];
+  }
+
+  updateAttendanceDateUI() {
+    if (this.elements.attendanceDateInput) {
+      this.elements.attendanceDateInput.value = this.state.filters.attendanceDate || this.getToday();
+    }
+    if (this.elements.attendanceDateHelper) {
+      const program = this.getSelectedProgram();
+      const scale = program ? this.getProgramTimeScale(program) : 'one off';
+      const labelMap = {
+        'one off': 'One Off',
+        daily: 'Daily',
+        weekly: 'Weekly',
+        monthly: 'Monthly',
+        berkala: 'Berkala'
+      };
+      const dateText = this.formatDateForDisplay(this.state.filters.attendanceDate || this.getToday());
+      this.elements.attendanceDateHelper.textContent = `${labelMap[scale] || 'One Off'} • ${dateText}`;
+    }
+  }
+
+  formatDateForDisplay(dateValue) {
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return dateValue || '-';
+    return date.toLocaleDateString('ms-MY', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  setDefaultAttendanceDateForProgram(program) {
+    if (!program) {
+      this.state.filters.attendanceDate = this.getToday();
+      this.updateAttendanceDateUI();
+      return;
+    }
+    const today = this.getToday();
+    this.state.filters.attendanceDate = this.clampAttendanceDate(today, program);
+    this.updateAttendanceDateUI();
   }
 
   updateProgramStatusTabs() {
@@ -388,6 +528,12 @@ export class ProgramKehadiranNewest {
         section.classList.remove('active');
       }
     });
+    const tabs = this.root.querySelectorAll('.program-tab');
+    tabs.forEach(tab => {
+      const target = tab.getAttribute('data-tab-target');
+      tab.classList.toggle('active', target === sectionKey);
+    });
+    this.handleSectionLoad(sectionKey);
   }
 
   async loadPrograms() {
@@ -418,6 +564,7 @@ export class ProgramKehadiranNewest {
       this.populateProgramFilter(programs);
       this.renderProgramTable();
       this.renderAttendanceProgramList();
+      this.setDefaultAttendanceDateForProgram(this.getSelectedProgram());
     } catch (error) {
       console.error('ProgramKehadiranNewest: gagal memuat program', error);
       target.innerHTML = `
@@ -492,6 +639,7 @@ export class ProgramKehadiranNewest {
             ${selectedProgram ? this.escapeHtml(selectedProgram.nama_program || selectedProgram.nama || 'Program') : 'Sila pilih program untuk mula menapis kehadiran.'}
           </div>
           ${selectedProgram ? `<div class="selection-meta">${startLabel}${endLabel ? ' - ' + endLabel : ''}</div>` : ''}
+          ${selectedProgram ? `<div class="selection-meta">Skala: ${this.getProgramTimeScale(selectedProgram).replace('one off', 'One Off')}</div>` : ''}
         </div>
         <button class="btn btn-secondary" data-action="open-program-selector">
           ${selectedProgram ? 'Tukar Program' : 'Pilih Program'}
@@ -564,6 +712,8 @@ export class ProgramKehadiranNewest {
         const programId = btn.getAttribute('data-program-option');
         this.state.filters.programId = programId;
         this.renderAttendanceProgramList();
+        const program = this.state.programs.find(p => p.id === programId);
+        this.setDefaultAttendanceDateForProgram(program);
         this.closeProgramSelectionModal();
         await this.loadAttendanceData(true);
       });
@@ -756,6 +906,11 @@ export class ProgramKehadiranNewest {
     const start = this.formatDate(program.tarikh_mula || program.startDate);
     const end = this.formatDate(program.tarikh_tamat || program.endDate);
     const status = this.resolveStatus(program);
+    const expenseDisplay = this.formatExpenseDisplay(program.expenses ?? program.perbelanjaan);
+    const hasExpenseGrant = this.programHasExpenseGrant(program);
+    const expenseGrantName = program.expense_grant_name || program.expenseGrantName || '';
+    const expenseDeductedAmount = program.expense_deducted_amount ?? program.expenseDeductedAmount ?? 0;
+    const expenseGrantNotes = program.expense_grant_notes || program.expenseGrantNotes || '';
 
     const modal = document.createElement('div');
     modal.id = 'program-newest-details-modal';
@@ -797,7 +952,9 @@ export class ProgramKehadiranNewest {
           </div>
           <div class="detail-item">
             <span class="detail-label">Perbelanjaan</span>
-            <span class="detail-value">${program.expenses || program.perbelanjaan || '-'}</span>
+            <span class="detail-value">${expenseDisplay}</span>
+            ${hasExpenseGrant ? `<span class="detail-hint">Ditolak daripada ${this.escapeHtml(expenseGrantName || '-')} (${this.formatCurrency(expenseDeductedAmount)})</span>` : ''}
+            ${expenseGrantNotes ? `<span class="detail-hint">Catatan: ${this.escapeHtml(expenseGrantNotes)}</span>` : ''}
           </div>
           <div class="detail-item detail-span">
             <span class="detail-label">Penerangan</span>
@@ -880,10 +1037,12 @@ export class ProgramKehadiranNewest {
     this.openCreateProgramModal();
   }
 
-  openCreateProgramModal() {
+  async openCreateProgramModal() {
     if (document.getElementById("program-newest-create-modal")) {
       return;
     }
+
+    await this.ensureFinancialGrants().catch(() => {});
 
     const modal = document.createElement("div");
     modal.id = "program-newest-create-modal";
@@ -924,6 +1083,7 @@ export class ProgramKehadiranNewest {
                 <option value="">Pilih skala masa</option>
                 <option value="One Off">One Off</option>
                 <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
                 <option value="Monthly">Monthly</option>
                 <option value="Berkala">Berkala</option>
               </select>
@@ -939,8 +1099,19 @@ export class ProgramKehadiranNewest {
               <input id="program-newest-co-organizer" name="co_organizer" type="text" class="form-input" placeholder="Contoh: NGO Tempatan">
             </div>
             <div class="form-group">
-              <label for="program-newest-expenses">Perbelanjaan (Pilihan)</label>
-              <input id="program-newest-expenses" name="expenses" type="text" class="form-input" placeholder="Contoh: RM 5000">
+              <label for="program-newest-expenses">Perbelanjaan (RM)</label>
+              <input id="program-newest-expenses" name="expenses" type="number" min="0" step="0.01" class="form-input" placeholder="0.00" data-role="expense-input" data-expense-scope="create">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="program-newest-expense-grant">Tolak Dari Geran (Pilihan)</label>
+              <select id="program-newest-expense-grant" name="expense_grant_id" class="form-input" data-role="expense-grant-select" data-expense-scope="create"></select>
+              <small class="form-helper" data-role="expense-grant-balance" data-expense-scope="create">Baki semasa: -</small>
+            </div>
+            <div class="form-group">
+              <label for="program-newest-expense-notes">Catatan Tolakan (Pilihan)</label>
+              <input id="program-newest-expense-notes" name="expense_grant_notes" type="text" class="form-input" placeholder="Contoh: Logistik program">
             </div>
           </div>
           <div class="modal-actions">
@@ -968,6 +1139,11 @@ export class ProgramKehadiranNewest {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       await this.submitCreateProgram(form);
+    });
+
+    this.initializeExpenseGrantControls({
+      scope: 'create',
+      modal
     });
   }
 
@@ -1006,15 +1182,39 @@ export class ProgramKehadiranNewest {
       const location = (formData.get("location") || "").toString().trim();
       const timeScale = (formData.get("time_scale") || "").toString();
       const coOrganizer = (formData.get("co_organizer") || "").toString().trim();
-      const expenses = (formData.get("expenses") || "").toString().trim();
+      const expenseGrantId = (formData.get("expense_grant_id") || "").toString().trim();
+      const expenseGrantNotes = (formData.get("expense_grant_notes") || "").toString().trim();
+      const expensesRaw = formData.get("expenses");
+      const expenseAmount = this.parseAmountInput(expensesRaw);
+      const shouldDeduct = expenseGrantId && expenseAmount > 0;
 
       if (!name || !description || !startDate || !endDate || !category) {
         this.showToast("Sila lengkapkan semua maklumat wajib.", "error");
         return;
       }
+
+      if (expenseGrantId && expenseAmount <= 0) {
+        this.showToast("Masukkan jumlah perbelanjaan sebelum memilih geran.", "error");
+        return;
+      }
+
+      if (shouldDeduct) {
+        await this.ensureFinancialGrants().catch(() => {});
+        const grant = this.getFinancialGrantById(expenseGrantId);
+        if (!grant) {
+          this.showToast("Geran tidak ditemui.", "error");
+          return;
+        }
+        if (grant.availableAmount < expenseAmount) {
+          this.showToast("Baki geran tidak mencukupi untuk perbelanjaan ini.", "error");
+          return;
+        }
+      }
+
       const startIso = new Date(startDate).toISOString();
       const endIso = new Date(endDate).toISOString();
       const status = this.getStatusLabelFromDates(startIso, endIso);
+      const normalizedExpenses = expenseAmount > 0 ? expenseAmount : '';
 
       const payload = {
         name,
@@ -1026,13 +1226,37 @@ export class ProgramKehadiranNewest {
         location,
         time_scale: timeScale,
         co_organizer: coOrganizer,
-        expenses
+        expenses: normalizedExpenses,
+        expense_grant_notes: expenseGrantNotes,
+        expense_grant_id: shouldDeduct ? expenseGrantId : ''
       };
 
-      await ProgramService.createProgram(payload);
-      this.showToast("Program baharu berjaya dicipta.", "success");
-      this.closeCreateProgramModal();
-      await this.loadPrograms();
+      let createdProgram = null;
+      try {
+        createdProgram = await ProgramService.createProgram(payload);
+        if (shouldDeduct && createdProgram?.id) {
+          await this.reconcileProgramExpenseGrant({
+            programId: createdProgram.id,
+            programName: name,
+            newGrantId: expenseGrantId,
+            newAmount: expenseAmount,
+            notes: expenseGrantNotes,
+            previousMetadata: {}
+          });
+        }
+        this.showToast("Program baharu berjaya dicipta.", "success");
+        this.closeCreateProgramModal();
+        await this.loadPrograms();
+      } catch (deductionError) {
+        if (createdProgram?.id && shouldDeduct) {
+          try {
+            await ProgramService.deleteProgram(createdProgram.id);
+          } catch (cleanupError) {
+            console.warn("ProgramKehadiranNewest: gagal memadam program selepas ralat tolakan", cleanupError);
+          }
+        }
+        throw deductionError;
+      }
     } catch (error) {
       console.error("ProgramKehadiranNewest: gagal mencipta program baharu", error);
       this.showToast(error.message || "Gagal mencipta program baharu.", "error");
@@ -1101,7 +1325,13 @@ export class ProgramKehadiranNewest {
     const currentTimeScale = (program.time_scale || program.timeScale || "").toLowerCase();
     const currentLocation = program.lokasi || program.location || "";
     const currentCoOrganizer = program.co_organizer || program.coOrganizer || "";
-    const currentExpenses = program.expenses || program.perbelanjaan || "";
+    const currentExpenses = program.expenses ?? program.perbelanjaan ?? "";
+    const parsedExpenseValue = this.parseAmountInput(currentExpenses);
+    const expenseInputValue = parsedExpenseValue > 0 ? parsedExpenseValue : (currentExpenses || "");
+    const currentExpenseGrantId = program.expense_grant_id || program.expenseGrantId || "";
+    const currentExpenseGrantNotes = program.expense_grant_notes || program.expenseGrantNotes || "";
+
+    await this.ensureFinancialGrants().catch(() => {});
 
     const modal = document.createElement("div");
     modal.id = "program-newest-edit-modal";
@@ -1142,6 +1372,7 @@ export class ProgramKehadiranNewest {
                 <option value="" ${currentTimeScale === "" ? "selected" : ""}>Pilih skala masa</option>
                 <option value="One Off" ${currentTimeScale === "one off" ? "selected" : ""}>One Off</option>
                 <option value="Daily" ${currentTimeScale === "daily" ? "selected" : ""}>Daily</option>
+                <option value="Weekly" ${currentTimeScale === "weekly" ? "selected" : ""}>Weekly</option>
                 <option value="Monthly" ${currentTimeScale === "monthly" ? "selected" : ""}>Monthly</option>
                 <option value="Berkala" ${currentTimeScale === "berkala" ? "selected" : ""}>Berkala</option>
               </select>
@@ -1157,8 +1388,19 @@ export class ProgramKehadiranNewest {
               <input id="program-newest-edit-co-organizer" name="co_organizer" type="text" class="form-input" value="${currentCoOrganizer}">
             </div>
             <div class="form-group">
-              <label for="program-newest-edit-expenses">Perbelanjaan (Pilihan)</label>
-              <input id="program-newest-edit-expenses" name="expenses" type="text" class="form-input" value="${currentExpenses}">
+              <label for="program-newest-edit-expenses">Perbelanjaan (RM)</label>
+              <input id="program-newest-edit-expenses" name="expenses" type="number" min="0" step="0.01" class="form-input" value="${expenseInputValue}" data-role="expense-input" data-expense-scope="edit">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="program-newest-edit-expense-grant">Tolak Dari Geran (Pilihan)</label>
+              <select id="program-newest-edit-expense-grant" name="expense_grant_id" class="form-input" data-role="expense-grant-select" data-expense-scope="edit" data-selected-grant="${currentExpenseGrantId}"></select>
+              <small class="form-helper" data-role="expense-grant-balance" data-expense-scope="edit">Baki semasa: -</small>
+            </div>
+            <div class="form-group">
+              <label for="program-newest-edit-expense-notes">Catatan Tolakan (Pilihan)</label>
+              <input id="program-newest-edit-expense-notes" name="expense_grant_notes" type="text" class="form-input" value="${currentExpenseGrantNotes}">
             </div>
           </div>
           <div class="modal-actions">
@@ -1186,6 +1428,12 @@ export class ProgramKehadiranNewest {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       await this.submitSuntingProgram(form, programId);
+    });
+
+    this.initializeExpenseGrantControls({
+      scope: 'edit',
+      modal,
+      selectedGrantId: currentExpenseGrantId
     });
   }
 
@@ -1224,12 +1472,50 @@ export class ProgramKehadiranNewest {
       const location = (formData.get("location") || "").toString().trim();
       const timeScale = (formData.get("time_scale") || "").toString();
       const coOrganizer = (formData.get("co_organizer") || "").toString().trim();
-      const expenses = (formData.get("expenses") || "").toString().trim();
+      const expenseGrantId = (formData.get("expense_grant_id") || "").toString().trim();
+      const expenseGrantNotes = (formData.get("expense_grant_notes") || "").toString().trim();
+      const expensesRaw = formData.get("expenses");
+      const expenseAmount = this.parseAmountInput(expensesRaw);
+      const normalizedExpenses = expenseAmount > 0 ? expenseAmount : '';
+      const shouldDeduct = expenseGrantId && expenseAmount > 0;
+
+      let previousProgramMeta = this.state.programs.find(item => item.id === programId);
+      if (!previousProgramMeta) {
+        try {
+          previousProgramMeta = await ProgramService.getProgramById(programId);
+        } catch (loadError) {
+          console.warn("ProgramKehadiranNewest: gagal mendapatkan metadata program untuk pelarasan geran", loadError);
+        }
+      }
+      const hasExistingGrantLink = this.programHasExpenseGrant(previousProgramMeta);
+      const requiresGrantSync = shouldDeduct || hasExistingGrantLink;
 
       if (!name || !description || !startDate || !endDate || !category) {
         this.showToast("Sila lengkapkan semua maklumat wajib.", "error");
         return;
       }
+
+      if (expenseGrantId && expenseAmount <= 0) {
+        this.showToast("Masukkan jumlah perbelanjaan sebelum memilih geran.", "error");
+        return;
+      }
+
+      if (requiresGrantSync) {
+        await this.ensureFinancialGrants().catch(() => {});
+      }
+
+      if (shouldDeduct) {
+        const grant = this.getFinancialGrantById(expenseGrantId);
+        if (!grant) {
+          this.showToast("Geran tidak ditemui.", "error");
+          return;
+        }
+        if (grant.availableAmount < expenseAmount && (!hasExistingGrantLink || grant.id !== (previousProgramMeta?.expense_grant_id || previousProgramMeta?.expenseGrantId))) {
+          this.showToast("Baki geran tidak mencukupi untuk jumlah baharu.", "error");
+          return;
+        }
+      }
+
       const startIso = new Date(startDate).toISOString();
       const endIso = new Date(endDate).toISOString();
       const status = this.getStatusLabelFromDates(startIso, endIso);
@@ -1244,8 +1530,21 @@ export class ProgramKehadiranNewest {
         location,
         time_scale: timeScale,
         co_organizer: coOrganizer,
-        expenses
+        expenses: normalizedExpenses,
+        expense_grant_notes: expenseGrantNotes,
+        expense_grant_id: shouldDeduct ? expenseGrantId : ''
       };
+
+      if (requiresGrantSync) {
+        await this.reconcileProgramExpenseGrant({
+          programId,
+          programName: name,
+          newGrantId: shouldDeduct ? expenseGrantId : '',
+          newAmount: expenseAmount,
+          notes: expenseGrantNotes,
+          previousMetadata: previousProgramMeta || {}
+        });
+      }
 
       await ProgramService.updateProgram(programId, payload);
       this.showToast("Program dikemas kini.", "success");
@@ -1306,6 +1605,7 @@ export class ProgramKehadiranNewest {
     if (!target) return;
 
     const { programId } = this.state.filters;
+    this.updateAttendanceDateUI();
     if (!programId) {
       target.innerHTML = `
         <tr>
@@ -1322,7 +1622,8 @@ export class ProgramKehadiranNewest {
     `;
 
     try {
-      const records = await (await import('../../services/backend/AttendanceService.js')).listAttendanceByProgram(programId, null);
+      const attendanceDate = this.state.filters.attendanceDate || this.getToday();
+      const records = await (await import('../../services/backend/AttendanceService.js')).listAttendanceByProgram(programId, attendanceDate);
       this.state.attendance = records || [];
       this.renderAttendanceTable();
 
@@ -1351,9 +1652,10 @@ export class ProgramKehadiranNewest {
     });
 
     if (!records || records.length === 0) {
+      const dateText = this.formatDateForDisplay(this.state.filters.attendanceDate || this.getToday());
       target.innerHTML = `
         <tr>
-          <td colspan="6" class="empty-text">Tiada rekod kehadiran ditemui.</td>
+          <td colspan="6" class="empty-text">Tiada rekod kehadiran pada ${dateText}.</td>
         </tr>
       `;
       if (this.elements.attendanceFooter) {
@@ -1629,6 +1931,264 @@ export class ProgramKehadiranNewest {
     }
   }
 
+  parseAmountInput(rawValue) {
+    if (rawValue === null || rawValue === undefined) {
+      return 0;
+    }
+    if (typeof rawValue === 'number') {
+      return Number.isFinite(rawValue) ? rawValue : 0;
+    }
+    const cleaned = rawValue.toString().replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+    const parsed = parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  formatCurrency(value) {
+    const amount = this.parseAmountInput(value);
+    return `RM ${amount.toLocaleString('en-MY', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
+
+  formatExpenseDisplay(value) {
+    if (value === null || value === undefined || value === '') {
+      return '-';
+    }
+    const parsed = this.parseAmountInput(value);
+    if (parsed > 0) {
+      return this.formatCurrency(parsed);
+    }
+    return typeof value === 'string' ? value : '-';
+  }
+
+  programHasExpenseGrant(program) {
+    if (!program) return false;
+    const grantId = program.expense_grant_id || program.expenseGrantId || '';
+    const amount = this.parseAmountInput(
+      program.expense_deducted_amount ?? program.expenseDeductedAmount ?? 0
+    );
+    return Boolean(grantId && amount > 0);
+  }
+
+  getFinancialGrantById(grantId) {
+    if (!grantId) return null;
+    return (this.state.financialGrants || []).find(grant => grant.id === grantId) || null;
+  }
+
+  async ensureFinancialGrants(force = false) {
+    if (this.state.financialGrantsLoading) {
+      return this.state.financialGrants;
+    }
+    if (!force && this.state.financialGrantsLoaded && this.state.financialGrants.length) {
+      return this.state.financialGrants;
+    }
+    this.state.financialGrantsLoading = true;
+    try {
+      const { collection, getDocs, query } = await import('firebase/firestore');
+      const { db } = await import('../../services/database/firebase.js');
+      const { COLLECTIONS, createEnvFilter } = await import('../../services/database/collections.js');
+      const snapshot = await getDocs(query(collection(db, COLLECTIONS.FINANCIAL_GRANTS), createEnvFilter()));
+      this.state.financialGrants = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || 'Geran',
+            availableAmount: Number(data.availableAmount ?? data.totalAmount ?? 0)
+          };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.state.financialGrantsLoaded = true;
+      return this.state.financialGrants;
+    } catch (error) {
+      console.error('ProgramKehadiranNewest: gagal memuat senarai geran kewangan', error);
+      this.state.financialGrants = [];
+      throw error;
+    } finally {
+      this.state.financialGrantsLoading = false;
+    }
+  }
+
+  populateGrantSelectElement(select, selectedId = '') {
+    if (!select) {
+      return;
+    }
+    const grants = this.state.financialGrants || [];
+    if (!grants.length) {
+      select.innerHTML = '<option value="">Tiada geran tersedia</option>';
+      select.value = '';
+      select.disabled = true;
+      return;
+    }
+    select.disabled = false;
+    const options = ['<option value="">Pilih Geran</option>', ...grants.map(
+      grant => `<option value="${grant.id}">${this.escapeHtml(grant.name)}</option>`
+    )];
+    select.innerHTML = options.join('');
+    if (selectedId && grants.some(grant => grant.id === selectedId)) {
+      select.value = selectedId;
+    } else {
+      select.value = '';
+    }
+  }
+
+  initializeExpenseGrantControls({ scope, modal, selectedGrantId = '' }) {
+    if (!modal) return;
+    const select = modal.querySelector(
+      `[data-role="expense-grant-select"][data-expense-scope="${scope}"]`
+    );
+    if (select) {
+      this.populateGrantSelectElement(select, selectedGrantId);
+      select.addEventListener('change', () => this.updateExpenseGrantHelper(scope, modal));
+    }
+    this.updateExpenseGrantHelper(scope, modal);
+  }
+
+  updateExpenseGrantHelper(scope, container = document) {
+    if (!container) return;
+    const select = container.querySelector(
+      `[data-role="expense-grant-select"][data-expense-scope="${scope}"]`
+    );
+    const helper = container.querySelector(
+      `[data-role="expense-grant-balance"][data-expense-scope="${scope}"]`
+    );
+    if (!helper) {
+      return;
+    }
+    if (!select) {
+      helper.textContent = 'Baki semasa: -';
+      return;
+    }
+    if (select.disabled) {
+      helper.textContent = 'Tiada geran tersedia.';
+      return;
+    }
+    if (!select.value) {
+      helper.textContent = 'Baki semasa: -';
+      return;
+    }
+    const grant = this.getFinancialGrantById(select.value);
+    helper.textContent = grant ? `Baki semasa: ${this.formatCurrency(grant.availableAmount)}` : 'Baki semasa: -';
+  }
+
+  async reconcileProgramExpenseGrant({ programId, programName, newGrantId, newAmount, notes, previousMetadata = {} }) {
+    const prevGrantId = previousMetadata?.expense_grant_id || previousMetadata?.expenseGrantId || '';
+    const prevAmount = this.parseAmountInput(
+      previousMetadata?.expense_deducted_amount ?? previousMetadata?.expenseDeductedAmount ?? 0
+    );
+    const sameGrant = prevGrantId && newGrantId && prevGrantId === newGrantId;
+    const amountsEqual = sameGrant && Math.abs(prevAmount - newAmount) < 0.01;
+    if (amountsEqual) {
+      return;
+    }
+    const requiresRefund = Boolean(prevGrantId && prevAmount > 0);
+    const requiresNewDeduction = Boolean(newGrantId && newAmount > 0);
+    if (!requiresRefund && !requiresNewDeduction) {
+      return;
+    }
+
+    const { doc, collection, runTransaction } = await import('firebase/firestore');
+    const { db } = await import('../../services/database/firebase.js');
+    const { COLLECTIONS, addStandardFields } = await import('../../services/database/collections.js');
+
+    await runTransaction(db, async transaction => {
+      const now = new Date();
+      const programRef = doc(db, COLLECTIONS.PROGRAM, programId);
+      const updates = {};
+
+      if (requiresRefund) {
+        const refundGrantRef = doc(db, COLLECTIONS.FINANCIAL_GRANTS, prevGrantId);
+        const prevSnap = await transaction.get(refundGrantRef);
+        if (prevSnap.exists()) {
+          const prevData = prevSnap.data();
+          const prevAvailable = Number(prevData.availableAmount ?? prevData.totalAmount ?? 0) + prevAmount;
+          transaction.update(refundGrantRef, {
+            availableAmount: prevAvailable,
+            updatedAt: now
+          });
+
+          const refundTxnRef = doc(collection(db, COLLECTIONS.FINANCIAL_TRANSACTIONS));
+          transaction.set(
+            refundTxnRef,
+            addStandardFields({
+              type: 'adjustment',
+              amount: prevAmount,
+              date: now,
+              description: `Pelarasan perbelanjaan untuk ${programName}`,
+              reference: `PROGRAM-${programId}`,
+              grantImpacts: [{
+                grantId: prevGrantId,
+                grantName: previousMetadata?.expense_grant_name || previousMetadata?.expenseGrantName || prevData.name || 'Geran',
+                amount: prevAmount
+              }],
+              metadata: { programId, action: 'program-expense-refund' },
+              createdAt: now,
+              updatedAt: now
+            })
+          );
+        }
+        if (!requiresNewDeduction) {
+          updates.expense_grant_id = '';
+          updates.expense_grant_name = '';
+          updates.expense_deducted_amount = 0;
+          updates.expense_deducted_at = null;
+          updates.expense_deduction_transaction_id = '';
+        }
+      }
+
+      if (requiresNewDeduction) {
+        const grantRef = doc(db, COLLECTIONS.FINANCIAL_GRANTS, newGrantId);
+        const grantSnap = await transaction.get(grantRef);
+        if (!grantSnap.exists()) {
+          throw new Error('Geran tidak ditemui.');
+        }
+        const grantData = grantSnap.data();
+        const baseAvailable = Number(grantData.availableAmount ?? grantData.totalAmount ?? 0);
+        const effectiveAvailable = sameGrant ? baseAvailable + prevAmount : baseAvailable;
+        if (effectiveAvailable < newAmount) {
+          throw new Error(`Baki ${grantData.name || 'geran'} tidak mencukupi.`);
+        }
+        transaction.update(grantRef, {
+          availableAmount: effectiveAvailable - newAmount,
+          updatedAt: now
+        });
+
+        const deductionTxnRef = doc(collection(db, COLLECTIONS.FINANCIAL_TRANSACTIONS));
+        transaction.set(
+          deductionTxnRef,
+          addStandardFields({
+            type: 'deduction',
+            amount: newAmount,
+            date: now,
+            description: notes || `Perbelanjaan program ${programName}`,
+            reference: `PROGRAM-${programId}`,
+            grantImpacts: [{
+              grantId: newGrantId,
+              grantName: grantData.name || 'Geran',
+              amount: newAmount
+            }],
+            metadata: { programId, action: 'program-expense' },
+            createdAt: now,
+            updatedAt: now
+          })
+        );
+
+        updates.expense_grant_id = newGrantId;
+        updates.expense_grant_name = grantData.name || '';
+        updates.expense_deducted_amount = newAmount;
+        updates.expense_deducted_at = now;
+        updates.expense_deduction_transaction_id = deductionTxnRef.id;
+      }
+
+      if (Object.keys(updates).length) {
+        transaction.update(programRef, updates);
+      }
+    });
+
+    this.state.financialGrantsLoaded = false;
+  }
+
   formatDate(value) {
     if (!value) return 'N/A';
 
@@ -1726,6 +2286,7 @@ export class ProgramKehadiranNewest {
 
     const program = this.state.programs.find(p => p.id === this.state.filters.programId);
     const programNama = program?.nama_program || program?.nama || 'program';
+    const dateKey = this.state.filters.attendanceDate || this.getToday();
 
     const header = ['Nama', 'No KP', 'Sumber', 'Status', 'Catatan'];
     const rows = this.state.attendance.map(rec => ([
@@ -1743,7 +2304,7 @@ export class ProgramKehadiranNewest {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `attendance-${programNama.replace(/\s+/g, '-').toLowerCase()}.csv`;
+    link.download = `attendance-${programNama.replace(/\s+/g, '-').toLowerCase()}-${dateKey}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1776,8 +2337,8 @@ style.textContent = `
   .program-newest-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 0;
+    gap: 0px;
+    padding: 0px 0 0;
   }
 
   .program-newest-wrapper .program-newest-section {
@@ -1786,6 +2347,74 @@ style.textContent = `
 
   .program-newest-wrapper .program-newest-section.active {
     display: block;
+  }
+
+  .program-tab-shell {
+    margin-bottom: 0px;
+  }
+
+  .program-tab-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--warna-sempadan);
+    padding: 8px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .program-tab {
+    flex: 1 1 200px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: #f9f9ff;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 64px;
+  }
+
+  .program-tab .tab-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 8px 16px rgba(124, 58, 237, 0.25);
+  }
+
+  .program-tab .tab-title {
+    display: block;
+    font-weight: 700;
+    color: var(--warna-teks-utama);
+    font-size: 0.95rem;
+  }
+
+  .program-tab .tab-desc {
+    display: block;
+    color: var(--warna-teks-sekunder);
+    font-size: 0.78rem;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+
+  .program-tab.active {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.07), rgba(96, 165, 250, 0.05));
+    border-color: rgba(124, 58, 237, 0.3);
+    box-shadow: 0 12px 22px rgba(124, 58, 237, 0.15);
+  }
+
+  .program-tab.active .tab-icon {
+    background: linear-gradient(135deg, #7c3aed, #6366f1);
   }
 
   .program-newest-wrapper .program-newest-grid {
@@ -1845,7 +2474,7 @@ style.textContent = `
   }
 
   .program-newest-wrapper .section-header {
-    margin-bottom: 14px;
+    margin-bottom: 0px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2101,6 +2730,35 @@ style.textContent = `
     background: #fff;
   }
 
+  .attendance-date-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0;
+  }
+
+  .attendance-date-filter .filter-label {
+    font-weight: 600;
+    color: var(--warna-teks-utama);
+  }
+
+  .attendance-date-filter .date-control-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    max-width: 360px;
+  }
+
+  .attendance-date-filter .date-control-group .btn {
+    padding: 8px 12px;
+  }
+
+  .attendance-date-filter .date-helper {
+    margin: 0;
+    font-size: 13px;
+    color: var(--warna-teks-sekunder);
+  }
+
   .program-newest-wrapper .program-action-bar {
     background: #f8f7ff;
     border: 1px solid var(--warna-sempadan);
@@ -2221,28 +2879,143 @@ style.textContent = `
     padding: 10px 14px;
   }
 
+  .program-newest-wrapper .reports-layered-shell {
+    position: relative;
+    padding: clamp(12px, 2vw, 24px);
+  }
+
+  .program-newest-wrapper .reports-layered-backdrop {
+    position: absolute;
+    inset: clamp(12px, 2vw, 24px);
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(236, 72, 153, 0.08));
+    transform: translate(16px, 18px);
+    z-index: 0;
+    filter: blur(2px);
+  }
+
+  .program-newest-wrapper .reports-layered-panel {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: 32px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow: 0 40px 65px rgba(15, 23, 42, 0.15);
+    padding: clamp(20px, 2.8vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .program-newest-wrapper .report-hero {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .program-newest-wrapper .report-eyebrow {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+
+  .program-newest-wrapper .report-hero h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  }
+
+  .program-newest-wrapper .report-description {
+    max-width: 520px;
+    margin-top: 6px;
+    color: var(--warna-teks-sekunder);
+  }
+
+  .program-newest-wrapper .report-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
   .program-newest-wrapper .reports-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 18px;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    gap: clamp(16px, 2vw, 24px);
     align-items: stretch;
   }
 
-  @media (min-width: 1400px) {
-    .program-newest-wrapper .reports-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
   .program-newest-wrapper .report-card {
-    border: 1px solid var(--warna-sempadan);
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-    padding: 18px;
+    position: relative;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 24px;
+    background: linear-gradient(135deg, #ffffff, #f7f5ff);
+    box-shadow: 0 25px 45px rgba(15, 23, 42, 0.15);
+    padding: clamp(16px, 2vw, 22px);
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
+  }
+
+  .program-newest-wrapper .report-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.35);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .program-newest-wrapper .report-card > * {
+    position: relative;
+  }
+
+  .program-newest-wrapper .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .program-newest-wrapper .report-header h4 {
+    margin: 0;
+  }
+
+  .program-newest-wrapper .report-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #a855f7, #6366f1);
+    color: #fff;
+    font-size: 1.1rem;
+    box-shadow: 0 12px 25px rgba(99, 102, 241, 0.35);
+  }
+
+  .program-newest-wrapper .report-card.span-2 {
+    grid-column: 1 / 2;
+  }
+
+  .program-newest-wrapper .report-card.span-full {
+    grid-column: 1 / 3;
+  }
+
+  @media (max-width: 1024px) {
+    .program-newest-wrapper .reports-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .program-newest-wrapper .report-card.span-2,
+    .program-newest-wrapper .report-card.span-full {
+      grid-column: span 1;
+    }
   }
 
   .program-newest-wrapper .stat-grid {
@@ -2356,6 +3129,11 @@ style.textContent = `
     margin-bottom: 14px;
   }
 
+  .program-newest-modal .form-helper {
+    font-size: 12px;
+    color: var(--warna-teks-sekunder);
+  }
+
   .program-newest-modal .form-group label {
     font-weight: 600;
     color: var(--warna-teks-utama);
@@ -2415,6 +3193,12 @@ style.textContent = `
     font-size: 16px;
     font-weight: 600;
     color: var(--warna-teks-utama);
+  }
+
+  .program-details-grid .detail-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--warna-teks-sekunder);
   }
 
   .program-details-grid .detail-span {
