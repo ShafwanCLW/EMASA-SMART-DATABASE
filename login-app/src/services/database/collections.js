@@ -98,10 +98,10 @@ export const createEnvFilter = () => {
   return where(STANDARD_FIELDS.ENV, '==', getEnvironment());
 };
 
-// Utility function to normalize no_kp (digits only)
+// Utility function to normalize no_kp (alphanumeric, uppercase)
 export const normalizeNoKP = (noKP) => {
   if (!noKP) return '';
-  return noKP.toString().replace(/\D/g, '');
+  return noKP.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
 };
 
 // Helper function to validate status_rekod

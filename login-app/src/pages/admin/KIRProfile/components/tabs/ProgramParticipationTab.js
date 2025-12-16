@@ -103,7 +103,7 @@ export class ProgramParticipationTab extends BaseTab {
 
   buildParticipantList() {
     const list = [];
-    const normalizeNoKP = value => (value || '').toString().replace(/\D/g, '');
+    const normalizeNoKP = value => (value || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     const kirName = this.kirData?.nama_penuh || this.kirData?.nama || 'Ketua Isi Rumah';
     if (this.kirProfile.kirId) {
@@ -447,7 +447,7 @@ export class ProgramParticipationTab extends BaseTab {
   }
 
   normalizeNoKP(value) {
-    return (value || '').toString().replace(/\D/g, '');
+    return (value || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
   }
 
   doesRecordBelongToParticipant(record, participant) {

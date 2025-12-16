@@ -135,11 +135,24 @@ export class SenaraiKIR {
                                     class="form-input" 
                                     placeholder="123456-12-1234"
                                     maxlength="14"
-                                    pattern="\\d{6}-\\d{2}-\\d{4}"
                                     required
                                 >
                                 <div class="error-text" id="ic-error"></div>
                                 <small class="form-help">Ikuti format standard: 123456-12-1234</small>
+                            </div>
+                            <div class="form-group identity-type-group">
+                                <label>Jenis Dokumen</label>
+                                <div class="identity-type-options">
+                                    <label class="identity-type-option">
+                                        <input type="radio" name="kir_identity_type" value="nric" checked>
+                                        <span>No. Kad Pengenalan</span>
+                                    </label>
+                                    <label class="identity-type-option">
+                                        <input type="radio" name="kir_identity_type" value="passport">
+                                        <span>Passport</span>
+                                    </label>
+                                </div>
+                                <small class="form-help">Pilih "Passport" untuk benarkan nombor alfanumerik.</small>
                             </div>
                         </form>
                     </div>
@@ -638,6 +651,29 @@ export class SenaraiKIR {
                 flex: 1;
                 font-weight: 500;
             }
+
+            .identity-type-group {
+                margin-top: 0.5rem;
+            }
+
+            .identity-type-options {
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+                margin-top: 0.35rem;
+            }
+
+            .identity-type-option {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                font-weight: 500;
+                color: #475569;
+            }
+
+            .identity-type-option input {
+                width: auto;
+            }
             </style>
                 <div class="toast-content">
                     <span class="toast-icon"></span>
@@ -702,7 +738,13 @@ export class SenaraiKIR {
         // IC number input mask
         document.addEventListener('input', (e) => {
             if (e.target && e.target.id === 'kir-ic') {
-                e.target.value = formatICWithDashes(e.target.value);
+                const type = this.getSelectedIdentityType();
+                if (type === 'passport') {
+                    e.target.value = this.sanitizeIdentityValue(e.target.value, 'passport');
+                } else {
+                    const digits = this.sanitizeIdentityValue(e.target.value, 'nric');
+                    e.target.value = this.formatNRICForInput(digits);
+                }
             }
         });
     }
@@ -1043,6 +1085,7 @@ export class SenaraiKIR {
         modal.style.display = 'flex';
         // Clear previous form data and errors
         this.clearCreateKIRForm();
+        this.initializeIdentityTypeControls();
         // Focus on name input
         setTimeout(() => {
             const nameInput = document.getElementById('kir-nama');
@@ -1075,6 +1118,11 @@ export class SenaraiKIR {
         // Remove error styling
         document.getElementById('kir-nama').classList.remove('error');
         document.getElementById('kir-ic').classList.remove('error');
+        const nricRadio = document.querySelector('input[name="kir_identity_type"][value="nric"]');
+        if (nricRadio) {
+            nricRadio.checked = true;
+        }
+        this.applyIdentityTypeRules('nric');
     }
 }
 
@@ -1110,7 +1158,8 @@ export class SenaraiKIR {
      */
     formatICNumber(ic) {
         if (!ic) return '';
-        return normalizeICDigits(ic);
+        const type = this.getSelectedIdentityType();
+        return this.sanitizeIdentityValue(ic, type);
     }
 
     formatICDisplay(ic) {
@@ -1152,21 +1201,27 @@ export class SenaraiKIR {
             isValid = false;
         }
         
-        // Validate IC number using validateKIR function (same as Cipta KIR)
+        const identityType = this.getSelectedIdentityType();
         const ic = icInput.value.trim();
         const normalizedIC = this.formatICNumber(ic);
         if (!normalizedIC) {
-            icError.textContent = 'No. Kad Pengenalan diperlukan';
+            icError.textContent = identityType === 'passport'
+                ? 'Nombor passport diperlukan'
+                : 'No. Kad Pengenalan diperlukan';
+            icInput.classList.add('error');
+            isValid = false;
+        } else if (identityType === 'nric' && normalizedIC.length !== 12) {
+            icError.textContent = 'Format No. Kad Pengenalan tidak sah (12 digit nombor sahaja)';
             icInput.classList.add('error');
             isValid = false;
         } else {
             try {
-                // Use validateKIR to validate the IC number (same as Cipta KIR)
                 const testData = { no_kp: normalizedIC };
                 validateKIR(testData);
-                // If validateKIR doesn't throw an error, the IC is valid
             } catch (error) {
-                icError.textContent = 'Format No. Kad Pengenalan tidak sah (12 digit nombor sahaja)';
+                icError.textContent = identityType === 'passport'
+                    ? 'Nombor passport tidak sah.'
+                    : 'Format No. Kad Pengenalan tidak sah.';
                 icInput.classList.add('error');
                 isValid = false;
             }
@@ -1198,10 +1253,12 @@ export class SenaraiKIR {
         const nameInput = document.getElementById('kir-nama');
         const icInput = document.getElementById('kir-ic');
         
+        const identityType = this.getSelectedIdentityType();
         const formData = {
             nama_penuh: nameInput.value.trim(),
             no_kp: this.formatICNumber(icInput.value.trim()),
-            status_rekod: 'Draf' // Use 'Draf' to match backend STATUS_REKOD enum
+            identity_type: identityType,
+            status_rekod: 'Draf'
         };
         
         console.log('Creating new KIR with data:', formData);
@@ -1243,7 +1300,79 @@ export class SenaraiKIR {
         btnText.style.display = 'inline';
         btnLoading.style.display = 'none';
     }
-}
+  }
+
+    getSelectedIdentityType() {
+        const radio = document.querySelector('input[name="kir_identity_type"]:checked');
+        return radio?.value || 'nric';
+    }
+
+    sanitizeIdentityValue(value, type = 'nric') {
+        const raw = (value || '').toString();
+        if (type === 'passport') {
+            return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20);
+        }
+        return raw.replace(/\D/g, '').slice(0, 12);
+    }
+
+    formatNRICForInput(value = '') {
+        const digits = value.replace(/\D/g, '').slice(0, 12);
+        if (digits.length <= 6) return digits;
+        if (digits.length <= 8) return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+        return `${digits.slice(0, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
+    }
+
+    applyIdentityTypeRules(type = 'nric') {
+        const icInput = document.getElementById('kir-ic');
+        if (!icInput) return;
+
+        if (type === 'passport') {
+            icInput.removeAttribute('maxlength');
+            icInput.placeholder = 'Contoh: A1234567';
+            icInput.inputMode = 'text';
+            icInput.dataset.identityType = 'passport';
+        } else {
+            icInput.setAttribute('maxlength', '14');
+            icInput.placeholder = '123456-12-1234';
+            icInput.inputMode = 'numeric';
+            icInput.dataset.identityType = 'nric';
+        }
+    }
+
+    initializeIdentityTypeControls() {
+        const icInput = document.getElementById('kir-ic');
+        if (!icInput) return;
+
+        if (!icInput.dataset.identityListener) {
+            icInput.addEventListener('input', (event) => {
+                const type = this.getSelectedIdentityType();
+                if (type === 'passport') {
+                    event.target.value = this.sanitizeIdentityValue(event.target.value, 'passport');
+                } else {
+                    const digits = this.sanitizeIdentityValue(event.target.value, 'nric');
+                    event.target.value = this.formatNRICForInput(digits);
+                }
+            });
+            icInput.dataset.identityListener = 'true';
+        }
+
+        const identityRadios = document.querySelectorAll('input[name="kir_identity_type"]');
+        identityRadios.forEach(radio => {
+            if (radio.dataset.identityListener) return;
+            radio.addEventListener('change', () => {
+                if (!radio.checked) return;
+                this.applyIdentityTypeRules(radio.value);
+                const icInputEl = document.getElementById('kir-ic');
+                if (!icInputEl) return;
+                icInputEl.value = radio.value === 'passport'
+                    ? this.sanitizeIdentityValue(icInputEl.value, 'passport')
+                    : this.formatNRICForInput(this.sanitizeIdentityValue(icInputEl.value, 'nric'));
+            });
+            radio.dataset.identityListener = 'true';
+        });
+
+        this.applyIdentityTypeRules(this.getSelectedIdentityType());
+    }
 
     /**
      * Show toast message

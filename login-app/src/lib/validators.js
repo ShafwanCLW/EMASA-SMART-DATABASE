@@ -30,6 +30,7 @@ const KIR_SCHEMA = {
   bandar: 'string',
   negeri: 'string',
   tempat_lahir: 'string',
+  identity_type: 'string',
   
   // Family
   status_perkahwinan: 'string',

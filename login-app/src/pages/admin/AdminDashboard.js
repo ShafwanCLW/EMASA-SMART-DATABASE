@@ -1850,6 +1850,21 @@ export function createAdminMainContent() {
                   <input type="text" id="no_kp" name="no_kp" required pattern="[0-9]{12}" placeholder="123456789012" maxlength="12">
                 </div>
                 
+                <div class="form-group identity-type-group">
+                  <label>Jenis Dokumen</label>
+                  <div class="identity-type-options">
+                    <label class="identity-type-option">
+                      <input type="radio" name="identity_type" value="nric" checked>
+                      <span>No. Kad Pengenalan</span>
+                    </label>
+                    <label class="identity-type-option">
+                      <input type="radio" name="identity_type" value="passport">
+                      <span>Passport</span>
+                    </label>
+                  </div>
+                  <small class="form-help">Pilih jenis dokumen. Passport membenarkan nombor alfanumerik.</small>
+                </div>
+                
                 <div class="form-group">
                   <label for="tarikh_lahir">Tarikh Lahir *</label>
                   <input type="date" id="tarikh_lahir" name="tarikh_lahir" required>
@@ -4126,14 +4141,48 @@ async function openQuickKIRCreationModal({ prefillName = '', prefillNoKP = '' } 
     const statusElement = modal.querySelector('#quick-kir-status');
     const nameInput = modal.querySelector('#quickKirName');
     const icInput = modal.querySelector('#quickKirNoKP');
+    const identityRadios = modal.querySelectorAll('input[name="quick_identity_type"]');
+    
+    const getQuickIdentityType = () => {
+      return modal.querySelector('input[name="quick_identity_type"]:checked')?.value || 'nric';
+    };
+    
+    const applyQuickIdentityRules = (type = getQuickIdentityType()) => {
+      if (!icInput) return;
+      if (type === 'passport') {
+        icInput.removeAttribute('maxlength');
+        icInput.placeholder = 'Contoh: A1234567';
+      } else {
+        icInput.setAttribute('maxlength', '12');
+        icInput.placeholder = '123456789012';
+      }
+    };
     
     if (nameInput && prefillName) nameInput.value = prefillName;
     if (icInput) {
       if (prefillNoKP) icInput.value = prefillNoKP;
       icInput.addEventListener('input', (event) => {
-        event.target.value = normalizeNoKP(event.target.value).slice(0, 12);
+        const type = getQuickIdentityType();
+        if (type === 'passport') {
+          event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20);
+        } else {
+          event.target.value = event.target.value.replace(/\D/g, '').slice(0, 12);
+        }
       });
     }
+    
+    identityRadios.forEach(radio => {
+      radio.addEventListener('change', (event) => {
+        if (!event.target.checked) return;
+        applyQuickIdentityRules(event.target.value);
+        if (icInput) {
+          icInput.value = event.target.value === 'passport'
+            ? icInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20)
+            : icInput.value.replace(/\D/g, '').slice(0, 12);
+        }
+      });
+    });
+    applyQuickIdentityRules();
     
     const setStatus = (message, type = 'info') => {
       statusElement.textContent = message;
@@ -4157,16 +4206,24 @@ async function openQuickKIRCreationModal({ prefillName = '', prefillNoKP = '' } 
         const originalText = submitBtn?.innerHTML;
         
         const kirName = (nameInput?.value || '').trim();
+        const identityType = getQuickIdentityType();
         const kirNoKpRaw = (icInput?.value || '').trim();
-        const kirNoKp = normalizeNoKP(kirNoKpRaw);
+        const kirNoKp = identityType === 'passport'
+          ? kirNoKpRaw.toUpperCase().replace(/[^A-Z0-9]/g, '')
+          : normalizeNoKP(kirNoKpRaw);
         
         if (!kirName || kirName.length < 2) {
           setStatus('Nama penuh diperlukan.', 'error');
           return;
         }
         
-        if (!kirNoKp || kirNoKp.length !== 12) {
-          setStatus('No. KP mesti 12 digit nombor.', 'error');
+        if (identityType === 'nric') {
+          if (!kirNoKp || kirNoKp.length !== 12) {
+            setStatus('No. KP mesti 12 digit nombor.', 'error');
+            return;
+          }
+        } else if (!kirNoKp) {
+          setStatus('Nombor passport diperlukan.', 'error');
           return;
         }
         
@@ -4181,6 +4238,7 @@ async function openQuickKIRCreationModal({ prefillName = '', prefillNoKP = '' } 
           const result = await KIRService.createKIR({
             nama_penuh: kirName,
             no_kp: kirNoKp,
+            identity_type: identityType,
             status_rekod: 'Draf'
           });
           
@@ -4225,6 +4283,19 @@ function getQuickKIRModalTemplate(prefillName, prefillNoKP) {
             <label for="quickKirNoKP">No. Kad Pengenalan</label>
             <input type="text" id="quickKirNoKP" name="no_kp" required maxlength="12" placeholder="123456789012" value="${prefillNoKP || ''}">
             <small class="form-help">12 digit nombor sahaja, tanpa jarak atau tanda.</small>
+          </div>
+          <div class="form-group">
+            <label>Jenis Dokumen</label>
+            <div class="identity-type-options">
+              <label class="identity-type-option">
+                <input type="radio" name="quick_identity_type" value="nric" checked>
+                <span>No. Kad Pengenalan</span>
+              </label>
+              <label class="identity-type-option">
+                <input type="radio" name="quick_identity_type" value="passport">
+                <span>Passport</span>
+              </label>
+            </div>
           </div>
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" id="cancel-quick-kir">Batal</button>
@@ -9729,6 +9800,9 @@ function initializeBasicWizard() {
       let value;
       if (input.type === 'checkbox') {
         value = input.checked;
+      } else if (input.type === 'radio') {
+        if (!input.checked) return;
+        value = input.value;
       } else {
         value = input.value;
       }
@@ -9797,6 +9871,8 @@ function initializeBasicWizard() {
           }
           if (input.type === 'checkbox') {
             input.checked = data[key] === 'on' || data[key] === true;
+          } else if (input.type === 'radio') {
+            input.checked = data[key] === input.value;
           } else {
             input.value = data[key];
           }
@@ -9809,6 +9885,8 @@ function initializeBasicWizard() {
     if (statusPerkahwinanField && statusPerkahwinanField.value) {
       statusPerkahwinanField.dispatchEvent(new Event('change'));
     }
+    
+    applyIdentityTypeRules(document.querySelector('input[name="identity_type"]:checked')?.value || 'nric');
   }
   
   // Age calculation
@@ -9913,7 +9991,60 @@ function initializeBasicWizard() {
       monthlyAssistance += kadar * (factors[kekerapan] || 0);
     });
     const assistanceDisplay = document.getElementById('anggaran-bulanan');
-    if (assistanceDisplay) assistanceDisplay.textContent = monthlyAssistance.toFixed(2);
+  if (assistanceDisplay) assistanceDisplay.textContent = monthlyAssistance.toFixed(2);
+  }
+  
+  function sanitizeIdentityValue(value = '', type = 'nric') {
+    const raw = (value || '').toString();
+    if (type === 'passport') {
+      return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20);
+    }
+    return raw.replace(/\D/g, '').slice(0, 12);
+  }
+  
+  function applyIdentityTypeRules(type = 'nric') {
+    const noKpInput = document.getElementById('no_kp');
+    if (!noKpInput) return;
+    
+    if (type === 'passport') {
+      noKpInput.removeAttribute('pattern');
+      noKpInput.removeAttribute('maxlength');
+      noKpInput.placeholder = 'Contoh: A1234567';
+      noKpInput.inputMode = 'text';
+      noKpInput.dataset.identityType = 'passport';
+    } else {
+      noKpInput.setAttribute('pattern', '[0-9]{12}');
+      noKpInput.setAttribute('maxlength', '12');
+      noKpInput.placeholder = '123456789012';
+      noKpInput.inputMode = 'numeric';
+      noKpInput.dataset.identityType = 'nric';
+    }
+  }
+  
+  function initializeIdentityTypeControls() {
+    const identityRadios = document.querySelectorAll('input[name="identity_type"]');
+    const noKpInput = document.getElementById('no_kp');
+    if (!identityRadios.length || !noKpInput) return;
+    
+    const getCurrentType = () => {
+      return document.querySelector('input[name="identity_type"]:checked')?.value || 'nric';
+    };
+    
+    identityRadios.forEach(radio => {
+      radio.addEventListener('change', (event) => {
+        if (!event.target.checked) return;
+        applyIdentityTypeRules(event.target.value);
+        noKpInput.value = sanitizeIdentityValue(noKpInput.value, event.target.value);
+        triggerAutosave();
+      });
+    });
+    
+    noKpInput.addEventListener('input', (event) => {
+      const currentType = getCurrentType();
+      event.target.value = sanitizeIdentityValue(event.target.value, currentType);
+    });
+    
+    applyIdentityTypeRules(getCurrentType());
   }
   
   // Dynamic field addition handlers
@@ -9983,6 +10114,8 @@ function initializeBasicWizard() {
         triggerAutosave();
       });
     }
+    
+    initializeIdentityTypeControls();
   }
   
   // Autosave functionality

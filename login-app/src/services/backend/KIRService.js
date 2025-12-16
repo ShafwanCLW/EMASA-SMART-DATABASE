@@ -88,6 +88,7 @@ export class KIRService {
           ibu_nama: cleanedData.ibu_nama || '',
           no_kwsp: cleanedData.no_kwsp || '',
           no_perkeso: cleanedData.no_perkeso || '',
+          identity_type: cleanedData.identity_type || 'nric',
           status_rekod: cleanedData.status_rekod || 'Draf',
           tarikh_cipta: serverTimestamp(),
           tarikh_kemas_kini: serverTimestamp()
@@ -386,7 +387,8 @@ export class KIRService {
   
   // Helper method to normalize No. KP (remove spaces and dashes)
   static normalizeNoKP(noKP) {
-    return noKP.replace(/[\s-]/g, '');
+    if (!noKP) return '';
+    return noKP.toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
   }
 
   // Derive birth date and age from Malaysian NRIC (No. KP)
