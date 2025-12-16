@@ -258,12 +258,12 @@ export class PKIRTab extends BaseTab {
         </div>
 
         <!-- Form Actions -->
-        <div class="form-actions">
+        <div class="form-actions form-actions-right">
+          <button type="button" class="btn btn-light" onclick="pkirTab.resetForm()">
+            <i class="fas fa-undo"></i> Reset
+          </button>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-save"></i> Simpan PKIR
-          </button>
-          <button type="button" class="btn btn-secondary" onclick="pkirTab.resetForm()">
-            <i class="fas fa-undo"></i> Reset Form
           </button>
         </div>
       </form>

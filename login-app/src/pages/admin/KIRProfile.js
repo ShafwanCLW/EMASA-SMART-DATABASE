@@ -57,6 +57,8 @@ export class KIRProfile {
     this.validPKIRSections = ['maklumat-asas', 'kafa', 'pendidikan', 'pekerjaan', 'kesihatan'];
     this.isPKIRModalOpen = false;
     this.duplicateKIRWarning = null;
+    this.pkirSummaryStep = 0;
+    this.pkirSummarySteps = ['Maklumat Asas', 'Pendidikan', 'Pekerjaan', 'Kesihatan'];
     
     // Kesihatan KIR-related properties
     this.currentKesihatanSection = 'ringkasan';
@@ -337,6 +339,7 @@ export class KIRProfile {
       // Assign global tab component references for backward compatibility
       this.assignGlobalTabReferences();
       this.setupBirthInfoAutomation();
+      setTimeout(() => this.bindQuickStatActions(), 0);
 
       // Ensure active tab component binds its event listeners on initial render
       const activeTabComponent = this.tabComponents[this.currentTab];
@@ -2498,7 +2501,7 @@ export class KIRProfile {
     return `
       <div class="hero-quick-insights">
         ${stats.map(stat => `
-      <div class="hero-insight-pill">
+      <div class="hero-insight-pill ${stat.action ? 'hero-pill-clickable' : ''}" ${stat.action ? `data-action="${stat.action}"` : ''}>
         <div class="pill-body">
           <span class="pill-label">${stat.label}</span>
           <span class="pill-value">${stat.value}</span>
@@ -2521,9 +2524,444 @@ export class KIRProfile {
     return [
       { label: 'Umur', value: this.getAgeDisplay(), icon: 'fas fa-user-clock' },
       { label: 'Status Perkahwinan', value: maritalStatus, icon: 'fas fa-ring' },
-      { label: 'Ahli Isi Rumah', value: `${householdCount} orang`, icon: 'fas fa-users' },
-      { label: 'PKIR', value: pkirStatus, icon: 'fas fa-heart' }
+      { label: 'Ahli Isi Rumah', value: `${householdCount} orang`, icon: 'fas fa-users', action: 'air-summary' },
+      { label: 'PKIR', value: pkirStatus, icon: 'fas fa-heart', action: this.pkirData ? 'pkir-summary' : null }
     ].filter(stat => stat.value && stat.value !== 'Tidak diketahui');
+  }
+
+  bindQuickStatActions() {
+    this.ensureQuickStatStyles();
+    const pills = document.querySelectorAll('.hero-insight-pill[data-action]');
+    pills.forEach(pill => {
+      if (pill.dataset.quickBound === 'true') return;
+      pill.dataset.quickBound = 'true';
+      pill.addEventListener('click', () => {
+        const action = pill.dataset.action;
+        if (action === 'air-summary') {
+          this.openAIRQuickModal();
+        } else if (action === 'pkir-summary') {
+          this.openPKIRSummaryModal();
+        }
+      });
+    });
+  }
+
+  ensureQuickStatStyles() {
+    if (document.getElementById('hero-pill-quick-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'hero-pill-quick-styles';
+    style.textContent = `
+      .hero-insight-pill.hero-pill-clickable {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .hero-insight-pill.hero-pill-clickable:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  ensureQuickModalStyles() {
+    if (document.getElementById('quick-modal-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'quick-modal-styles';
+    style.textContent = `
+      .kir-quick-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      .kir-quick-modal {
+        background: #fff;
+        border-radius: 24px;
+        width: min(720px, 92vw);
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 65px rgba(15, 23, 42, 0.25);
+        overflow: hidden;
+      }
+      .quick-modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .quick-modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .quick-modal-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+      }
+      .kir-quick-modal .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 2px solid;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        background: transparent;
+      }
+      .kir-quick-modal .btn.btn-sm {
+        padding: 0.45rem 1rem;
+        font-size: 0.8rem;
+      }
+      .kir-quick-modal .btn-light {
+        background: #f8fafc;
+        color: #475569;
+        border-color: #e2e8f0;
+      }
+      .kir-quick-modal .btn-light:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+        transform: translateY(-1px);
+      }
+      .kir-quick-modal .btn-primary {
+        background: #3b82f6;
+        color: #fff;
+        border-color: #3b82f6;
+      }
+      .kir-quick-modal .btn-primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+      }
+      .kir-quick-modal .btn-outline {
+        background: transparent;
+        color: #4338ca;
+        border-color: #c7d2fe;
+      }
+      .kir-quick-modal .btn-outline:hover {
+        background: #eef2ff;
+        color: #312e81;
+        border-color: #6366f1;
+        transform: translateY(-1px);
+      }
+      .air-summary-list .summary-row,
+      .pkir-summary-list .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .air-summary-list .summary-row:last-child,
+      .pkir-summary-list .summary-row:last-child {
+        border-bottom: none;
+      }
+      .summary-row-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+      .summary-row-grid .summary-row-card {
+        padding: 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+      }
+      .summary-row-card .label {
+        display: block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+      }
+      .summary-row-card .value {
+        display: block;
+        font-weight: 600;
+        color: #0f172a;
+        margin-top: 0.25rem;
+      }
+      .pkir-wizard-nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+      }
+      .pkir-step {
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid #dbeafe;
+        background: #fff;
+        text-align: left;
+        cursor: pointer;
+      }
+      .pkir-step.active {
+        border-color: #6366f1;
+        background: #eef2ff;
+      }
+      .pkir-summary-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  openAIRQuickModal() {
+    this.ensureQuickModalStyles();
+    const overlay = document.createElement('div');
+    overlay.id = 'airSummaryModal';
+    overlay.className = 'kir-quick-modal-overlay';
+
+    const listContent = this.airData.length
+      ? `
+        <div class="air-summary-list">
+          ${this.airData.map(air => `
+            <div class="summary-row">
+              <div>
+                <strong>${air.nama || 'Tiada Nama'}</strong>
+                <p style="margin:0;color:#64748b;">${air.hubungan || 'Tidak dinyatakan'} &bull; ${formatICWithDashes(air.no_kp) || 'Tiada No. KP'}</p>
+              </div>
+              <div class="summary-row-actions">
+                <button type="button" class="btn btn-outline btn-sm" onclick="kirProfile.launchAirWizard('${air.id}')">
+                  <i class="fas fa-eye"></i> Lihat / Edit
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `
+      : '<p class="text-muted">Tiada ahli isi rumah berdaftar buat masa ini.</p>';
+
+    overlay.innerHTML = `
+      <div class="kir-quick-modal">
+        <div class="quick-modal-header">
+          <div>
+            <p class="summary-eyebrow">Senarai Ahli Isi Rumah</p>
+            <h3>Ahli Isi Rumah Berdaftar</h3>
+          </div>
+          <button class="btn btn-light" data-dismiss="airSummaryModal">&times;</button>
+        </div>
+        <div class="quick-modal-body">
+          ${listContent}
+        </div>
+        <div class="quick-modal-footer">
+          <button class="btn btn-light" data-dismiss="airSummaryModal">Tutup</button>
+          <button class="btn btn-primary" onclick="kirProfile.launchAirWizard()">
+            <i class="fas fa-plus"></i> Tambah AIR
+          </button>
+        </div>
+      </div>
+    `;
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay || e.target.dataset.dismiss === 'airSummaryModal') {
+        overlay.remove();
+      }
+    });
+
+    document.body.appendChild(overlay);
+  }
+
+  async launchAirWizard(airId = null) {
+    this.closeQuickModal('airSummaryModal');
+    if (this.currentTab !== 'air') {
+      await this.switchTab('air');
+      setTimeout(() => this.openAirFormFromSummary(airId), 200);
+    } else {
+      this.openAirFormFromSummary(airId);
+    }
+  }
+
+  openAirFormFromSummary(airId) {
+    if (!window.airTab) return;
+    if (airId) {
+      window.airTab.editAIR(airId);
+    } else {
+      window.airTab.handleAddAIR();
+    }
+  }
+
+  openPKIRSummaryModal() {
+    if (!this.pkirData) {
+      this.showToast('Tiada maklumat PKIR untuk dipaparkan.', 'info');
+      return;
+    }
+    this.ensureQuickModalStyles();
+    this.pkirSummaryStep = 0;
+    const overlay = document.createElement('div');
+    overlay.id = 'pkirSummaryModal';
+    overlay.className = 'kir-quick-modal-overlay';
+
+    overlay.innerHTML = `
+      <div class="kir-quick-modal">
+        <div class="quick-modal-header">
+          <div>
+            <p class="summary-eyebrow">Maklumat Pasangan (PKIR)</p>
+            <h3>Ringkasan PKIR</h3>
+          </div>
+          <button class="btn btn-light" data-dismiss="pkirSummaryModal">&times;</button>
+        </div>
+        <div class="pkir-wizard-nav">
+          ${this.pkirSummarySteps.map((label, index) => `
+            <button class="pkir-step ${index === 0 ? 'active' : ''}" data-step-index="${index}">
+              ${label}
+            </button>
+          `).join('')}
+        </div>
+        <div class="quick-modal-body pkir-summary-body">
+          <div class="pkir-step-content">
+            ${this.getPKIRSummarySection(0)}
+          </div>
+        </div>
+        <div class="pkir-summary-footer">
+          <div class="left-actions">
+            <button class="btn btn-light pkir-nav-prev" onclick="kirProfile.prevPKIRSummaryStep()">
+              <i class="fas fa-arrow-left"></i> Kembali
+            </button>
+          </div>
+          <div class="right-actions">
+            <button class="btn btn-light pkir-nav-next" onclick="kirProfile.nextPKIRSummaryStep()">
+              Seterusnya <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="btn btn-primary" onclick="kirProfile.launchPKIRWizard()">
+              <i class="fas fa-edit"></i> Kemaskini PKIR
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay || e.target.dataset.dismiss === 'pkirSummaryModal') {
+        overlay.remove();
+      } else if (e.target.classList.contains('pkir-step')) {
+        const index = Number(e.target.dataset.stepIndex || 0);
+        this.goToPKIRSummaryStep(index);
+      }
+    });
+
+    document.body.appendChild(overlay);
+    this.updatePKIRSummaryWizard();
+  }
+
+  getPKIRSummarySection(stepIndex) {
+    const pkir = this.pkirData || {};
+    const fields = [];
+    if (stepIndex === 0) {
+      fields.push(
+        { label: 'Nama', value: pkir.nama_pasangan || '-' },
+        { label: 'No. KP', value: this.formatNoKP(pkir.no_kp_pasangan, { fallback: '-' }) },
+        { label: 'Tarikh Lahir', value: pkir.tarikh_lahir_pasangan || '-' },
+        { label: 'Umur', value: pkir.umur_pasangan ? `${pkir.umur_pasangan} tahun` : '-' },
+        { label: 'Jantina', value: pkir.jantina_pasangan || '-' },
+        { label: 'Telefon', value: pkir.telefon_pasangan || '-' }
+      );
+    } else if (stepIndex === 1) {
+      fields.push(
+        { label: 'Tahap Pendidikan', value: pkir.tahap_pendidikan || '-' },
+        { label: 'Institusi', value: pkir.institusi_pendidikan || '-' },
+        { label: 'Bidang Pengajian', value: pkir.bidang_pengajian || '-' },
+        { label: 'Tahun Tamat', value: pkir.tahun_tamat || '-' }
+      );
+    } else if (stepIndex === 2) {
+      fields.push(
+        { label: 'Status Pekerjaan', value: pkir.status_pekerjaan || '-' },
+        { label: 'Jenis Pekerjaan', value: pkir.jenis_pekerjaan || '-' },
+        { label: 'Nama Majikan', value: pkir.nama_majikan || '-' },
+        { label: 'Pendapatan Bulanan', value: pkir.pendapatan_bulanan ? this.formatCurrency(pkir.pendapatan_bulanan) : '-' }
+      );
+    } else if (stepIndex === 3) {
+      const penyakit = Array.isArray(pkir.penyakit_kronik) ? pkir.penyakit_kronik.join(', ') : (pkir.penyakit_kronik || '-');
+      const ubatTetap = Array.isArray(pkir.ubat_tetap) ? pkir.ubat_tetap.join(', ') : (pkir.ubat_tetap || '-');
+      fields.push(
+        { label: 'Status Kesihatan', value: pkir.status_kesihatan || '-' },
+        { label: 'Kumpulan Darah', value: pkir.kumpulan_darah || '-' },
+        { label: 'Penyakit Kronik', value: penyakit || '-' },
+        { label: 'Ubat Tetap', value: ubatTetap || '-' },
+        { label: 'Status Merokok', value: pkir.status_merokok || '-' }
+      );
+    }
+    return this.buildSummaryRows(fields);
+  }
+
+  buildSummaryRows(rows = []) {
+    if (!rows.length) {
+      return '<p class="text-muted">Tiada maklumat untuk dipaparkan.</p>';
+    }
+    return `
+      <div class="summary-row-grid">
+        ${rows.map(row => `
+          <div class="summary-row-card">
+            <span class="label">${row.label}</span>
+            <span class="value">${row.value || '-'}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  updatePKIRSummaryWizard() {
+    const modal = document.getElementById('pkirSummaryModal');
+    if (!modal) return;
+    const content = modal.querySelector('.pkir-step-content');
+    if (content) {
+      content.innerHTML = this.getPKIRSummarySection(this.pkirSummaryStep);
+    }
+    const steps = modal.querySelectorAll('.pkir-step');
+    steps.forEach(step => {
+      const index = Number(step.dataset.stepIndex || 0);
+      step.classList.toggle('active', index === this.pkirSummaryStep);
+      step.classList.toggle('completed', index < this.pkirSummaryStep);
+    });
+    const prev = modal.querySelector('.pkir-nav-prev');
+    const next = modal.querySelector('.pkir-nav-next');
+    if (prev) prev.disabled = this.pkirSummaryStep === 0;
+    if (next) next.disabled = this.pkirSummaryStep >= this.pkirSummarySteps.length - 1;
+  }
+
+  goToPKIRSummaryStep(index) {
+    const clamped = Math.max(0, Math.min(index, this.pkirSummarySteps.length - 1));
+    this.pkirSummaryStep = clamped;
+    this.updatePKIRSummaryWizard();
+  }
+
+  nextPKIRSummaryStep() {
+    this.goToPKIRSummaryStep(this.pkirSummaryStep + 1);
+  }
+
+  prevPKIRSummaryStep() {
+    this.goToPKIRSummaryStep(this.pkirSummaryStep - 1);
+  }
+
+  closeQuickModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal && modal.parentNode) {
+      modal.parentNode.removeChild(modal);
+    }
+  }
+
+  async launchPKIRWizard() {
+    this.closeQuickModal('pkirSummaryModal');
+    if (this.currentTab !== 'pkir') {
+      await this.switchTab('pkir');
+    }
   }
 
   getAgeDisplay() {
@@ -3182,6 +3620,7 @@ export class KIRProfile {
           const newHeader = temp.firstElementChild;
           if (newHeader) {
             headerModern.replaceWith(newHeader);
+            this.bindQuickStatActions();
           }
         }
       }

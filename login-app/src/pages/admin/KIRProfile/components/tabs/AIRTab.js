@@ -17,38 +17,69 @@ export class AIRTab extends BaseTab {
     this.isExamFormVisible = false;
     this.currentExamIndex = null;
     this.statusPelajaranValue = '';
+    this.currentWizardStep = 0;
+    this.showEmploymentStep = false;
   }
 
   render() {
+    this.ensureStylesInjected();
     return `
-      <div class="air-tab">
-        <div class="tab-header">
+      <div class="air-tab modern-air-tab">
+        ${this.renderAirListSection()}
+        ${this.renderFormModal()}
+        ${this.renderExamFormModal()}
+      </div>
+    `;
+  }
+
+  renderAirListSection() {
+    return `
+      <div class="air-list-card">
+        <div class="air-list-header">
           <div>
-            <h3>Ahli Isi Rumah (AIR)</h3>
-            <p class="tab-subtitle">Maklumat ahli isi rumah yang tinggal bersama</p>
+            <h4>Senarai Ahli Isi Rumah</h4>
+            <p>Klik Edit untuk melihat butiran penuh atau Padam untuk keluarkan ahli daripada senarai.</p>
           </div>
-          <div class="tab-actions">
-            <button type="button" class="btn btn-primary show-air-form-btn"
-              style="${this.isFormVisible ? 'display:none;' : ''}"
-              onclick="airTab.handleAddAIR()">
-              <i class="fas fa-plus"></i> Tambah Ahli Isi Rumah
-            </button>
-          </div>
+          <button type="button" class="btn btn-primary" onclick="airTab.handleAddAIR()">
+            <i class="fas fa-plus"></i> Tambah AIR
+          </button>
         </div>
-        
-        <div class="form-container air-form-container" style="${this.isFormVisible ? '' : 'display:none;'}">
+        <div class="air-list-section" id="airList">
+          ${this.createAIRList()}
+        </div>
+      </div>
+    `;
+  }
+
+  renderFormModal() {
+    const wizardSteps = this.getWizardStepsConfig();
+    return `
+      <div class="air-form-container ${this.isFormVisible ? 'open' : ''}">
+        <div class="air-form-backdrop" onclick="airTab.cancelForm()"></div>
+        <div class="air-form-panel">
           <div class="air-form-header">
             <div>
+              <p class="summary-eyebrow">${this.formMode === 'edit' ? 'Kemaskini Rekod' : 'Tambah Rekod Baharu'}</p>
               <h4>${this.formMode === 'edit' ? 'Kemaskini Ahli Isi Rumah' : 'Tambah Ahli Isi Rumah'}</h4>
               <p>${this.formMode === 'edit' ? 'Semak dan kemaskini maklumat ahli isi rumah yang dipilih.' : 'Lengkapkan borang ini untuk menambah ahli isi rumah baharu.'}</p>
             </div>
             <button type="button" class="btn btn-light" onclick="airTab.cancelForm()">
-              <i class="fas fa-arrow-left"></i> Kembali ke Senarai
+              <i class="fas fa-times"></i>
             </button>
           </div>
+          <div class="air-wizard-tabs">
+            ${wizardSteps.map((step, index) => `
+              <button type="button"
+                      class="wizard-tab ${this.currentWizardStep === index ? 'active' : ''} ${step.employmentOnly ? 'employment-tab' : ''}"
+                      data-step-index="${index}"
+                      data-step-id="${step.id}"
+                      style="${step.employmentOnly && !this.showEmploymentStep ? 'display:none;' : ''}">
+                ${step.label}
+              </button>
+            `).join('')}
+          </div>
           <form class="air-form" id="airForm">
-            <!-- Maklumat Asas Section -->
-            <div class="form-section">
+            <div class="form-section wizard-step-content ${this.currentWizardStep === 0 ? 'active' : ''}" data-step-index="0" data-step-id="maklumat-asas">
               <h4 class="section-title">Maklumat Asas</h4>
               <div class="form-grid">
                 <div class="form-group">
@@ -100,8 +131,7 @@ export class AIRTab extends BaseTab {
               </div>
             </div>
 
-            <!-- Pendidikan Section -->
-            <div class="form-section">
+            <div class="form-section wizard-step-content ${this.currentWizardStep === 1 ? 'active' : ''}" data-step-index="1" data-step-id="pendidikan">
               <h4 class="section-title">Maklumat Pendidikan</h4>
               <div class="form-grid">
                 <div class="form-group full-width">
@@ -150,8 +180,7 @@ export class AIRTab extends BaseTab {
               ${this.renderExamSection()}
             </div>
 
-            <!-- Pekerjaan Section -->
-            <div class="form-section employment-section" style="display:none;">
+            <div class="form-section employment-section wizard-step-content ${this.currentWizardStep === 2 ? 'active' : ''}" data-step-index="2" data-step-id="pekerjaan" style="${this.showEmploymentStep ? '' : 'display:none;'}">
               <h4 class="section-title">Maklumat Pekerjaan</h4>
               <div class="form-grid">
                 <div class="form-group">
@@ -173,8 +202,7 @@ export class AIRTab extends BaseTab {
               </div>
             </div>
 
-            <!-- Kesihatan Section -->
-            <div class="form-section">
+            <div class="form-section wizard-step-content ${this.currentWizardStep === 3 ? 'active' : ''}" data-step-index="3" data-step-id="kesihatan">
               <h4 class="section-title">Maklumat Kesihatan</h4>
               <div class="form-grid">
                 <div class="form-group">
@@ -210,26 +238,219 @@ export class AIRTab extends BaseTab {
                 </div>
               </div>
             </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" onclick="airTab.cancelForm()">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan AIR</button>
+            <div class="form-actions air-form-actions">
+              <div class="left-actions">
+                <button type="button" class="btn btn-light" onclick="airTab.cancelForm()">Batal</button>
+              </div>
+              <div class="right-actions">
+                <button type="submit" class="btn btn-primary">Simpan AIR</button>
+              </div>
             </div>
           </form>
         </div>
-
-        <!-- AIR List Section -->
-        <div class="air-list-section" style="${this.isFormVisible ? 'display:none;' : ''}">
-          <div class="list-header">
-            <h4>Senarai Ahli Isi Rumah</h4>
-            <p class="tab-subtitle">Klik Edit untuk melihat butiran penuh atau Padam untuk keluarkan ahli daripada senarai.</p>
-          </div>
-          <div class="air-list" id="airList">
-            ${this.createAIRList()}
-          </div>
-        </div>
       </div>
     `;
+  }
+
+  getWizardStepsConfig() {
+    return [
+      { id: 'maklumat-asas', label: 'Maklumat Asas' },
+      { id: 'pendidikan', label: 'Pendidikan' },
+      { id: 'pekerjaan', label: 'Pekerjaan', employmentOnly: true },
+      { id: 'kesihatan', label: 'Kesihatan' }
+    ];
+  }
+
+  ensureStylesInjected() {
+    if (document.getElementById('air-tab-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'air-tab-styles';
+    style.textContent = `
+      .modern-air-tab {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .air-summary-card,
+      .air-list-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.08);
+        border: 1px solid #eef2ff;
+      }
+      .air-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+      .air-summary-header h3 {
+        margin: 0.2rem 0 0;
+      }
+      .summary-eyebrow {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
+        color: #6366f1;
+      }
+      .air-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .summary-pill {
+        display: flex;
+        gap: 0.85rem;
+        padding: 1rem;
+        border-radius: 14px;
+        border: 1px solid #e0e7ff;
+        background: linear-gradient(120deg, #f8fafc, #ffffff);
+        align-items: center;
+      }
+      .summary-pill .pill-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #eef2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4f46e5;
+        font-size: 1rem;
+      }
+      .summary-pill .pill-label {
+        display: block;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+      }
+      .summary-pill .pill-value {
+        display: block;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+      .air-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .air-form-container {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+      }
+      .air-form-container.open {
+        display: flex;
+      }
+      .air-form-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+      }
+      .air-form-panel {
+        position: relative;
+        background: #fff;
+        border-radius: 22px;
+        width: min(960px, 95vw);
+        max-height: 95vh;
+        overflow-y: auto;
+        padding: 1.75rem;
+        box-shadow: 0 25px 70px rgba(15, 23, 42, 0.25);
+        z-index: 1;
+      }
+      .air-form-panel .air-form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .air-wizard-tabs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+      }
+      .wizard-tab {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.95rem 0.75rem;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        font-weight: 600;
+        color: #475569;
+        transition: all 0.2s ease;
+      }
+      .wizard-tab.active {
+        border-color: #6366f1;
+        background: #eef2ff;
+        color: #312e81;
+        box-shadow: 0 10px 25px rgba(99,102,241,0.15);
+      }
+      .wizard-tab.completed {
+        border-color: #10b981;
+        color: #065f46;
+      }
+      .wizard-step-content {
+        display: none;
+      }
+      .wizard-step-content.active {
+        display: block;
+      }
+      .air-list-card table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .air-list-card table thead th {
+        background: #f8fafc;
+      }
+      body.modal-open {
+        overflow: hidden;
+      }
+      .air-form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  goToWizardStep(targetIndex) {
+    const steps = this.getWizardStepsConfig();
+    if (!steps.length) return;
+    const clampedIndex = Math.max(0, Math.min(targetIndex, steps.length - 1));
+    this.currentWizardStep = clampedIndex;
+    this.updateWizardUI();
+  }
+
+  updateWizardUI() {
+    const stepContents = document.querySelectorAll('.wizard-step-content');
+    stepContents.forEach(el => {
+      const index = Number(el.dataset.stepIndex || 0);
+      el.classList.toggle('active', index === this.currentWizardStep);
+    });
+
+    const indicators = document.querySelectorAll('.wizard-tab');
+    indicators.forEach(el => {
+      const index = Number(el.dataset.stepIndex || 0);
+      el.classList.toggle('active', index === this.currentWizardStep);
+      el.classList.toggle('completed', index < this.currentWizardStep);
+    });
   }
 
   createAIRList() {
@@ -462,9 +683,11 @@ export class AIRTab extends BaseTab {
   handleAddAIR() {
     this.currentEditingId = null;
     this.resetForm();
+    this.formMode = 'create';
+    this.currentWizardStep = 0;
+    this.populateForm();
     this.isFormVisible = true;
     this.updateFormVisibility(true);
-    this.populateForm();
   }
 
   cancelForm() {
@@ -508,7 +731,7 @@ export class AIRTab extends BaseTab {
   updateFormVisibility(scrollToForm = false) {
     const formContainer = document.querySelector('.air-form-container');
     if (formContainer) {
-      formContainer.style.display = this.isFormVisible ? '' : 'none';
+      formContainer.classList.toggle('open', this.isFormVisible);
       if (scrollToForm && this.isFormVisible) {
         const form = formContainer.querySelector('#airForm');
         if (form) {
@@ -518,14 +741,8 @@ export class AIRTab extends BaseTab {
         }
       }
     }
-    const toggleBtn = document.querySelector('.show-air-form-btn');
-    if (toggleBtn) {
-      toggleBtn.style.display = this.isFormVisible ? 'none' : '';
-    }
-    const listSection = document.querySelector('.air-list-section');
-    if (listSection) {
-      listSection.style.display = this.isFormVisible ? 'none' : '';
-    }
+    document.body.classList.toggle('modal-open', this.isFormVisible);
+    this.updateWizardUI();
   }
 
   updateFormHeader() {
@@ -533,12 +750,17 @@ export class AIRTab extends BaseTab {
     if (!header) return;
 
     const title = header.querySelector('h4');
-    const subtitle = header.querySelector('p');
+    const eyebrow = header.querySelector('.summary-eyebrow');
+    const subtitle = header.querySelector('.air-form-header p:last-of-type');
 
     if (title) {
       title.textContent = this.formMode === 'edit'
         ? 'Kemaskini Ahli Isi Rumah'
         : 'Tambah Ahli Isi Rumah';
+    }
+
+    if (eyebrow) {
+      eyebrow.textContent = this.formMode === 'edit' ? 'Kemaskini Rekod' : 'Tambah Rekod Baharu';
     }
 
     if (subtitle) {
@@ -1366,10 +1588,13 @@ export class AIRTab extends BaseTab {
   }
 
   toggleEmploymentSection(statusValue) {
+    const shouldShow = statusValue === 'Bekerja';
+    this.showEmploymentStep = shouldShow;
     const section = document.querySelector('.employment-section');
     if (section) {
-      section.style.display = statusValue === 'Bekerja' ? '' : 'none';
+      section.style.display = shouldShow ? '' : 'none';
     }
+    this.updateWizardTabsVisibility();
   }
 
   toggleOkuFields(value, rootElement = null) {
@@ -1423,10 +1648,11 @@ export class AIRTab extends BaseTab {
     this.resetForm();
     this.formMode = 'edit';
     this.currentEditingId = airId;
-    this.isFormVisible = true;
+    this.currentWizardStep = 0;
     this.updateFormHeader();
-    this.updateFormVisibility(true);
     this.populateForm(air);
+    this.isFormVisible = true;
+    this.updateFormVisibility(true);
   }
 
   async deleteAIR(airId) {
@@ -1760,7 +1986,39 @@ export class AIRTab extends BaseTab {
           }
         });
       }
+
+      const wizardTabsContainer = document.querySelector('.air-wizard-tabs');
+      if (wizardTabsContainer && !wizardTabsContainer.dataset.wizardTabsBound) {
+        wizardTabsContainer.addEventListener('click', (event) => {
+          const tabButton = event.target.closest('.wizard-tab');
+          if (!tabButton || tabButton.hasAttribute('disabled') || tabButton.style.display === 'none') {
+            return;
+          }
+          event.preventDefault();
+          const index = Number(tabButton.dataset.stepIndex || 0);
+          this.goToWizardStep(index);
+        });
+        wizardTabsContainer.dataset.wizardTabsBound = 'true';
+      }
+
+      // Ensure the wizard state reflects the latest step
+      setTimeout(() => this.updateWizardUI(), 0);
     }
+  }
+
+  updateWizardTabsVisibility() {
+    const tab = document.querySelector('.wizard-tab[data-step-id="pekerjaan"]');
+    if (tab) {
+      tab.style.display = this.showEmploymentStep ? '' : 'none';
+    }
+    const section = document.querySelector('.wizard-step-content[data-step-id="pekerjaan"]');
+    if (section) {
+      section.style.display = this.showEmploymentStep ? '' : 'none';
+    }
+    if (!this.showEmploymentStep && this.currentWizardStep === 2) {
+      this.currentWizardStep = 0;
+    }
+    this.updateWizardUI();
   }
 
   async save() {
