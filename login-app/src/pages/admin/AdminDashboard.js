@@ -1693,7 +1693,8 @@ export function createAdminMainContent() {
               <div class="stat-helper-text">Ahli Isi Rumah</div>
             </div>
           </div>
-          <div class="family-viewer-card">
+          <!-- Family tree viewer temporarily hidden; remove the hidden attribute below to re-enable -->
+          <div class="family-viewer-card" data-feature="family-tree" hidden>
             <div class="family-viewer-header">
               <div>
                 <p class="family-viewer-label">Lihat pokok keluarga</p>
