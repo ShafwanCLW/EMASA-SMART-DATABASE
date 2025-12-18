@@ -104,6 +104,14 @@ export class AIRTab extends BaseTab {
                   <input type="number" id="umur" name="umur" readonly>
                 </div>
                 <div class="form-group">
+                  <label for="jantina">Jantina</label>
+                  <select id="jantina" name="jantina">
+                    <option value="">Pilih Jantina</option>
+                    <option value="Lelaki">Lelaki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div class="form-group">
                   <label for="hubungan">Hubungan dengan KIR</label>
                   <select id="hubungan" name="hubungan">
                     <option value="">Pilih Hubungan</option>
@@ -116,6 +124,10 @@ export class AIRTab extends BaseTab {
                     <option value="Datuk/Nenek">Datuk/Nenek</option>
                     <option value="Lain-lain">Lain-lain</option>
                   </select>
+                </div>
+                <div class="form-group">
+                  <label for="penjaga">Penjaga (Sekiranya Ada)</label>
+                  <input type="text" id="penjaga" name="penjaga" placeholder="Nama penjaga utama">
                 </div>
                 <div class="form-group">
                   <label for="status_pekerjaan_asas">Status Pekerjaan</label>
@@ -143,7 +155,7 @@ export class AIRTab extends BaseTab {
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="tahap_semasa">Tahap Pendidikan Semasa</label>
+                  <label for="tahap_semasa" id="tahap_semasa_label">${this.getTahapLabel(this.statusPelajaranValue)}</label>
                   <select id="tahap_semasa" name="tahap_semasa">
                     <option value="">Pilih Tahap Pendidikan</option>
                     <option value="Tidak Bersekolah">Tidak Bersekolah</option>
@@ -159,18 +171,6 @@ export class AIRTab extends BaseTab {
                 <div class="form-group">
                   <label for="sekolah_ipt">Sekolah/IPT</label>
                   <input type="text" id="sekolah_ipt" name="sekolah_ipt">
-                </div>
-                <div class="form-group">
-                  <label for="keputusan">Keputusan</label>
-                  <input type="text" id="keputusan" name="keputusan">
-                </div>
-                <div class="form-group">
-                  <label for="sekolah_kafa">Sekolah KAFA</label>
-                  <input type="text" id="sekolah_kafa" name="sekolah_kafa">
-                </div>
-                <div class="form-group">
-                  <label for="keputusan_kafa">Keputusan KAFA</label>
-                  <input type="text" id="keputusan_kafa" name="keputusan_kafa">
                 </div>
                 <div class="form-group full-width">
                   <label for="keperluan_sokongan">Catatan Tambahan</label>
@@ -475,6 +475,23 @@ export class AIRTab extends BaseTab {
     return date.toISOString().split('T')[0];
   }
 
+  getTahapLabel(statusValue = '') {
+    return statusValue === 'Sudah Tamat Pelajaran'
+      ? 'Tahap Pendidikan Tertinggi'
+      : 'Tahap Pendidikan Semasa';
+  }
+
+  updateTahapPendidikanLabels(statusValue = '') {
+    const wizardLabel = document.getElementById('tahap_semasa_label');
+    if (wizardLabel) {
+      wizardLabel.textContent = this.getTahapLabel(statusValue);
+    }
+    const drawerLabel = document.getElementById('air_tahap_label');
+    if (drawerLabel) {
+      drawerLabel.textContent = this.getTahapLabel(statusValue);
+    }
+  }
+
   populateForm(data = {}) {
     const form = document.getElementById('airForm');
     if (!form) return;
@@ -497,7 +514,9 @@ export class AIRTab extends BaseTab {
     if (ageInput) {
       ageInput.value = data.tarikh_lahir ? this.calculateAge(data.tarikh_lahir) : '';
     }
+    setValue('jantina', data.jantina || '');
     setValue('hubungan', data.hubungan || '');
+    setValue('penjaga', data.penjaga || '');
 
     if (!data.tarikh_lahir && data.no_kp) {
       this.applyBirthInfoFromIC(data.no_kp, true);
@@ -505,11 +524,9 @@ export class AIRTab extends BaseTab {
 
     setValue('status_pelajaran', data.status_pelajaran || '');
     this.statusPelajaranValue = data.status_pelajaran || '';
+    this.updateTahapPendidikanLabels(this.statusPelajaranValue);
     setValue('tahap_semasa', data.tahap_semasa || '');
     setValue('sekolah_ipt', data.sekolah_ipt || '');
-    setValue('keputusan', data.keputusan || '');
-    setValue('sekolah_kafa', data.sekolah_kafa || '');
-    setValue('keputusan_kafa', data.keputusan_kafa || '');
     setValue('keperluan_sokongan', data.keperluan_sokongan || '');
 
     setValue('status', data.status || '');
@@ -560,6 +577,11 @@ export class AIRTab extends BaseTab {
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
       submitBtn.textContent = data.id ? 'Kemaskini AIR' : 'Simpan AIR';
+    }
+
+    if (this.kirProfile?.captureTabSnapshot) {
+      setTimeout(() => this.kirProfile.captureTabSnapshot(this.tabId), 0);
+      this.kirProfile.clearTabDirty(this.tabId);
     }
   }
 
@@ -1192,6 +1214,22 @@ export class AIRTab extends BaseTab {
               </select>
             </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="air_jantina">Jantina</label>
+              <select id="air_jantina" name="jantina">
+                <option value="">Pilih Jantina</option>
+                <option value="Lelaki" ${data.jantina === 'Lelaki' ? 'selected' : ''}>Lelaki</option>
+                <option value="Perempuan" ${data.jantina === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="air_penjaga">Penjaga (Sekiranya Ada)</label>
+              <input type="text" id="air_penjaga" name="penjaga" value="${data.penjaga || ''}" placeholder="Nama penjaga utama">
+            </div>
+          </div>
         </div>
         
         <div class="form-actions">
@@ -1204,14 +1242,25 @@ export class AIRTab extends BaseTab {
   createAIRPendidikanTab() {
     const data = this.currentAIR || {};
     
+    const tahapLabel = this.getTahapLabel(data.status_pelajaran);
+    
     return `
       <form class="air-form" data-drawer-tab="pendidikan">
         <div class="form-section">
           <h4>Pendidikan</h4>
           
+          <div class="form-group">
+            <label for="air_status_pelajaran">Status Pelajaran</label>
+            <select id="air_status_pelajaran" name="status_pelajaran">
+              <option value="">Pilih Status</option>
+              <option value="Masih Belajar" ${data.status_pelajaran === 'Masih Belajar' ? 'selected' : ''}>Masih Belajar</option>
+              <option value="Sudah Tamat Pelajaran" ${data.status_pelajaran === 'Sudah Tamat Pelajaran' ? 'selected' : ''}>Sudah Tamat Pelajaran</option>
+            </select>
+          </div>
+
           <div class="form-row">
             <div class="form-group">
-              <label for="air_tahap_semasa">Tahap Pendidikan Semasa</label>
+              <label for="air_tahap_semasa" id="air_tahap_label">${tahapLabel}</label>
               <select id="air_tahap_semasa" name="tahap_semasa">
                 <option value="">Pilih Tahap</option>
                 <option value="Tadika" ${data.tahap_semasa === 'Tadika' ? 'selected' : ''}>Tadika</option>
@@ -1230,28 +1279,9 @@ export class AIRTab extends BaseTab {
             </div>
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label for="air_keperluan_sokongan">Catatan Tambahan</label>
-              <textarea id="air_keperluan_sokongan" name="keperluan_sokongan" rows="3">${data.keperluan_sokongan || ''}</textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="air_keputusan">Keputusan</label>
-              <input type="text" id="air_keputusan" name="keputusan" value="${data.keputusan || ''}">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="air_sekolah_kafa">Sekolah KAFA</label>
-              <input type="text" id="air_sekolah_kafa" name="sekolah_kafa" value="${data.sekolah_kafa || ''}">
-            </div>
-            
-            <div class="form-group">
-              <label for="air_keputusan_kafa">Keputusan KAFA</label>
-              <input type="text" id="air_keputusan_kafa" name="keputusan_kafa" value="${data.keputusan_kafa || ''}">
-            </div>
+          <div class="form-group">
+            <label for="air_keperluan_sokongan">Catatan Tambahan</label>
+            <textarea id="air_keperluan_sokongan" name="keperluan_sokongan" rows="3">${data.keperluan_sokongan || ''}</textarea>
           </div>
         </div>
         
@@ -1401,6 +1431,14 @@ export class AIRTab extends BaseTab {
           this.toggleOkuFields(e.target.value, form);
         });
         this.toggleOkuFields(statusSelect.value, form);
+      }
+    } else if (tabId === 'pendidikan') {
+      const statusPelajaranSelect = form.querySelector('[name="status_pelajaran"]');
+      if (statusPelajaranSelect) {
+        statusPelajaranSelect.addEventListener('change', (e) => {
+          this.updateTahapPendidikanLabels(e.target.value);
+        });
+        this.updateTahapPendidikanLabels(statusPelajaranSelect.value);
       }
     }
   }
@@ -1977,12 +2015,14 @@ export class AIRTab extends BaseTab {
       if (statusPelajaranSelect) {
         statusPelajaranSelect.addEventListener('change', (e) => {
           this.statusPelajaranValue = e.target.value;
+          this.updateTahapPendidikanLabels(this.statusPelajaranValue);
           this.updateExamSectionVisibility();
           if (this.statusPelajaranValue !== 'Masih Belajar') {
             this.isExamFormVisible = false;
             this.updateExamFormVisibility();
           }
         });
+        this.updateTahapPendidikanLabels(statusPelajaranSelect.value);
       }
 
       const statusKesihatanSelect = form.querySelector('[name="status_kesihatan"]');

@@ -62,19 +62,58 @@ export class PKIRTab extends BaseTab {
             
             <div class="form-group">
               <label for="bangsa_pasangan">Bangsa</label>
-              <input type="text" id="bangsa_pasangan" name="bangsa_pasangan">
+              <select id="bangsa_pasangan" name="bangsa_pasangan">
+                <option value="">Pilih Bangsa</option>
+                <option value="Melayu">Melayu</option>
+                <option value="Cina">Cina</option>
+                <option value="India">India</option>
+                <option value="Lain-lain">Lain-lain</option>
+              </select>
             </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
               <label for="agama_pasangan">Agama</label>
-              <input type="text" id="agama_pasangan" name="agama_pasangan">
+              <select id="agama_pasangan" name="agama_pasangan">
+                <option value="">Pilih Agama</option>
+                <option value="Islam">Islam</option>
+                <option value="Kristian">Kristian</option>
+                <option value="Buddha">Buddha</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Lain-lain">Lain-lain</option>
+              </select>
             </div>
             
             <div class="form-group">
               <label for="telefon_pasangan">No. Telefon</label>
               <input type="tel" id="telefon_pasangan" name="telefon_pasangan">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status_bantuan_pasangan">Bantuan</label>
+              <select id="status_bantuan_pasangan" name="status_bantuan_pasangan">
+                <option value="">Pilih Status</option>
+                <option value="Ya">Menerima Bantuan</option>
+                <option value="Tidak">Tidak Menerima Bantuan</option>
+              </select>
+            </div>
+            <div class="form-group bantuan-details" style="display:none;">
+              <label for="jenis_bantuan_pasangan">Jenis Bantuan</label>
+              <input type="text" id="jenis_bantuan_pasangan" name="jenis_bantuan_pasangan" placeholder="Contoh: JKM, Zakat">
+            </div>
+          </div>
+
+          <div class="form-row bantuan-details" style="display:none;">
+            <div class="form-group">
+              <label for="jumlah_bantuan_pasangan">Jumlah Bantuan (RM)</label>
+              <input type="number" id="jumlah_bantuan_pasangan" name="jumlah_bantuan_pasangan" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+              <label for="catatan_bantuan_pasangan">Catatan Bantuan</label>
+              <textarea id="catatan_bantuan_pasangan" name="catatan_bantuan_pasangan" rows="2" placeholder="Maklumat ringkas bantuan"></textarea>
             </div>
           </div>
 
@@ -280,6 +319,7 @@ export class PKIRTab extends BaseTab {
     this.toggleSmokingFields('');
     this.togglePekerjaanSendiri('');
     this.toggleKenderaanAnsuran('');
+    this.toggleBantuanFields('');
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
@@ -330,6 +370,7 @@ export class PKIRTab extends BaseTab {
     this.togglePekerjaanSendiri(pkir.jenis_pekerjaan || '');
     this.toggleSmokingFields(pkir.status_merokok || '');
     this.toggleKenderaanAnsuran(pkir.jenis_kenderaan || '');
+    this.toggleBantuanFields(pkir.status_bantuan_pasangan || pkir.bantuan_status || '');
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
@@ -401,6 +442,19 @@ export class PKIRTab extends BaseTab {
         }
       }
     }
+  }
+
+  toggleBantuanFields(value) {
+    const sections = document.querySelectorAll('.bantuan-details');
+    const shouldShow = value === 'Ya';
+    sections.forEach(section => {
+      section.style.display = shouldShow ? '' : 'none';
+      if (!shouldShow) {
+        section.querySelectorAll('input, textarea').forEach(input => {
+          input.value = '';
+        });
+      }
+    });
   }
 
   // Data Management Methods
@@ -641,6 +695,14 @@ export class PKIRTab extends BaseTab {
         toggleAnsuran();
       }
       
+      const statusBantuanSelect = form.querySelector('#status_bantuan_pasangan');
+      if (statusBantuanSelect) {
+        statusBantuanSelect.addEventListener('change', (e) => {
+          this.toggleBantuanFields(e.target.value);
+        });
+        this.toggleBantuanFields(statusBantuanSelect.value);
+      }
+      
       // Form change tracking
       form.addEventListener('input', () => {
         this.isDirty = true;
@@ -681,6 +743,10 @@ export class PKIRTab extends BaseTab {
 
     const jenisKenderaanValue = normalize(formData.jenis_kenderaan) || 'Tiada';
     const ansuranKenderaanValue = jenisKenderaanValue === 'Tiada' ? '' : toNumber(formData.ansuran_kenderaan);
+    const bantuanStatus = normalize(formData.status_bantuan_pasangan);
+    const bantuanJenis = normalize(formData.jenis_bantuan_pasangan);
+    const bantuanJumlah = toNumber(formData.jumlah_bantuan_pasangan);
+    const bantuanCatatan = normalize(formData.catatan_bantuan_pasangan);
 
     const payload = {
       nama_pasangan: normalize(formData.nama_pasangan),
@@ -690,6 +756,10 @@ export class PKIRTab extends BaseTab {
       bangsa_pasangan: normalize(formData.bangsa_pasangan),
       agama_pasangan: normalize(formData.agama_pasangan),
       telefon_pasangan: normalize(formData.telefon_pasangan),
+      status_bantuan_pasangan: bantuanStatus,
+      jenis_bantuan_pasangan: bantuanJenis,
+      jumlah_bantuan_pasangan: bantuanJumlah,
+      catatan_bantuan_pasangan: bantuanCatatan,
       tahap_pendidikan: normalize(formData.tahap_pendidikan),
       institusi_pendidikan: normalize(formData.institusi_pendidikan),
       bidang_pengajian: normalize(formData.bidang_pengajian),
@@ -708,6 +778,12 @@ export class PKIRTab extends BaseTab {
       bilangan_rokok: toNumber(formData.bilangan_rokok),
       jenis_kenderaan: jenisKenderaanValue,
       ansuran_kenderaan: ansuranKenderaanValue,
+      bantuan: {
+        status: bantuanStatus,
+        jenis: bantuanJenis,
+        jumlah: bantuanJumlah,
+        catatan: bantuanCatatan
+      },
       asas: {
         nama: normalize(formData.nama_pasangan),
         no_kp: normalizedIC,
@@ -784,6 +860,10 @@ export class PKIRTab extends BaseTab {
       bangsa_pasangan: asas.bangsa || record.bangsa_pasangan || '',
       agama_pasangan: asas.agama || record.agama_pasangan || '',
       telefon_pasangan: asas.telefon || record.telefon_pasangan || '',
+      status_bantuan_pasangan: record.status_bantuan_pasangan || record.bantuan?.status || '',
+      jenis_bantuan_pasangan: record.jenis_bantuan_pasangan || record.bantuan?.jenis || '',
+      jumlah_bantuan_pasangan: record.jumlah_bantuan_pasangan ?? record.bantuan?.jumlah ?? '',
+      catatan_bantuan_pasangan: record.catatan_bantuan_pasangan || record.bantuan?.catatan || '',
       tahap_pendidikan: pendidikan.tahap || record.tahap_pendidikan || '',
       institusi_pendidikan: pendidikan.institusi || record.institusi_pendidikan || '',
       bidang_pengajian: pendidikan.bidang || record.bidang_pengajian || '',

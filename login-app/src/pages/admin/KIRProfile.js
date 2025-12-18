@@ -3529,14 +3529,19 @@ export class KIRProfile {
     if (!form) return;
     const snapshot = this.serializeFormState(form);
     this.tabSnapshots.set(tabId, snapshot);
+    form.dataset.snapshotState = snapshot;
   }
 
   refreshDirtyStateFromForm(tabId, form) {
     if (!tabId || !form) return;
     const currentState = this.serializeFormState(form);
-    const previousState = this.tabSnapshots.get(tabId);
+    let previousState = this.tabSnapshots.get(tabId);
+    if (previousState === undefined && form.dataset && typeof form.dataset.snapshotState === 'string') {
+      previousState = form.dataset.snapshotState;
+    }
     if (previousState === undefined) {
       this.tabSnapshots.set(tabId, currentState);
+      form.dataset.snapshotState = currentState;
       this.clearTabDirty(tabId);
       return;
     }
@@ -3544,6 +3549,9 @@ export class KIRProfile {
       this.clearTabDirty(tabId);
     } else {
       this.markTabDirty(tabId);
+    }
+    if (!this.dirtyTabs.has(tabId) && form.dataset) {
+      form.dataset.snapshotState = currentState;
     }
   }
 
