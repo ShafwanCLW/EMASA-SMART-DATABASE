@@ -100,6 +100,10 @@ export class PKIRTab extends BaseTab {
                 <option value="Tidak Boleh Mengaji">Tidak Boleh Mengaji</option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="minat">Minat</label>
+              <input type="text" id="minat" name="minat" placeholder="Contoh: Sukan, Kesenian">
+            </div>
           </div>
 
           <div class="form-row">
@@ -806,6 +810,7 @@ export class PKIRTab extends BaseTab {
       agama_pasangan: normalize(formData.agama_pasangan),
       telefon_pasangan: normalize(formData.telefon_pasangan),
       kemahiran_mengaji: normalize(formData.kemahiran_mengaji),
+      minat: normalize(formData.minat),
       status_bantuan_pasangan: bantuanStatus,
       jenis_bantuan_pasangan: bantuanJenis,
       jumlah_bantuan_pasangan: bantuanJumlah,
@@ -842,7 +847,8 @@ export class PKIRTab extends BaseTab {
         jantina: normalize(formData.jantina_pasangan),
         bangsa: normalize(formData.bangsa_pasangan),
         agama: normalize(formData.agama_pasangan),
-        kemahiran_mengaji: normalize(formData.kemahiran_mengaji)
+        kemahiran_mengaji: normalize(formData.kemahiran_mengaji),
+        minat: normalize(formData.minat)
       },
       pendidikan: {
         tahap: normalize(formData.tahap_pendidikan),
@@ -912,6 +918,7 @@ export class PKIRTab extends BaseTab {
       agama_pasangan: asas.agama || record.agama_pasangan || '',
       telefon_pasangan: asas.telefon || record.telefon_pasangan || '',
       kemahiran_mengaji: asas.kemahiran_mengaji || record.kemahiran_mengaji || '',
+      minat: asas.minat || record.minat || '',
       status_bantuan_pasangan: record.status_bantuan_pasangan || record.bantuan?.status || '',
       jenis_bantuan_pasangan: record.jenis_bantuan_pasangan || record.bantuan?.jenis || '',
       jumlah_bantuan_pasangan: record.jumlah_bantuan_pasangan ?? record.bantuan?.jumlah ?? '',
