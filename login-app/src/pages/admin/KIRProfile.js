@@ -1287,6 +1287,7 @@ export class KIRProfile {
 
     const pkirNameInput = pkirForm.querySelector('[name="nama_pasangan"]');
     const pkirNoKpInput = pkirForm.querySelector('[name="no_kp_pasangan"]');
+    let noKpUpdated = false;
     if (pkirNameInput && pending.nama && (!onlyIfEmpty || !pkirNameInput.value.trim())) {
       pkirNameInput.value = pending.nama;
     }
@@ -1295,6 +1296,13 @@ export class KIRProfile {
       pkirNoKpInput.value = pkirTab?.formatICForInput
         ? pkirTab.formatICForInput(pending.noKp)
         : pending.noKp;
+      noKpUpdated = true;
+    }
+
+    if (noKpUpdated && typeof window.pkirTab?.applyBirthInfoFromIC === 'function') {
+      window.requestAnimationFrame(() => {
+        window.pkirTab.applyBirthInfoFromIC(pkirNoKpInput.value, true);
+      });
     }
   }
 
